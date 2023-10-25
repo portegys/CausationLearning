@@ -26,28 +26,34 @@
 
 package mona.causation;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Random;
-import javax.swing.UIManager;
 
 public class Main
 {
+	// Parameters.
+    public static int NUM_EVENT_TYPES       = 10;
+    public static int NUM_CAUSATIONS        = 2;
+    public static int MAX_CAUSE_EVENTS      = 2;
+    public static int MAX_INTERVENING_EVENTS = 1;
+    public static int EVENT_STREAM_LENGTH   = 100;
+
+   // Random numbers.
+   public static final int DEFAULT_RANDOM_SEED = 4517;
+   public static int    randomSeed = DEFAULT_RANDOM_SEED;
+   public static Random random;
+   
    // Version.
    public static final String VERSION = "1.0";
-
-   // Default random seed.
-   public static final int DEFAULT_RANDOM_SEED = 4517;
-
+   
    // Usage.
    public static final String Usage =
       "Usage:\n" +
       "    java mona.causation.Main\n" +
-      "        [-numEventTypes <quantity> (default=" + Parameters.NUM_EVENT_TYPES + ")]\n" +
-      "        [-numCausations <quantity> (default=" + Parameters.NUM_CAUSATIONS + ")]\n" +
-      "        [-maxCauseEvents <quantity> (default=" + Parameters.MAX_CAUSE_EVENTS + ")]\n" +
-      "        [-maxIntervening <quantity> (default=" + Parameters.MAX_INTERVENING_EVENTS + ")]\n" +
-      "        [-eventStreamLength <length> (default=" + Parameters.EVENT_STREAM_LENGTH + ")]\n" +
+      "        [-numEventTypes <quantity> (default=" + NUM_EVENT_TYPES + ")]\n" +
+      "        [-numCausations <quantity> (default=" + NUM_CAUSATIONS + ")]\n" +
+      "        [-maxCauseEvents <quantity> (default=" + MAX_CAUSE_EVENTS + ")]\n" +
+      "        [-maxIntervening <quantity> (default=" + MAX_INTERVENING_EVENTS + ")]\n" +
+      "        [-eventStreamLength <length> (default=" + EVENT_STREAM_LENGTH + ")]\n" +
       "        [-randomSeed <random number seed> (default=" + DEFAULT_RANDOM_SEED + ")]\n" +      
       "  Print parameters:\n" +
       "    java mona.causation.Main -printParameters\n" +
@@ -56,10 +62,6 @@ public class Main
       "Exit codes:\n" +
       "  0=success\n" +
       "  1=error";
-
-   // Random numbers.
-   public static int    randomSeed = DEFAULT_RANDOM_SEED;
-   public static Random random;
 
    // Main.
    // Exit codes:
@@ -82,14 +84,14 @@ public class Main
             }
             try
             {
-               Parameters.NUM_EVENT_TYPES = Integer.parseInt(args[i]);
+               NUM_EVENT_TYPES = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid numEventTypes option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if (Parameters.NUM_EVENT_TYPES < 0)
+            if (NUM_EVENT_TYPES < 0)
             {
                System.err.println("Invalid numEventTypes option");
                System.err.println(Usage);
@@ -108,14 +110,14 @@ public class Main
             }
             try
             {
-               Parameters.NUM_CAUSATIONS = Integer.parseInt(args[i]);
+               NUM_CAUSATIONS = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid numCausations option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if (Parameters.NUM_CAUSATIONS < 0)
+            if (NUM_CAUSATIONS < 0)
             {
                System.err.println("Invalid numCausations option");
                System.err.println(Usage);
@@ -134,14 +136,14 @@ public class Main
             }
             try
             {
-               Parameters.MAX_CAUSE_EVENTS = Integer.parseInt(args[i]);
+               MAX_CAUSE_EVENTS = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid maxCauseEvents option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if (Parameters.MAX_CAUSE_EVENTS < 0)
+            if (MAX_CAUSE_EVENTS < 0)
             {
                System.err.println("Invalid maxCauseEvents option");
                System.err.println(Usage);
@@ -160,14 +162,14 @@ public class Main
             }
             try
             {
-               Parameters.MAX_INTERVENING_EVENTS = Integer.parseInt(args[i]);
+               MAX_INTERVENING_EVENTS = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid maxInterveningEvents option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if (Parameters.MAX_INTERVENING_EVENTS < 0)
+            if (MAX_INTERVENING_EVENTS < 0)
             {
                System.err.println("Invalid maxInterveningEvents option");
                System.err.println(Usage);
@@ -186,14 +188,14 @@ public class Main
             }
             try
             {
-               Parameters.EVENT_STREAM_LENGTH = Integer.parseInt(args[i]);
+               EVENT_STREAM_LENGTH = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid eventStreamLength option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if (Parameters.EVENT_STREAM_LENGTH < 0)
+            if (EVENT_STREAM_LENGTH < 0)
             {
                System.err.println("Invalid eventStreamLength option");
                System.err.println(Usage);
@@ -224,7 +226,7 @@ public class Main
          if (args[i].equals("-printParameters"))
          {
              System.out.println("Parameters:");
-             Parameters.print();
+             printParameters();
              System.exit(0);
          }
          if (args[i].equals("-help") || args[i].equals("-h") || args[i].equals("-?"))
@@ -248,4 +250,15 @@ public class Main
 
       System.exit(0);
    }
+   
+   
+   // Print.
+   public static void printParameters()
+   {
+      System.out.println("NUM_EVENT_TYPES = " + NUM_EVENT_TYPES);
+      System.out.println("NUM_CAUSATIONS = " + NUM_CAUSATIONS);
+      System.out.println("MAX_CAUSE_EVENTS = " + MAX_CAUSE_EVENTS);
+      System.out.println("MAX_INTERVENING_EVENTS = " + MAX_INTERVENING_EVENTS);
+      System.out.println("EVENT_STREAM_LENGTH = " + EVENT_STREAM_LENGTH);
+   }   	   
 }
