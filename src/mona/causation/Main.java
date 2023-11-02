@@ -34,12 +34,13 @@ import java.util.Random;
 public class Main
 {
 	// Parameters.
-    public static int NUM_CAUSE_EVENT_TYPES       = 10;
-    public static int EFFECT_EVENT_TYPE = NUM_CAUSE_EVENT_TYPES;
+    public static int NUM_EVENT_TYPES       = 10;
+    public static int NUM_CAUSE_EVENT_TYPES = 5;    
+    public static int EFFECT_EVENT_TYPE = NUM_EVENT_TYPES;
     public static int NUM_CAUSATIONS        = 2;
     public static int MAX_CAUSE_EVENTS      = 2;
     public static int MAX_INTERVENING_EVENTS = 1;
-    public static int EVENT_STREAM_LENGTH   = 100;
+    public static int CAUSATION_INSTANCE_LENGTH = MAX_CAUSE_EVENTS * (MAX_INTERVENING_EVENTS + 1) + 1;
     public static int NUM_CAUSATION_INSTANCES        = 10;
     
    // Random numbers.
@@ -59,22 +60,51 @@ public class Main
 	   {
 		   causeEvents = new ArrayList<Integer>();
 	   }
+	   public void print()
+	   {
+    	  System.out.print("causes: { ");
+    	  for (int i : causeEvents)
+    	  {
+    		  System.out.print(i + " ");
+    	  }
+    	  System.out.println("}, effect: " + EFFECT_EVENT_TYPE);		   
+	   }
    };   
    public static ArrayList<Causation> Causations;
    
-   // Event stream.
-   public static int[] EventStream;
-   public static ArrayList<Integer>[] EffectCausations;
+   // Causation instances.
+   public static class CausationInstance
+   {
+	   public int[] events;
+	   public int causationIndex;
+	   public int effectEventIndex;
+	   public CausationInstance()
+	   {
+		   events = new int[CAUSATION_INSTANCE_LENGTH];
+		   causationIndex = -1;
+	   }
+	   public void print()
+	   {
+    	  System.out.print("events: { ");
+    	  for (int i : events)
+    	  {
+    		  System.out.print(i + " ");
+    	  }
+    	  System.out.println("}, effect event index=" + effectEventIndex);		   
+	   }
+   };      
+   public static ArrayList<CausationInstance> CausationInstances;
    
    // Usage.
    public static final String Usage =
       "Usage:\n" +
       "    java mona.causation.Main\n" +
-      "        [-numCauseEventTypes <quantity> (default=" + NUM_CAUSE_EVENT_TYPES + ")]\n" +
+      "        [-numEventTypes <quantity> (default=" + NUM_EVENT_TYPES + ")]\n" +
+      "        [-numCauseEventTypes <quantity> (default=" + NUM_CAUSE_EVENT_TYPES + ")]\n" +      
       "        [-numCausations <quantity> (default=" + NUM_CAUSATIONS + ")]\n" +
       "        [-maxCauseEvents <quantity> (default=" + MAX_CAUSE_EVENTS + ")]\n" +
-      "        [-maxIntervening <quantity> (default=" + MAX_INTERVENING_EVENTS + ")]\n" +
-      "        [-eventStreamLength <length> (default=" + EVENT_STREAM_LENGTH + ")]\n" +
+      "        [-maxInterveningEvents <quantity> (default=" + MAX_INTERVENING_EVENTS + ")]\n" +
+      "        [-causationInstanceLength <length> (default=" + CAUSATION_INSTANCE_LENGTH + ")]\n" +
       "        [-numCausationInstances <quantity> (default=" + NUM_CAUSATION_INSTANCES + ")]\n" +      
       "        [-randomSeed <random number seed> (default=" + DEFAULT_RANDOM_SEED + ")]\n" +      
       "  Print parameters:\n" +
@@ -95,6 +125,32 @@ public class Main
       // Get options.
       for (int i = 0; i < args.length; i++)
       {
+         if (args[i].equals("-numEventTypes"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid numEventTypes option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               NUM_EVENT_TYPES = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid numEventTypes option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (NUM_EVENT_TYPES <= 0)
+            {
+               System.err.println("Invalid numEventTypes option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
          if (args[i].equals("-numCauseEventTypes"))
          {
             i++;
@@ -120,7 +176,7 @@ public class Main
                System.exit(1);
             }
             continue;
-         }
+         }         
          if (args[i].equals("-numCausations"))
          {
             i++;
@@ -199,27 +255,27 @@ public class Main
             }
             continue;
          } 
-         if (args[i].equals("-eventStreamLength"))
+         if (args[i].equals("-causationInstanceLength"))
          {
             i++;
             if (i >= args.length)
             {
-               System.err.println("Invalid eventStreamLength option");
+               System.err.println("Invalid causationInstanceLength option");
                System.err.println(Usage);
                System.exit(1);
             }
             try
             {
-               EVENT_STREAM_LENGTH = Integer.parseInt(args[i]);
+               CAUSATION_INSTANCE_LENGTH = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
-               System.err.println("Invalid eventStreamLength option");
+               System.err.println("Invalid causationInstanceLength option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if (EVENT_STREAM_LENGTH < 0)
+            if (CAUSATION_INSTANCE_LENGTH < 0)
             {
-               System.err.println("Invalid eventStreamLength option");
+               System.err.println("Invalid causationInstanceLength option");
                System.err.println(Usage);
                System.exit(1);
             }
@@ -291,7 +347,19 @@ public class Main
          System.err.println(Usage);
          System.exit(1);
       }
-
+      if (NUM_CAUSE_EVENT_TYPES > NUM_EVENT_TYPES)
+      {
+          System.err.println("number of cause event types cannot be greater than number of event types");
+          System.err.println(Usage);
+          System.exit(1);    	  
+      }
+      if (MAX_INTERVENING_EVENTS > 0 && NUM_CAUSE_EVENT_TYPES == NUM_EVENT_TYPES)
+      {
+          System.err.println("number of cause event types cannot be equal to the number of event types");
+          System.err.println(Usage);
+          System.exit(1);    	  
+      }
+      
       // Initialize random numbers.
       random = new Random();
       random.setSeed(randomSeed);
@@ -382,73 +450,61 @@ public class Main
 		  }
       } 
       
-      // Generate event stream.
-      EventStream = new int[EVENT_STREAM_LENGTH];
-      EffectCausations = new ArrayList[EVENT_STREAM_LENGTH];      
-      for (int i = 0; i < EVENT_STREAM_LENGTH; i++)
+      // Generate causation instances.
+      CausationInstances = new ArrayList<CausationInstance>();
+      for (int i = 0; i < NUM_CAUSATION_INSTANCES; i++)
       {
-    	  EventStream[i] = random.nextInt(NUM_CAUSE_EVENT_TYPES + 1);
-    	  EffectCausations[i] = new ArrayList<Integer>();
+    	  CausationInstance instance = new CausationInstance();
+    	  instance.causationIndex = random.nextInt(NUM_CAUSATIONS);
+    	  Causation causation = Causations.get(instance.causationIndex);
+    	  List<List<Integer>> eventPermutations = permuteList(causation.causeEvents);
+    	  List<Integer> permutation = eventPermutations.get(random.nextInt(eventPermutations.size()));
+    	  int j = 0;
+    	  for (int k : permutation)
+    	  {
+    		  instance.events[j] = k;
+    		  j++;
+    		  if (MAX_INTERVENING_EVENTS > 0)
+    		  {
+    			  int n = random.nextInt(MAX_INTERVENING_EVENTS + 1);
+    			  for (int q = 0; q < n; q++)
+    			  {
+    				  instance.events[j] = NUM_CAUSE_EVENT_TYPES + random.nextInt(NUM_EVENT_TYPES - NUM_CAUSE_EVENT_TYPES);
+    				  j++;
+    			  }
+    		  }
+    	  }
+    	  instance.events[j] = EFFECT_EVENT_TYPE;
+    	  instance.effectEventIndex = j;
+    	  j++;
+    	  for (; j < CAUSATION_INSTANCE_LENGTH; j++)
+    	  {
+			  instance.events[j] = NUM_CAUSE_EVENT_TYPES + random.nextInt(NUM_EVENT_TYPES - NUM_CAUSE_EVENT_TYPES);    		  
+    	  }
+    	  CausationInstances.add(instance);
       }
       
-      // Map causations in stream.
-      for (int i = 0; i < NUM_CAUSATIONS; i++)
+      // Print causations.
+      System.out.println("Parameters:");
+      printParameters();
+      System.out.println("Causations:");
+      for (int i = 0; i < Causations.size(); i++)
       {
     	  Causation causation = Causations.get(i);
-    	  List<List<Integer>> eventPermutations = permuteList(causation.causeEvents);
-    	  for (List<Integer> eventPermutation : eventPermutations)
-    	  {
-        	  int startIndex = 0;
-        	  while (startIndex != -1)
-        	  {
-        		  startIndex = mapCausation(i, eventPermutation, 0, -1, startIndex);
-        	  }
-    	  } 
+    	  System.out.print("[" + i + "] ");
+    	  causation.print();
       }
+      System.out.println("Causation instances:");
+      for (int i = 0; i < CausationInstances.size(); i++)
+      {
+    	  CausationInstance instance = CausationInstances.get(i);
+    	  System.out.print("[" + i + "] causation index=" + instance.causationIndex + ", ");
+    	  instance.print();
+      }      
       
       // Learn and evaluate performance.
 
       System.exit(0);
-   }
-   
-   // Map causations in stream.
-   public static int mapCausation(int causationIndex, List<Integer> causeEvents, int eventIndex, int anchorIndex, int startIndex)
-   {
-	   if (eventIndex == 0)
-	   {
-		   for (int i = startIndex, j = EVENT_STREAM_LENGTH - causeEvents.size(); i < j; i++)
-		   {
-			   if (EventStream[i] == causeEvents.get(0))
-			   {
-				   return mapCausation(causationIndex, causeEvents, eventIndex + 1, i, i + 1);
-			   }	   
-		   }
-		   return -1;
-	   } else {
-		   if (eventIndex < causeEvents.size())
-		   {
-			   for (int i = startIndex, j = EVENT_STREAM_LENGTH - (causeEvents.size() - eventIndex), k = 0; 
-					   i < j && k <= MAX_INTERVENING_EVENTS; i++, k++)
-			   {
-				   if (EventStream[i] == causeEvents.get(eventIndex))
-				   {
-					   return mapCausation(causationIndex, causeEvents, eventIndex + 1, i, i + 1);
-				   }	   
-			   }
-			   return anchorIndex + 1;			
-		   } else {
-			   for (int i = startIndex, j = 0; i < EVENT_STREAM_LENGTH && 
-					   j <= MAX_INTERVENING_EVENTS; i++, j++)
-			   {
-				   if (EventStream[i] == EFFECT_EVENT_TYPE)
-				   {
-					   EffectCausations[i].add(causationIndex);
-					   return i + 1;
-				   }	   
-			   }
-			   return anchorIndex + 1;			   
-		   }
-	   }
    }
    
    // Permute list of numbers.
@@ -492,12 +548,13 @@ public class Main
    // Print.
    public static void printParameters()
    {
+	  System.out.println("NUM_EVENT_TYPES = " + NUM_EVENT_TYPES);	   
       System.out.println("NUM_CAUSE_EVENT_TYPES = " + NUM_CAUSE_EVENT_TYPES);
       System.out.println("EFFECT_EVENT_TYPE = " + EFFECT_EVENT_TYPE);     
       System.out.println("NUM_CAUSATIONS = " + NUM_CAUSATIONS);
       System.out.println("MAX_CAUSE_EVENTS = " + MAX_CAUSE_EVENTS);
       System.out.println("MAX_INTERVENING_EVENTS = " + MAX_INTERVENING_EVENTS);
-      System.out.println("EVENT_STREAM_LENGTH = " + EVENT_STREAM_LENGTH);
+      System.out.println("CAUSATION_INSTANCE_LENGTH = " + CAUSATION_INSTANCE_LENGTH);
       System.out.println("NUM_CAUSATION_INSTANCES = " + NUM_CAUSATION_INSTANCES);      
    }   	   
 }
