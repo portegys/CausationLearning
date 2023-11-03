@@ -534,7 +534,7 @@ public class Main
          PrintWriter printWriter = new PrintWriter(fileWriter);
          printWriter.println("X_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
                              CAUSATION_INSTANCE_LENGTH + ", " + (NUM_EVENT_TYPES + 1) + " ]");
-         printWriter.print("X_train = [");
+         printWriter.print("X_train_seq = [");
          String X_train = "";
          for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
          {
@@ -542,7 +542,7 @@ public class Main
             CausationInstance instance = CausationTrainingInstances.get(i);
             for (int k = 0; k < instance.events.length; k++)
             {
-               X_train += oneHot(instance.events[k], NUM_EVENT_TYPES);
+               X_train += oneHot(instance.events[k], (NUM_EVENT_TYPES + 1));
                X_train += ",";
             }
          }
@@ -553,8 +553,8 @@ public class Main
          printWriter.println(X_train);
          printWriter.println("]");
          printWriter.println("y_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-                             CAUSATION_INSTANCE_LENGTH + ", " + NUM_CAUSATIONS + " ]");
-         printWriter.print("y_train = [");
+                             CAUSATION_INSTANCE_LENGTH + ", " + (NUM_CAUSATIONS + 1) + " ]");
+         printWriter.print("y_train_seq = [");
          String y_train = "";
          for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
          {
@@ -581,7 +581,7 @@ public class Main
          printWriter.println("]");
          printWriter.println("X_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
                              CAUSATION_INSTANCE_LENGTH + ", " + (NUM_EVENT_TYPES + 1) + " ]");
-         printWriter.print("X_test = [");
+         printWriter.print("X_test_seq = [");
          String X_test = "";
          for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
          {
@@ -589,7 +589,7 @@ public class Main
             CausationInstance instance = CausationTestingInstances.get(i);
             for (int k = 0; k < instance.events.length; k++)
             {
-               X_test += oneHot(instance.events[k], NUM_EVENT_TYPES);
+               X_test += oneHot(instance.events[k], (NUM_EVENT_TYPES + 1));
                X_test += ",";
             }
          }
@@ -600,8 +600,8 @@ public class Main
          printWriter.println(X_test);
          printWriter.println("]");
          printWriter.println("y_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-                             CAUSATION_INSTANCE_LENGTH + ", " + NUM_CAUSATIONS + " ]");
-         printWriter.print("y_test = [");
+                             CAUSATION_INSTANCE_LENGTH + ", " + (NUM_CAUSATIONS + 1) + " ]");
+         printWriter.print("y_test_seq = [");
          String y_test = "";
          for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
          {
