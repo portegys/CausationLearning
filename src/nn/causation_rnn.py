@@ -1,5 +1,7 @@
 # Causation RNN.
 # results written to causation_rnn_results.txt
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 from numpy import array, argmax
 from keras.models import Sequential
 from keras.layers import Dense
@@ -44,14 +46,14 @@ model.compile(loss='mean_squared_error', optimizer='adam')
 #print(model.summary())
 
 # train
-model.fit(X, y, epochs=n_epochs, batch_size=X_train_shape[0], verbose=2)
+model.fit(X, y, epochs=n_epochs, batch_size=X_train_shape[0], verbose=0)
 
 # validate training
 seq = array(X_train_seq)
 X = seq.reshape(X_train_shape[0], X_train_shape[1], X_train_shape[2])
 seq = array(y_train_seq)
 y = seq.reshape(y_train_shape[0], y_train_shape[1], y_train_shape[2])
-predictions = model.predict(X, batch_size=X_train_shape[0], verbose=2)
+predictions = model.predict(X, batch_size=X_train_shape[0], verbose=0)
 trainOK = 0
 trainErrors = 0
 trainTotal = 0
@@ -86,7 +88,7 @@ testOK = 0
 testErrors = 0
 testTotal = 0
 if X_test_shape[0] > 0:
-    predictions = model.predict(X, batch_size=X_test_shape[0], verbose=2)
+    predictions = model.predict(X, batch_size=X_test_shape[0], verbose=0)
     for path in range(X_test_shape[0]):
         p = []
         for step in range(X_test_shape[1]):

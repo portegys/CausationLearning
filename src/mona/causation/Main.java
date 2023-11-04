@@ -43,7 +43,7 @@ public class Main
    public static int NUM_CAUSATIONS            = 2;
    public static int MAX_CAUSE_EVENTS          = 2;
    public static int MAX_INTERVENING_EVENTS    = 1;
-   public static int CAUSATION_INSTANCE_LENGTH = MAX_CAUSE_EVENTS * (MAX_INTERVENING_EVENTS + 1) + 1;
+   public static int CAUSATION_INSTANCE_LENGTH = (MAX_CAUSE_EVENTS + 1) * (MAX_INTERVENING_EVENTS + 1);
    public static int NUM_CAUSATION_INSTANCES   = 10;
 
    // Random numbers.
@@ -93,8 +93,6 @@ public class Main
          int           j           = 0;
          for (int k : permutation)
          {
-            events[j] = k;
-            j++;
             if (MAX_INTERVENING_EVENTS > 0)
             {
                int n = random.nextInt(MAX_INTERVENING_EVENTS + 1);
@@ -104,7 +102,18 @@ public class Main
                   j++;
                }
             }
+            events[j] = k;
+            j++;            
          }
+         if (MAX_INTERVENING_EVENTS > 0)
+         {
+            int n = random.nextInt(MAX_INTERVENING_EVENTS + 1);
+            for (int q = 0; q < n; q++)
+            {
+               events[j] = NUM_CAUSE_EVENT_TYPES + random.nextInt(NUM_EVENT_TYPES - NUM_CAUSE_EVENT_TYPES);
+               j++;
+            }
+         }         
          events[j]        = EFFECT_EVENT_TYPE;
          effectEventIndex = j;
          j++;
@@ -113,7 +122,6 @@ public class Main
             events[j] = NUM_CAUSE_EVENT_TYPES + random.nextInt(NUM_EVENT_TYPES - NUM_CAUSE_EVENT_TYPES);
          }
       }
-
 
       public void print()
       {
@@ -401,89 +409,47 @@ public class Main
       random.setSeed(randomSeed);
 
       // Generate causations.
-      // Constraints:
-      // Unique events.
-      // No subset causes.
       Causations = new ArrayList<Causation>();
       for (int i = 0; i < NUM_CAUSATIONS; i++)
       {
          Causation causation = new Causation();
-         int       t0        = 0;
-         for ( ; t0 < MAX_TRIES; t0++)
+         int       t        = 0;
+         for ( ; t < MAX_TRIES; t++)
          {
             causation.causeEvents.clear();
-
-            // Unique events.
             int n = random.nextInt(MAX_CAUSE_EVENTS) + 1;
             for (int j = 0; j < n; j++)
             {
-               int c  = -1;
-               int t1 = 0;
-               for ( ; t1 < MAX_TRIES; t1++)
-               {
-                  c = random.nextInt(NUM_CAUSE_EVENT_TYPES);
-                  int k = 0;
-                  for ( ; k < j; k++)
-                  {
-                     if (c == causation.causeEvents.get(k))
-                     {
-                        break;
-                     }
-                  }
-                  if (k == j) { break; }
-               }
-               if ((c != -1) && (t1 < MAX_TRIES))
-               {
-                  causation.causeEvents.add(c);
-               }
-               else
-               {
-                  System.err.println("Cannot generate unique cause event");
-                  System.exit(1);
-               }
+               causation.causeEvents.add(random.nextInt(NUM_CAUSE_EVENT_TYPES));            	
             }
             Collections.sort(causation.causeEvents);
-
-            // Subset check.
-            boolean subset = false;
+            boolean duplicate = false;
             for (Causation c : Causations)
             {
-               ArrayList<Integer> c1, c2;
-               if (c.causeEvents.size() <= causation.causeEvents.size())
+               if (c.causeEvents.size() == causation.causeEvents.size())
                {
-                  c1 = c.causeEvents;
-                  c2 = causation.causeEvents;
-               }
-               else
-               {
-                  c1 = causation.causeEvents;
-                  c2 = c.causeEvents;
-               }
-               int j = 0;
-               for (int e1 : c1)
-               {
-                  for (int e2 : c2)
-                  {
-                     if (e1 == e2)
-                     {
-                        j++;
-                        break;
-                     }
-                  }
-               }
-               if (j == c1.size())
-               {
-                  subset = true;
-                  break;
+            	   duplicate = true;
+	               for (int j = 0, k = causation.causeEvents.size(); j < k; j++)
+	               {
+	                  if (c.causeEvents.get(j) != causation.causeEvents.get(j))
+	                  {
+	                     duplicate = false;
+	                     break;
+	                  }
+	               }
+	               if (duplicate)
+	               {
+	                  break;
+	               }
                }
             }
-            if (!subset)
+            if (!duplicate)
             {
                Causations.add(causation);
                break;
             }
          }
-         if (t0 == MAX_TRIES)
+         if (t == MAX_TRIES)
          {
             System.err.println("Cannot generate causation");
             System.exit(1);
