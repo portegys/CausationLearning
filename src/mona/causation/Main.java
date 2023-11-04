@@ -26,8 +26,11 @@
 
 package mona.causation;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,10 +48,12 @@ public class Main
    public static int MAX_INTERVENING_EVENTS    = 1;
    public static int CAUSATION_INSTANCE_LENGTH = (MAX_CAUSE_EVENTS + 1) * (MAX_INTERVENING_EVENTS + 1);
    public static int NUM_CAUSATION_INSTANCES   = 10;
-
+   public static int NUM_NEURONS = 128;
+   public static int NUM_EPOCHS = 500;
+   
    // Random numbers.
    public static final int DEFAULT_RANDOM_SEED = 4517;
-   public static int       randomSeed          = DEFAULT_RANDOM_SEED;
+   public static int       RANDOM_SEED          = DEFAULT_RANDOM_SEED;
    public static Random    random;
    public final static int MAX_TRIES = 100;
 
@@ -150,6 +155,8 @@ public class Main
       "        [-maxInterveningEvents <quantity> (default=" + MAX_INTERVENING_EVENTS + ")]\n" +
       "        [-causationInstanceLength <length> (default=" + CAUSATION_INSTANCE_LENGTH + ")]\n" +
       "        [-numCausationInstances <quantity> (default=" + NUM_CAUSATION_INSTANCES + ")]\n" +
+      "        [-numNeurons <quantity> (default=" + NUM_NEURONS + ")]\n" +
+      "        [-numEpochs <quantity> (default=" + NUM_EPOCHS + ")]\n" +      
       "        [-randomSeed <random number seed> (default=" + DEFAULT_RANDOM_SEED + ")]\n" +
       "  Print parameters:\n" +
       "    java mona.causation.Main -printParameters\n" +
@@ -351,6 +358,58 @@ public class Main
             }
             continue;
          }
+         if (args[i].equals("-numNeurons"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid numNeurons option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               NUM_NEURONS = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid numNeurons option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (NUM_NEURONS <= 0)
+            {
+               System.err.println("Invalid numNeurons option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
+         if (args[i].equals("-numEpochs"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid numEpochs option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               NUM_EPOCHS = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid numEpochs option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (NUM_EPOCHS < 0)
+            {
+               System.err.println("Invalid numEpochs option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }                  
          if (args[i].equals("-randomSeed"))
          {
             i++;
@@ -362,7 +421,7 @@ public class Main
             }
             try
             {
-               randomSeed = Integer.parseInt(args[i]);
+               RANDOM_SEED = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid randomSeed option");
@@ -406,7 +465,7 @@ public class Main
 
       // Initialize random numbers.
       random = new Random();
-      random.setSeed(randomSeed);
+      random.setSeed(RANDOM_SEED);
 
       // Generate causations.
       Causations = new ArrayList<Causation>();
@@ -482,14 +541,14 @@ public class Main
       for (int i = 0; i < CausationTrainingInstances.size(); i++)
       {
          CausationInstance instance = CausationTrainingInstances.get(i);
-         System.out.print("[" + i + "] causation index=" + instance.causationIndex + ", ");
+         System.out.print("[" + i + "] causation number=" + instance.causationIndex + ", ");
          instance.print();
       }
       System.out.println("Causation testing instances:");
       for (int i = 0; i < CausationTestingInstances.size(); i++)
       {
          CausationInstance instance = CausationTestingInstances.get(i);
-         System.out.print("[" + i + "] causation index=" + instance.causationIndex + ", ");
+         System.out.print("[" + i + "] causation number=" + instance.causationIndex + ", ");
          instance.print();
       }
 
@@ -599,10 +658,47 @@ public class Main
          System.err.println("Cannot write RNN dataset to file " + RNN_DATASET_FILENAME);
          System.exit(1);
       }
-
+      
+      // Run RNN.
+      try
+      {
+         InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream("causation_lstm.py");
+         if (in == null)
+         {
+            System.err.println("Cannot access maze_rnn.py");
+            System.exit(1);
+         }
+         File             pythonScript = new File("causation_lstm.py");
+         FileOutputStream out          = new FileOutputStream(pythonScript);
+         byte[] buffer = new byte[1024];
+         int bytesRead;
+         while ((bytesRead = in.read(buffer)) != -1)
+         {
+            out.write(buffer, 0, bytesRead);
+         }
+         out.close();
+      }
+      catch (Exception e)
+      {
+         System.err.println("Cannot create causation_lstm.py");
+         System.exit(1);
+      }
+      ProcessBuilder processBuilder = new ProcessBuilder("python", "causation_lstm.py",
+                                                         "-n", (NUM_NEURONS + ""), "-e", (NUM_EPOCHS + ""));
+      processBuilder.inheritIO();
+      try
+      {
+         Process process = processBuilder.start();    	  
+         process.waitFor();
+      }
+      catch (IOException e)
+      {
+         System.err.println("Cannot run causation_lstm.py");
+         System.exit(1);
+      }      
+	  catch (InterruptedException e) {}
       System.exit(0);
    }
-
 
    // One hot encoding of integer.
    public static String oneHot(int n, int numvals)
@@ -678,5 +774,9 @@ public class Main
       System.out.println("MAX_INTERVENING_EVENTS = " + MAX_INTERVENING_EVENTS);
       System.out.println("CAUSATION_INSTANCE_LENGTH = " + CAUSATION_INSTANCE_LENGTH);
       System.out.println("NUM_CAUSATION_INSTANCES = " + NUM_CAUSATION_INSTANCES);
+      System.out.println("CAUSATION_INSTANCE_LENGTH = " + CAUSATION_INSTANCE_LENGTH);
+      System.out.println("NUM_NEURONS = " + NUM_NEURONS);
+      System.out.println("NUM_EPOCHS = " + NUM_EPOCHS);
+      System.out.println("RANDOM_SEED = " + RANDOM_SEED);      
    }
 }

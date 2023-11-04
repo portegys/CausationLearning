@@ -1,4 +1,4 @@
-# Causation RNN.
+# Causation LSTM.
 # results written to causation_rnn_results.txt
 import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -16,20 +16,25 @@ n_epochs = 500
 # results file name
 results_filename = 'causation_rnn_results.json'
 
+# verbosity
+verbose = False
+
 # get options
 try:
-  opts, args = getopt.getopt(sys.argv[1:],"hn:e:",["neurons=","epochs="])
+  opts, args = getopt.getopt(sys.argv[1:],"hvn:e:",["neurons=","epochs="])
 except getopt.GetoptError:
-  print('causation_rnn.py [-n <neurons>] [-e <epochs>]')
+  print('causation_lstm.py [-n <neurons>] [-e <epochs>] [-verbose]')
   sys.exit(2)
 for opt, arg in opts:
   if opt == '-h':
-     print('causation_rnn.py [-n <neurons>] [-e <epochs>]')
+     print('causation_lstm.py [-n <neurons>] [-e <epochs>] [-verbose]')
      sys.exit()
   if opt in ("-n", "--neurons"):
      n_neurons = int(arg)
   elif opt in ("-e", "--epochs"):
      n_epochs = int(arg)
+  elif opt == "-v":
+     verbose = True
 
 # prepare data
 from causation_rnn_dataset import X_train_shape, X_train_seq, y_train_shape, y_train_seq
@@ -61,13 +66,15 @@ for path in range(X_train_shape[0]):
     p = []
     for step in range(X_train_shape[1]):
         if not all([ v == 0 for v in y[path][step]]):
-            r = argmax(predictions[path][step])
-            p.append(r)
+            if y[path][step][-1] == 0:
+                r = argmax(predictions[path][step])
+                p.append(r)
     t = []
     for step in range(X_train_shape[1]):
         if not all([ v == 0 for v in y[path][step]]):
-            r = argmax(y[path][step])
-            t.append(r)
+            if y[path][step][-1] == 0:
+                r = argmax(y[path][step])
+                t.append(r)
     if p == t:
         trainOK += 1
     else:
@@ -93,13 +100,15 @@ if X_test_shape[0] > 0:
         p = []
         for step in range(X_test_shape[1]):
             if not all([ v == 0 for v in y[path][step]]):
-                r = argmax(predictions[path][step])
-                p.append(r)
+                if y[path][step][-1] == 0:
+                    r = argmax(predictions[path][step])
+                    p.append(r)
         t = []
         for step in range(X_test_shape[1]):
             if not all([ v == 0 for v in y[path][step]]):
-                r = argmax(y[path][step])
-                t.append(r)
+                if y[path][step][-1] == 0:
+                    r = argmax(y[path][step])
+                    t.append(r)
         if p == t:
             testOK += 1
         else:
@@ -109,30 +118,33 @@ if X_test_shape[0] > 0:
                     errs += 1
             testErrors += errs
         testTotal += len(p)
-
-# results to causaation_rnn_results.txt
-print("Train correct paths/total = ", trainOK, "/", X_train_shape[0], sep='', end='')
-if X_train_shape[0] > 0:
-    r = (float(trainOK) / float(X_train_shape[0])) * 100.0
-    print(" (", str(round(r, 2)), "%)", sep='', end='')
-print(", prediction errors/total = ", trainErrors, "/", trainTotal, sep='', end='')
 trainErrorPct=0
 if trainTotal > 0:
     trainErrorPct = (float(trainErrors) / float(trainTotal)) * 100.0
-    print(" (", str(round(trainErrorPct, 2)), "%)", sep='', end='')
-print('')
-print("Test correct paths/total = ", testOK, "/", X_test_shape[0], sep='', end='')
-if X_test_shape[0] > 0:
-    r = (float(testOK) / float(X_test_shape[0])) * 100.0
-    print(" (", str(round(r, 2)), "%)", sep='', end='')
-print(", prediction errors/total = ", testErrors, "/", testTotal, sep='', end='')
 testErrorPct=0
 if testTotal > 0:
     testErrorPct = (float(testErrors) / float(testTotal)) * 100.0
-    print(" (", str(round(testErrorPct, 2)), "%)", sep='', end='')
-print('')
 
-# Write results to file.
+# print results
+if verbose == True:
+    print("Train correct paths/total = ", trainOK, "/", X_train_shape[0], sep='', end='')
+    if X_train_shape[0] > 0:
+        r = (float(trainOK) / float(X_train_shape[0])) * 100.0
+        print(" (", str(round(r, 2)), "%)", sep='', end='')
+    print(", prediction errors/total = ", trainErrors, "/", trainTotal, sep='', end='')
+    if trainTotal > 0:
+        print(" (", str(round(trainErrorPct, 2)), "%)", sep='', end='')
+    print('')
+    print("Test correct paths/total = ", testOK, "/", X_test_shape[0], sep='', end='')
+    if X_test_shape[0] > 0:
+        r = (float(testOK) / float(X_test_shape[0])) * 100.0
+        print(" (", str(round(r, 2)), "%)", sep='', end='')
+    print(", prediction errors/total = ", testErrors, "/", testTotal, sep='', end='')
+    if testTotal > 0:
+        print(" (", str(round(testErrorPct, 2)), "%)", sep='', end='')
+    print('')
+
+# Write results to causaation_rnn_results.txt
 with open(results_filename, 'w') as f:
     f.write('{')
     f.write('\"train_prediction_errors\":\"'+str(trainErrors)+'\",')

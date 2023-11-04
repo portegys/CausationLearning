@@ -1,4 +1,4 @@
-# Causation RNN.
+# Causation LSTM.
 # results written to causation_rnn_results.txt
 import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -20,11 +20,11 @@ results_filename = 'causation_rnn_results.json'
 try:
   opts, args = getopt.getopt(sys.argv[1:],"hn:e:",["neurons=","epochs="])
 except getopt.GetoptError:
-  print('causation_rnn.py [-n <neurons>] [-e <epochs>]')
+  print('causation_lstm.py [-n <neurons>] [-e <epochs>]')
   sys.exit(2)
 for opt, arg in opts:
   if opt == '-h':
-     print('causation_rnn.py [-n <neurons>] [-e <epochs>]')
+     print('causation_lstm.py [-n <neurons>] [-e <epochs>]')
      sys.exit()
   if opt in ("-n", "--neurons"):
      n_neurons = int(arg)
@@ -61,13 +61,15 @@ for path in range(X_train_shape[0]):
     p = []
     for step in range(X_train_shape[1]):
         if not all([ v == 0 for v in y[path][step]]):
-            r = argmax(predictions[path][step])
-            p.append(r)
+            if y[path][step][-1] == 0:
+                r = argmax(predictions[path][step])
+                p.append(r)
     t = []
     for step in range(X_train_shape[1]):
         if not all([ v == 0 for v in y[path][step]]):
-            r = argmax(y[path][step])
-            t.append(r)
+            if y[path][step][-1] == 0:
+                r = argmax(y[path][step])
+                t.append(r)
     if p == t:
         trainOK += 1
     else:
@@ -93,13 +95,15 @@ if X_test_shape[0] > 0:
         p = []
         for step in range(X_test_shape[1]):
             if not all([ v == 0 for v in y[path][step]]):
-                r = argmax(predictions[path][step])
-                p.append(r)
+                if y[path][step][-1] == 0:
+                    r = argmax(predictions[path][step])
+                    p.append(r)
         t = []
         for step in range(X_test_shape[1]):
             if not all([ v == 0 for v in y[path][step]]):
-                r = argmax(y[path][step])
-                t.append(r)
+                if y[path][step][-1] == 0:
+                    r = argmax(y[path][step])
+                    t.append(r)
         if p == t:
             testOK += 1
         else:
