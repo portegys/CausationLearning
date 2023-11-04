@@ -691,7 +691,7 @@ public class Main
          System.exit(1);
       }
       ProcessBuilder processBuilder = new ProcessBuilder("python", LSTM_FILENAME,
-                                                         "-n", (NUM_NEURONS + ""), "-e", (NUM_EPOCHS + ""));
+                                                         "-n", (NUM_NEURONS + ""), "-e", (NUM_EPOCHS + ""), "-q");
       processBuilder.inheritIO();
       try
       {

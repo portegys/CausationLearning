@@ -17,24 +17,24 @@ n_epochs = 500
 results_filename = 'causation_rnn_results.json'
 
 # verbosity
-verbose = False
+verbose = True
 
 # get options
 try:
-  opts, args = getopt.getopt(sys.argv[1:],"hvn:e:",["neurons=","epochs="])
+  opts, args = getopt.getopt(sys.argv[1:],"hqn:e:",["neurons=","epochs="])
 except getopt.GetoptError:
-  print('causation_lstm.py [-n <neurons>] [-e <epochs>] [-verbose]')
+  print('causation_lstm.py [-n <neurons>] [-e <epochs>] [-q (quiet)]')
   sys.exit(2)
 for opt, arg in opts:
   if opt == '-h':
-     print('causation_lstm.py [-n <neurons>] [-e <epochs>] [-verbose]')
+     print('causation_lstm.py [-n <neurons>] [-e <epochs>] [-q (quiet)]')
      sys.exit()
   if opt in ("-n", "--neurons"):
      n_neurons = int(arg)
   elif opt in ("-e", "--epochs"):
      n_epochs = int(arg)
-  elif opt == "-v":
-     verbose = True
+  elif opt == "-q":
+     verbose = False
 
 # prepare data
 from causation_rnn_dataset import X_train_shape, X_train_seq, y_train_shape, y_train_seq
