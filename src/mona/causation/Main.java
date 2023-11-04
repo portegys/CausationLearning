@@ -26,16 +26,21 @@
 
 package mona.causation;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Main
 {
@@ -56,7 +61,12 @@ public class Main
    public static int       RANDOM_SEED          = DEFAULT_RANDOM_SEED;
    public static Random    random;
    public final static int MAX_TRIES = 100;
-
+   
+   // RNN.
+   public static final String RNN_DATASET_FILENAME = "causation_rnn_dataset.py";
+   public static final String LSTM_FILENAME         = "causation_lstm.py";
+   public static final String RNN_RESULTS_FILENAME = "causation_rnn_results.json";
+   
    // Version.
    public static final String VERSION = "1.0";
 
@@ -140,9 +150,6 @@ public class Main
    };
    public static ArrayList<CausationInstance> CausationTrainingInstances;
    public static ArrayList<CausationInstance> CausationTestingInstances;
-
-   // RNN.
-   public static final String RNN_DATASET_FILENAME = "causation_rnn_dataset.py";
 
    // Usage.
    public static final String Usage =
@@ -659,16 +666,16 @@ public class Main
          System.exit(1);
       }
       
-      // Run RNN.
+      // Run LSTM.
       try
       {
-         InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream("causation_lstm.py");
+         InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(LSTM_FILENAME);
          if (in == null)
          {
-            System.err.println("Cannot access maze_rnn.py");
+            System.err.println("Cannot access " + LSTM_FILENAME);
             System.exit(1);
          }
-         File             pythonScript = new File("causation_lstm.py");
+         File             pythonScript = new File(LSTM_FILENAME);
          FileOutputStream out          = new FileOutputStream(pythonScript);
          byte[] buffer = new byte[1024];
          int bytesRead;
@@ -680,10 +687,10 @@ public class Main
       }
       catch (Exception e)
       {
-         System.err.println("Cannot create causation_lstm.py");
+         System.err.println("Cannot create " + LSTM_FILENAME);
          System.exit(1);
       }
-      ProcessBuilder processBuilder = new ProcessBuilder("python", "causation_lstm.py",
+      ProcessBuilder processBuilder = new ProcessBuilder("python", LSTM_FILENAME,
                                                          "-n", (NUM_NEURONS + ""), "-e", (NUM_EPOCHS + ""));
       processBuilder.inheritIO();
       try
@@ -693,10 +700,95 @@ public class Main
       }
       catch (IOException e)
       {
-         System.err.println("Cannot run causation_lstm.py");
+         System.err.println("Cannot run " + LSTM_FILENAME);
          System.exit(1);
       }      
 	  catch (InterruptedException e) {}
+      
+      // Fetch the results.
+      int train_prediction_errors = 0;
+      int train_total_predictions = 0;
+      float train_error_pct = 0.0f;
+      int test_prediction_errors = 0;
+      int test_total_predictions = 0;
+      float test_error_pct = 0.0f;       
+      try      
+      {
+         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(RNN_RESULTS_FILENAME)));
+         String         json;
+         if ((json = br.readLine()) != null)
+         {
+            JSONObject jObj = null;
+            try
+            {
+               jObj = new JSONObject(json);
+            }
+            catch (JSONException e)
+            {
+               System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
+               System.exit(1);
+            }
+            String value = jObj.getString("train_prediction_errors");
+            if ((value == null) || value.isEmpty())
+            {
+               System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
+               System.exit(1);
+            }
+            train_prediction_errors = Integer.parseInt(value);            
+            value = jObj.getString("train_total_predictions");
+            if ((value == null) || value.isEmpty())
+            {
+               System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
+               System.exit(1);
+            }
+            train_total_predictions = Integer.parseInt(value);            
+            value = jObj.getString("train_error_pct");
+            if ((value == null) || value.isEmpty())
+            {
+               System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
+               System.exit(1);
+            }
+            train_error_pct = Float.parseFloat(value);           
+            value = jObj.getString("test_prediction_errors");
+            if ((value == null) || value.isEmpty())
+            {
+               System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
+               System.exit(1);
+            }
+            test_prediction_errors = Integer.parseInt(value);            
+            value = jObj.getString("test_total_predictions");
+            if ((value == null) || value.isEmpty())
+            {
+               System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
+               System.exit(1);
+            }
+            test_total_predictions = Integer.parseInt(value);             
+            value = jObj.getString("test_error_pct");
+            if ((value == null) || value.isEmpty())
+            {
+               System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
+               System.exit(1);
+            }
+            test_error_pct = Float.parseFloat(value);             
+         }
+         else
+         {
+            System.err.println("Cannot read results file " + RNN_RESULTS_FILENAME);
+            System.exit(1);
+         }
+         br.close();
+      }
+      catch (Exception e)
+      {
+         System.err.println("Cannot read results file " + RNN_RESULTS_FILENAME + ":" + e.getMessage());
+         System.exit(1);
+      }
+      System.out.println("Train correct paths/total = " + (train_total_predictions - train_prediction_errors) + 
+    		  "/" + train_total_predictions + " (" + (100.0 - train_error_pct) + "%), prediction errors/total = " +
+    		  train_prediction_errors + "/" + train_total_predictions + " (" + train_error_pct + "%)");
+      System.out.println("Test correct paths/total = " + (test_total_predictions - test_prediction_errors) + 
+    		  "/" + test_total_predictions + " (" + (100.0 - test_error_pct) + "%), prediction errors/total = " +
+    		  test_prediction_errors + "/" + test_total_predictions + " (" + test_error_pct + "%)");      
       System.exit(0);
    }
 
