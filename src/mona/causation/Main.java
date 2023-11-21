@@ -50,7 +50,8 @@ public class Main
    public static int EFFECT_EVENT_TYPE         = NUM_EVENT_TYPES;
    public static int NUM_CAUSATIONS            = 2;
    public static int MAX_CAUSE_EVENTS          = 2;
-   public static int MAX_INTERVENING_EVENTS    = 1;
+   public static int MAX_INTERVENING_EVENTS    = 2;   
+   public static int MAX_VALID_INTERVENING_EVENTS    = 1;
    public static int CAUSATION_INSTANCE_LENGTH = (MAX_CAUSE_EVENTS + 1) * (MAX_INTERVENING_EVENTS + 1);
    public static int NUM_CAUSATION_INSTANCES   = 10;
    public static int NUM_NEURONS = 128;
@@ -98,10 +99,12 @@ public class Main
       public int[] events;
       public int   causationIndex;
       public int   effectEventIndex;
+      public boolean valid;
       public CausationInstance()
       {
          events         = new int[CAUSATION_INSTANCE_LENGTH];
          causationIndex = random.nextInt(NUM_CAUSATIONS);
+         valid = true;
          Causation causation = Causations.get(causationIndex);
          List < List < Integer >> eventPermutations = permuteList(causation.causeEvents);
          List<Integer> permutation = eventPermutations.get(random.nextInt(eventPermutations.size()));
@@ -111,6 +114,10 @@ public class Main
             if (MAX_INTERVENING_EVENTS > 0)
             {
                int n = random.nextInt(MAX_INTERVENING_EVENTS + 1);
+               if (n > MAX_VALID_INTERVENING_EVENTS)
+               {
+            	   valid = false;
+               }
                for (int q = 0; q < n; q++)
                {
                   events[j] = NUM_CAUSE_EVENT_TYPES + random.nextInt(NUM_EVENT_TYPES - NUM_CAUSE_EVENT_TYPES);
@@ -123,13 +130,17 @@ public class Main
          if (MAX_INTERVENING_EVENTS > 0)
          {
             int n = random.nextInt(MAX_INTERVENING_EVENTS + 1);
+            if (n > MAX_VALID_INTERVENING_EVENTS)
+            {
+         	   valid = false;
+            }            
             for (int q = 0; q < n; q++)
             {
                events[j] = NUM_CAUSE_EVENT_TYPES + random.nextInt(NUM_EVENT_TYPES - NUM_CAUSE_EVENT_TYPES);
                j++;
             }
-         }         
-         events[j]        = EFFECT_EVENT_TYPE;
+         } 
+         events[j]        = EFFECT_EVENT_TYPE;        	 
          effectEventIndex = j;
          j++;
          for ( ; j < CAUSATION_INSTANCE_LENGTH; j++)
@@ -145,7 +156,13 @@ public class Main
          {
             System.out.print(i + " ");
          }
-         System.out.println("}, effect event index=" + effectEventIndex);
+         System.out.print("}, effect event index=" + effectEventIndex);
+         if (valid)
+         {
+             System.out.println(", valid=true");         	 
+         } else {
+             System.out.println(", valid=false");        	 
+         }
       }
    };
    public static ArrayList<CausationInstance> CausationTrainingInstances;
@@ -160,6 +177,7 @@ public class Main
       "        [-numCausations <quantity> (default=" + NUM_CAUSATIONS + ")]\n" +
       "        [-maxCauseEvents <quantity> (default=" + MAX_CAUSE_EVENTS + ")]\n" +
       "        [-maxInterveningEvents <quantity> (default=" + MAX_INTERVENING_EVENTS + ")]\n" +
+      "        [-maxValidInterveningEvents <quantity> (default=" + MAX_VALID_INTERVENING_EVENTS + ")]\n" +      
       "        [-causationInstanceLength <length> (default=" + CAUSATION_INSTANCE_LENGTH + ")]\n" +
       "        [-numCausationInstances <quantity> (default=" + NUM_CAUSATION_INSTANCES + ")]\n" +
       "        [-numNeurons <quantity> (default=" + NUM_NEURONS + ")]\n" +
@@ -313,6 +331,32 @@ public class Main
             }
             continue;
          }
+         if (args[i].equals("-maxValidInterveningEvents"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid maxValidInterveningEvents option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               MAX_VALID_INTERVENING_EVENTS = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid maxValidInterveningEvents option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (MAX_VALID_INTERVENING_EVENTS < 0)
+            {
+               System.err.println("Invalid maxValidInterveningEvents option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }         
          if (args[i].equals("-causationInstanceLength"))
          {
             i++;
@@ -469,7 +513,12 @@ public class Main
          System.err.println(Usage);
          System.exit(1);
       }
-
+      if (MAX_VALID_INTERVENING_EVENTS > MAX_INTERVENING_EVENTS)
+      {
+         System.err.println("warning: max valid intervening events should not be greater than max intervening events");
+         System.err.println(Usage);
+      }
+      
       // Initialize random numbers.
       random = new Random();
       random.setSeed(RANDOM_SEED);
@@ -594,7 +643,7 @@ public class Main
             CausationInstance instance = CausationTrainingInstances.get(i);
             for (int k = 0; k < instance.events.length; k++)
             {
-               if (instance.effectEventIndex == k)
+               if (instance.effectEventIndex == k && instance.valid)
                {
                   y_train += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1);
                }
@@ -641,7 +690,7 @@ public class Main
             CausationInstance instance = CausationTestingInstances.get(i);
             for (int k = 0; k < instance.events.length; k++)
             {
-               if (instance.effectEventIndex == k)
+               if (instance.effectEventIndex == k && instance.valid)
                {
                   y_test += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1);
                }
@@ -864,6 +913,7 @@ public class Main
       System.out.println("NUM_CAUSATIONS = " + NUM_CAUSATIONS);
       System.out.println("MAX_CAUSE_EVENTS = " + MAX_CAUSE_EVENTS);
       System.out.println("MAX_INTERVENING_EVENTS = " + MAX_INTERVENING_EVENTS);
+      System.out.println("MAX_VALID_INTERVENING_EVENTS = " + MAX_VALID_INTERVENING_EVENTS);      
       System.out.println("CAUSATION_INSTANCE_LENGTH = " + CAUSATION_INSTANCE_LENGTH);
       System.out.println("NUM_CAUSATION_INSTANCES = " + NUM_CAUSATION_INSTANCES);
       System.out.println("CAUSATION_INSTANCE_LENGTH = " + CAUSATION_INSTANCE_LENGTH);
