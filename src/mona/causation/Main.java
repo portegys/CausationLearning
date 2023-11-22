@@ -45,29 +45,30 @@ import org.json.JSONObject;
 public class Main
 {
    // Parameters.
-   public static int NUM_EVENT_TYPES           = 10;
-   public static int NUM_CAUSE_EVENT_TYPES     = 5;
-   public static int EFFECT_EVENT_TYPE         = NUM_EVENT_TYPES;
-   public static int NUM_CAUSATIONS            = 2;
-   public static int MAX_CAUSE_EVENTS          = 2;
-   public static int MAX_INTERVENING_EVENTS    = 2;   
-   public static int MAX_VALID_INTERVENING_EVENTS    = 1;
-   public static int CAUSATION_INSTANCE_LENGTH = (MAX_CAUSE_EVENTS + 1) * (MAX_INTERVENING_EVENTS + 1);
-   public static int NUM_CAUSATION_INSTANCES   = 10;
-   public static int NUM_NEURONS = 128;
-   public static int NUM_EPOCHS = 500;
-   
+   public static int   NUM_EVENT_TYPES                     = 10;
+   public static int   NUM_CAUSE_EVENT_TYPES               = 5;
+   public static int   EFFECT_EVENT_TYPE                   = NUM_EVENT_TYPES;
+   public static int   NUM_CAUSATIONS                      = 2;
+   public static int   MAX_CAUSE_EVENTS                    = 2;
+   public static int   MAX_INTERVENING_EVENTS              = 2;
+   public static int   MAX_VALID_INTERVENING_EVENTS        = 1;
+   public static float VALID_INTERVENING_EVENT_PROBABILITY = 0.9f;
+   public static int   CAUSATION_INSTANCE_LENGTH           = (MAX_CAUSE_EVENTS + 1) * (MAX_INTERVENING_EVENTS + 1);
+   public static int   NUM_CAUSATION_INSTANCES             = 10;
+   public static int   NUM_NEURONS = 128;
+   public static int   NUM_EPOCHS  = 500;
+
    // Random numbers.
    public static final int DEFAULT_RANDOM_SEED = 4517;
-   public static int       RANDOM_SEED          = DEFAULT_RANDOM_SEED;
+   public static int       RANDOM_SEED         = DEFAULT_RANDOM_SEED;
    public static Random    random;
    public final static int MAX_TRIES = 100;
-   
+
    // RNN.
    public static final String RNN_DATASET_FILENAME = "causation_rnn_dataset.py";
-   public static final String LSTM_FILENAME         = "causation_lstm.py";
+   public static final String LSTM_FILENAME        = "causation_lstm.py";
    public static final String RNN_RESULTS_FILENAME = "causation_rnn_results.json";
-   
+
    // Version.
    public static final String VERSION = "1.0";
 
@@ -96,51 +97,77 @@ public class Main
    // Causation instances.
    public static class CausationInstance
    {
-      public int[] events;
-      public int   causationIndex;
-      public int   effectEventIndex;
+      public int[]   events;
+      public int     causationIndex;
+      public int     effectEventIndex;
       public boolean valid;
       public CausationInstance()
       {
          events         = new int[CAUSATION_INSTANCE_LENGTH];
          causationIndex = random.nextInt(NUM_CAUSATIONS);
-         valid = true;
+         valid          = true;
          Causation causation = Causations.get(causationIndex);
          List < List < Integer >> eventPermutations = permuteList(causation.causeEvents);
          List<Integer> permutation = eventPermutations.get(random.nextInt(eventPermutations.size()));
          int           j           = 0;
          for (int k : permutation)
          {
-            if (MAX_INTERVENING_EVENTS > 0)
+            int n = 0;
+            if (random.nextFloat() < VALID_INTERVENING_EVENT_PROBABILITY)
             {
-               int n = random.nextInt(MAX_INTERVENING_EVENTS + 1);
-               if (n > MAX_VALID_INTERVENING_EVENTS)
+               if (MAX_INTERVENING_EVENTS > 0)
                {
-            	   valid = false;
-               }
-               for (int q = 0; q < n; q++)
-               {
-                  events[j] = NUM_CAUSE_EVENT_TYPES + random.nextInt(NUM_EVENT_TYPES - NUM_CAUSE_EVENT_TYPES);
-                  j++;
+                  n = random.nextInt(MAX_VALID_INTERVENING_EVENTS + 1);
                }
             }
-            events[j] = k;
-            j++;            
-         }
-         if (MAX_INTERVENING_EVENTS > 0)
-         {
-            int n = random.nextInt(MAX_INTERVENING_EVENTS + 1);
-            if (n > MAX_VALID_INTERVENING_EVENTS)
+            else
             {
-         	   valid = false;
-            }            
+               if ((MAX_INTERVENING_EVENTS - MAX_VALID_INTERVENING_EVENTS) == 1)
+               {
+                  n = MAX_VALID_INTERVENING_EVENTS + 1;
+               }
+               else
+               {
+                  n = random.nextInt(MAX_INTERVENING_EVENTS - (MAX_VALID_INTERVENING_EVENTS + 1)) +
+                      (MAX_VALID_INTERVENING_EVENTS + 1);
+               }
+               valid = false;
+            }
             for (int q = 0; q < n; q++)
             {
                events[j] = NUM_CAUSE_EVENT_TYPES + random.nextInt(NUM_EVENT_TYPES - NUM_CAUSE_EVENT_TYPES);
                j++;
             }
-         } 
-         events[j]        = EFFECT_EVENT_TYPE;        	 
+            events[j] = k;
+            j++;
+         }
+         int n = 0;
+         if (random.nextFloat() < VALID_INTERVENING_EVENT_PROBABILITY)
+         {
+            if (MAX_INTERVENING_EVENTS > 0)
+            {
+               n = random.nextInt(MAX_VALID_INTERVENING_EVENTS + 1);
+            }
+         }
+         else
+         {
+            if ((MAX_INTERVENING_EVENTS - MAX_VALID_INTERVENING_EVENTS) == 1)
+            {
+               n = MAX_VALID_INTERVENING_EVENTS + 1;
+            }
+            else
+            {
+               n = random.nextInt(MAX_INTERVENING_EVENTS - (MAX_VALID_INTERVENING_EVENTS + 1)) +
+                   (MAX_VALID_INTERVENING_EVENTS + 1);
+            }
+            valid = false;
+         }
+         for (int q = 0; q < n; q++)
+         {
+            events[j] = NUM_CAUSE_EVENT_TYPES + random.nextInt(NUM_EVENT_TYPES - NUM_CAUSE_EVENT_TYPES);
+            j++;
+         }
+         events[j]        = EFFECT_EVENT_TYPE;
          effectEventIndex = j;
          j++;
          for ( ; j < CAUSATION_INSTANCE_LENGTH; j++)
@@ -148,6 +175,7 @@ public class Main
             events[j] = NUM_CAUSE_EVENT_TYPES + random.nextInt(NUM_EVENT_TYPES - NUM_CAUSE_EVENT_TYPES);
          }
       }
+
 
       public void print()
       {
@@ -159,9 +187,11 @@ public class Main
          System.out.print("}, effect event index=" + effectEventIndex);
          if (valid)
          {
-             System.out.println(", valid=true");         	 
-         } else {
-             System.out.println(", valid=false");        	 
+            System.out.println(", valid=true");
+         }
+         else
+         {
+            System.out.println(", valid=false");
          }
       }
    };
@@ -177,11 +207,12 @@ public class Main
       "        [-numCausations <quantity> (default=" + NUM_CAUSATIONS + ")]\n" +
       "        [-maxCauseEvents <quantity> (default=" + MAX_CAUSE_EVENTS + ")]\n" +
       "        [-maxInterveningEvents <quantity> (default=" + MAX_INTERVENING_EVENTS + ")]\n" +
-      "        [-maxValidInterveningEvents <quantity> (default=" + MAX_VALID_INTERVENING_EVENTS + ")]\n" +      
+      "        [-maxValidInterveningEvents <quantity> (default=" + MAX_VALID_INTERVENING_EVENTS + ")]\n" +
+      "        [-validInterveningEventProbability <quantity> (default=" + VALID_INTERVENING_EVENT_PROBABILITY + ")]\n" +
       "        [-causationInstanceLength <length> (default=" + CAUSATION_INSTANCE_LENGTH + ")]\n" +
       "        [-numCausationInstances <quantity> (default=" + NUM_CAUSATION_INSTANCES + ")]\n" +
       "        [-numNeurons <quantity> (default=" + NUM_NEURONS + ")]\n" +
-      "        [-numEpochs <quantity> (default=" + NUM_EPOCHS + ")]\n" +      
+      "        [-numEpochs <quantity> (default=" + NUM_EPOCHS + ")]\n" +
       "        [-randomSeed <random number seed> (default=" + DEFAULT_RANDOM_SEED + ")]\n" +
       "  Print parameters:\n" +
       "    java mona.causation.Main -printParameters\n" +
@@ -356,7 +387,33 @@ public class Main
                System.exit(1);
             }
             continue;
-         }         
+         }
+         if (args[i].equals("-validInterveningEventProbability"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid validInterveningEventProbability option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               VALID_INTERVENING_EVENT_PROBABILITY = Float.parseFloat(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid validInterveningEventProbability option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if ((VALID_INTERVENING_EVENT_PROBABILITY < 0.0f) || (VALID_INTERVENING_EVENT_PROBABILITY > 1.0f))
+            {
+               System.err.println("Invalid validInterveningEventProbability option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }
          if (args[i].equals("-causationInstanceLength"))
          {
             i++;
@@ -460,7 +517,7 @@ public class Main
                System.exit(1);
             }
             continue;
-         }                  
+         }
          if (args[i].equals("-randomSeed"))
          {
             i++;
@@ -503,22 +560,30 @@ public class Main
       }
       if (NUM_CAUSE_EVENT_TYPES > NUM_EVENT_TYPES)
       {
-         System.err.println("number of cause event types cannot be greater than number of event types");
+         System.err.println("Number of cause event types cannot be greater than number of event types");
          System.err.println(Usage);
          System.exit(1);
       }
       if ((MAX_INTERVENING_EVENTS > 0) && (NUM_CAUSE_EVENT_TYPES == NUM_EVENT_TYPES))
       {
-         System.err.println("number of cause event types cannot be equal to the number of event types");
+         System.err.println("Number of cause event types cannot be equal to the number of event types");
          System.err.println(Usage);
          System.exit(1);
       }
       if (MAX_VALID_INTERVENING_EVENTS > MAX_INTERVENING_EVENTS)
       {
-         System.err.println("warning: max valid intervening events should not be greater than max intervening events");
+         System.err.println("Max valid intervening events cannot be greater than max intervening events");
          System.err.println(Usage);
+         System.exit(1);
       }
-      
+      if ((VALID_INTERVENING_EVENT_PROBABILITY < 1.0f) &&
+          ((MAX_INTERVENING_EVENTS == 0) || (MAX_VALID_INTERVENING_EVENTS == MAX_INTERVENING_EVENTS)))
+      {
+         System.err.println("Not possible to have an invalid number of intervening events");
+         System.err.println(Usage);
+         System.exit(1);
+      }
+
       // Initialize random numbers.
       random = new Random();
       random.setSeed(RANDOM_SEED);
@@ -528,14 +593,14 @@ public class Main
       for (int i = 0; i < NUM_CAUSATIONS; i++)
       {
          Causation causation = new Causation();
-         int       t        = 0;
+         int       t         = 0;
          for ( ; t < MAX_TRIES; t++)
          {
             causation.causeEvents.clear();
             int n = random.nextInt(MAX_CAUSE_EVENTS) + 1;
             for (int j = 0; j < n; j++)
             {
-               causation.causeEvents.add(random.nextInt(NUM_CAUSE_EVENT_TYPES));            	
+               causation.causeEvents.add(random.nextInt(NUM_CAUSE_EVENT_TYPES));
             }
             Collections.sort(causation.causeEvents);
             boolean duplicate = false;
@@ -543,19 +608,19 @@ public class Main
             {
                if (c.causeEvents.size() == causation.causeEvents.size())
                {
-            	   duplicate = true;
-	               for (int j = 0, k = causation.causeEvents.size(); j < k; j++)
-	               {
-	                  if (c.causeEvents.get(j) != causation.causeEvents.get(j))
-	                  {
-	                     duplicate = false;
-	                     break;
-	                  }
-	               }
-	               if (duplicate)
-	               {
-	                  break;
-	               }
+                  duplicate = true;
+                  for (int j = 0, k = causation.causeEvents.size(); j < k; j++)
+                  {
+                     if (c.causeEvents.get(j) != causation.causeEvents.get(j))
+                     {
+                        duplicate = false;
+                        break;
+                     }
+                  }
+                  if (duplicate)
+                  {
+                     break;
+                  }
                }
             }
             if (!duplicate)
@@ -643,7 +708,7 @@ public class Main
             CausationInstance instance = CausationTrainingInstances.get(i);
             for (int k = 0; k < instance.events.length; k++)
             {
-               if (instance.effectEventIndex == k && instance.valid)
+               if ((instance.effectEventIndex == k) && instance.valid)
                {
                   y_train += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1);
                }
@@ -690,7 +755,7 @@ public class Main
             CausationInstance instance = CausationTestingInstances.get(i);
             for (int k = 0; k < instance.events.length; k++)
             {
-               if (instance.effectEventIndex == k && instance.valid)
+               if ((instance.effectEventIndex == k) && instance.valid)
                {
                   y_test += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1);
                }
@@ -714,7 +779,7 @@ public class Main
          System.err.println("Cannot write RNN dataset to file " + RNN_DATASET_FILENAME);
          System.exit(1);
       }
-      
+
       // Run LSTM.
       try
       {
@@ -744,24 +809,24 @@ public class Main
       processBuilder.inheritIO();
       try
       {
-         Process process = processBuilder.start();    	  
+         Process process = processBuilder.start();
          process.waitFor();
       }
       catch (IOException e)
       {
          System.err.println("Cannot run " + LSTM_FILENAME);
          System.exit(1);
-      }      
-	  catch (InterruptedException e) {}
-      
+      }
+      catch (InterruptedException e) {}
+
       // Fetch the results.
-      int train_prediction_errors = 0;
-      int train_total_predictions = 0;
-      float train_error_pct = 0.0f;
-      int test_prediction_errors = 0;
-      int test_total_predictions = 0;
-      float test_error_pct = 0.0f;       
-      try      
+      int   train_prediction_errors = 0;
+      int   train_total_predictions = 0;
+      float train_error_pct         = 0.0f;
+      int   test_prediction_errors  = 0;
+      int   test_total_predictions  = 0;
+      float test_error_pct          = 0.0f;
+      try
       {
          BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(RNN_RESULTS_FILENAME)));
          String         json;
@@ -783,42 +848,42 @@ public class Main
                System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
                System.exit(1);
             }
-            train_prediction_errors = Integer.parseInt(value);            
+            train_prediction_errors = Integer.parseInt(value);
             value = jObj.getString("train_total_predictions");
             if ((value == null) || value.isEmpty())
             {
                System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
                System.exit(1);
             }
-            train_total_predictions = Integer.parseInt(value);            
+            train_total_predictions = Integer.parseInt(value);
             value = jObj.getString("train_error_pct");
             if ((value == null) || value.isEmpty())
             {
                System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
                System.exit(1);
             }
-            train_error_pct = Float.parseFloat(value);           
-            value = jObj.getString("test_prediction_errors");
+            train_error_pct = Float.parseFloat(value);
+            value           = jObj.getString("test_prediction_errors");
             if ((value == null) || value.isEmpty())
             {
                System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
                System.exit(1);
             }
-            test_prediction_errors = Integer.parseInt(value);            
+            test_prediction_errors = Integer.parseInt(value);
             value = jObj.getString("test_total_predictions");
             if ((value == null) || value.isEmpty())
             {
                System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
                System.exit(1);
             }
-            test_total_predictions = Integer.parseInt(value);             
+            test_total_predictions = Integer.parseInt(value);
             value = jObj.getString("test_error_pct");
             if ((value == null) || value.isEmpty())
             {
                System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
                System.exit(1);
             }
-            test_error_pct = Float.parseFloat(value);             
+            test_error_pct = Float.parseFloat(value);
          }
          else
          {
@@ -832,14 +897,15 @@ public class Main
          System.err.println("Cannot read results file " + RNN_RESULTS_FILENAME + ":" + e.getMessage());
          System.exit(1);
       }
-      System.out.println("Train correct paths/total = " + (train_total_predictions - train_prediction_errors) + 
-    		  "/" + train_total_predictions + " (" + (100.0 - train_error_pct) + "%), prediction errors/total = " +
-    		  train_prediction_errors + "/" + train_total_predictions + " (" + train_error_pct + "%)");
-      System.out.println("Test correct paths/total = " + (test_total_predictions - test_prediction_errors) + 
-    		  "/" + test_total_predictions + " (" + (100.0 - test_error_pct) + "%), prediction errors/total = " +
-    		  test_prediction_errors + "/" + test_total_predictions + " (" + test_error_pct + "%)");      
+      System.out.println("Train correct paths/total = " + (train_total_predictions - train_prediction_errors) +
+                         "/" + train_total_predictions + " (" + (100.0 - train_error_pct) + "%), prediction errors/total = " +
+                         train_prediction_errors + "/" + train_total_predictions + " (" + train_error_pct + "%)");
+      System.out.println("Test correct paths/total = " + (test_total_predictions - test_prediction_errors) +
+                         "/" + test_total_predictions + " (" + (100.0 - test_error_pct) + "%), prediction errors/total = " +
+                         test_prediction_errors + "/" + test_total_predictions + " (" + test_error_pct + "%)");
       System.exit(0);
    }
+
 
    // One hot encoding of integer.
    public static String oneHot(int n, int numvals)
@@ -913,12 +979,13 @@ public class Main
       System.out.println("NUM_CAUSATIONS = " + NUM_CAUSATIONS);
       System.out.println("MAX_CAUSE_EVENTS = " + MAX_CAUSE_EVENTS);
       System.out.println("MAX_INTERVENING_EVENTS = " + MAX_INTERVENING_EVENTS);
-      System.out.println("MAX_VALID_INTERVENING_EVENTS = " + MAX_VALID_INTERVENING_EVENTS);      
+      System.out.println("MAX_VALID_INTERVENING_EVENTS = " + MAX_VALID_INTERVENING_EVENTS);
+      System.out.println("VALID_INTERVENING_EVENT_PROBABILITY = " + VALID_INTERVENING_EVENT_PROBABILITY);
       System.out.println("CAUSATION_INSTANCE_LENGTH = " + CAUSATION_INSTANCE_LENGTH);
       System.out.println("NUM_CAUSATION_INSTANCES = " + NUM_CAUSATION_INSTANCES);
       System.out.println("CAUSATION_INSTANCE_LENGTH = " + CAUSATION_INSTANCE_LENGTH);
       System.out.println("NUM_NEURONS = " + NUM_NEURONS);
       System.out.println("NUM_EPOCHS = " + NUM_EPOCHS);
-      System.out.println("RANDOM_SEED = " + RANDOM_SEED);      
+      System.out.println("RANDOM_SEED = " + RANDOM_SEED);
    }
 }
