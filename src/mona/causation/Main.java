@@ -52,7 +52,7 @@ public class Main
    public static int   MAX_CAUSE_EVENTS                    = 2;
    public static int   MAX_INTERVENING_EVENTS              = 2;
    public static int   MAX_VALID_INTERVENING_EVENTS        = 1;
-   public static float VALID_INTERVENING_EVENT_PROBABILITY = 0.9f;
+   public static float VALID_INTERVENING_EVENTS_PROBABILITY = 0.9f;
    public static int   CAUSATION_INSTANCE_LENGTH           = (MAX_CAUSE_EVENTS + 1) * (MAX_INTERVENING_EVENTS + 1);
    public static int   NUM_CAUSATION_INSTANCES             = 10;
    public static int   NUM_NEURONS = 128;
@@ -113,7 +113,7 @@ public class Main
          for (int k : permutation)
          {
             int n = 0;
-            if (random.nextFloat() < VALID_INTERVENING_EVENT_PROBABILITY)
+            if (random.nextFloat() < VALID_INTERVENING_EVENTS_PROBABILITY)
             {
                if (MAX_INTERVENING_EVENTS > 0)
                {
@@ -142,7 +142,7 @@ public class Main
             j++;
          }
          int n = 0;
-         if (random.nextFloat() < VALID_INTERVENING_EVENT_PROBABILITY)
+         if (random.nextFloat() < VALID_INTERVENING_EVENTS_PROBABILITY)
          {
             if (MAX_INTERVENING_EVENTS > 0)
             {
@@ -208,7 +208,7 @@ public class Main
       "        [-maxCauseEvents <quantity> (default=" + MAX_CAUSE_EVENTS + ")]\n" +
       "        [-maxInterveningEvents <quantity> (default=" + MAX_INTERVENING_EVENTS + ")]\n" +
       "        [-maxValidInterveningEvents <quantity> (default=" + MAX_VALID_INTERVENING_EVENTS + ")]\n" +
-      "        [-validInterveningEventProbability <quantity> (default=" + VALID_INTERVENING_EVENT_PROBABILITY + ")]\n" +
+      "        [-validInterveningEventsProbability <quantity> (default=" + VALID_INTERVENING_EVENTS_PROBABILITY + ")]\n" +
       "        [-causationInstanceLength <length> (default=" + CAUSATION_INSTANCE_LENGTH + ")]\n" +
       "        [-numCausationInstances <quantity> (default=" + NUM_CAUSATION_INSTANCES + ")]\n" +
       "        [-numNeurons <quantity> (default=" + NUM_NEURONS + ")]\n" +
@@ -388,27 +388,27 @@ public class Main
             }
             continue;
          }
-         if (args[i].equals("-validInterveningEventProbability"))
+         if (args[i].equals("-validInterveningEventsProbability"))
          {
             i++;
             if (i >= args.length)
             {
-               System.err.println("Invalid validInterveningEventProbability option");
+               System.err.println("Invalid validInterveningEventsProbability option");
                System.err.println(Usage);
                System.exit(1);
             }
             try
             {
-               VALID_INTERVENING_EVENT_PROBABILITY = Float.parseFloat(args[i]);
+               VALID_INTERVENING_EVENTS_PROBABILITY = Float.parseFloat(args[i]);
             }
             catch (NumberFormatException e) {
-               System.err.println("Invalid validInterveningEventProbability option");
+               System.err.println("Invalid validInterveningEventsProbability option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if ((VALID_INTERVENING_EVENT_PROBABILITY < 0.0f) || (VALID_INTERVENING_EVENT_PROBABILITY > 1.0f))
+            if ((VALID_INTERVENING_EVENTS_PROBABILITY < 0.0f) || (VALID_INTERVENING_EVENTS_PROBABILITY > 1.0f))
             {
-               System.err.println("Invalid validInterveningEventProbability option");
+               System.err.println("Invalid validInterveningEventsProbability option");
                System.err.println(Usage);
                System.exit(1);
             }
@@ -576,7 +576,7 @@ public class Main
          System.err.println(Usage);
          System.exit(1);
       }
-      if ((VALID_INTERVENING_EVENT_PROBABILITY < 1.0f) &&
+      if ((VALID_INTERVENING_EVENTS_PROBABILITY < 1.0f) &&
           ((MAX_INTERVENING_EVENTS == 0) || (MAX_VALID_INTERVENING_EVENTS == MAX_INTERVENING_EVENTS)))
       {
          System.err.println("Not possible to have an invalid number of intervening events");
@@ -980,7 +980,7 @@ public class Main
       System.out.println("MAX_CAUSE_EVENTS = " + MAX_CAUSE_EVENTS);
       System.out.println("MAX_INTERVENING_EVENTS = " + MAX_INTERVENING_EVENTS);
       System.out.println("MAX_VALID_INTERVENING_EVENTS = " + MAX_VALID_INTERVENING_EVENTS);
-      System.out.println("VALID_INTERVENING_EVENT_PROBABILITY = " + VALID_INTERVENING_EVENT_PROBABILITY);
+      System.out.println("VALID_INTERVENING_EVENTS_PROBABILITY = " + VALID_INTERVENING_EVENTS_PROBABILITY);
       System.out.println("CAUSATION_INSTANCE_LENGTH = " + CAUSATION_INSTANCE_LENGTH);
       System.out.println("NUM_CAUSATION_INSTANCES = " + NUM_CAUSATION_INSTANCES);
       System.out.println("CAUSATION_INSTANCE_LENGTH = " + CAUSATION_INSTANCE_LENGTH);
