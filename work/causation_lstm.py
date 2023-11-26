@@ -24,11 +24,11 @@ try:
   opts, args = getopt.getopt(sys.argv[1:],"hqn:e:",["neurons=","epochs="])
 except getopt.GetoptError:
   print('causation_lstm.py [-n <neurons>] [-e <epochs>] [-q (quiet)]')
-  sys.exit(2)
+  sys.exit(1)
 for opt, arg in opts:
   if opt == '-h':
      print('causation_lstm.py [-n <neurons>] [-e <epochs>] [-q (quiet)]')
-     sys.exit()
+     sys.exit(0)
   if opt in ("-n", "--neurons"):
      n_neurons = int(arg)
   elif opt in ("-e", "--epochs"):
@@ -48,7 +48,8 @@ model = Sequential()
 model.add(LSTM(n_neurons, input_shape=(X_train_shape[1], X_train_shape[2]), return_sequences=True))
 model.add(TimeDistributed(Dense(y_train_shape[2])))
 model.compile(loss='mean_squared_error', optimizer='adam')
-#print(model.summary())
+if verbose:
+    print(model.summary())
 
 # train
 model.fit(X, y, epochs=n_epochs, batch_size=X_train_shape[0], verbose=0)
@@ -154,4 +155,7 @@ with open(results_filename, 'w') as f:
     f.write('\"test_total_predictions\":\"'+str(testTotal)+'\",')
     f.write('\"test_error_pct\":\"'+str(round(testErrorPct, 2))+'\"')
     f.write('}\n')
+    
+sys.exit(0)
+
 
