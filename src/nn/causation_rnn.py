@@ -1,4 +1,4 @@
-# Causation LSTM.
+# Causation RNN.
 # results written to causation_rnn_results.txt
 import os
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -6,11 +6,12 @@ from numpy import array, argmax
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import TimeDistributed
-from keras.layers import LSTM
+from keras.layers import SimpleRNN, LSTM
 import sys, getopt
 
-# define LSTM configuration
-n_neurons = 128
+# define RNN configuration
+network = 'LSTM'
+n_hidden = [128]
 n_epochs = 500
 
 # results file name
@@ -20,17 +21,28 @@ results_filename = 'causation_rnn_results.json'
 verbose = True
 
 # get options
+first_hidden = True
+usage = 'causation_attention.py [-n LSTM | SimpleRNN ] [-h <hidden neurons> (repeat for additional layers)] [-e <epochs>] [-q (quiet)]'
 try:
-  opts, args = getopt.getopt(sys.argv[1:],"hqn:e:",["neurons=","epochs="])
+  opts, args = getopt.getopt(sys.argv[1:],"?qn:h:e:",["network=", "hidden=","epochs="])
 except getopt.GetoptError:
-  print('causation_lstm.py [-n <neurons>] [-e <epochs>] [-q (quiet)]')
-  sys.exit(1)
+  print(usage)
+  sys.exit(2)
 for opt, arg in opts:
-  if opt == '-h':
-     print('causation_lstm.py [-n <neurons>] [-e <epochs>] [-q (quiet)]')
+  if opt in ("-?", "--help"):
+     print(usage)
      sys.exit(0)
-  if opt in ("-n", "--neurons"):
-     n_neurons = int(arg)
+  if opt in ("-n", "--network"):
+     network = arg
+     if network != 'LSTM' and network != 'SimpleRNN':
+         print('Invalid network type')
+         print(usage)
+         sys.exit(1)
+  elif opt in ("-h", "--hidden"):
+     if first_hidden:
+         first_hidden = False
+         n_hidden = []
+     n_hidden.append(int(arg))
   elif opt in ("-e", "--epochs"):
      n_epochs = int(arg)
   elif opt == "-q":
@@ -43,9 +55,16 @@ X = seq.reshape(X_train_shape[0], X_train_shape[1], X_train_shape[2])
 seq = array(y_train_seq)
 y = seq.reshape(y_train_shape[0], y_train_shape[1], y_train_shape[2])
 
-# create LSTM
+# create RNN
 model = Sequential()
-model.add(LSTM(n_neurons, input_shape=(X_train_shape[1], X_train_shape[2]), return_sequences=True))
+if network == 'LSTM':
+    model.add(LSTM(n_hidden[0], input_shape=(X_train_shape[1], X_train_shape[2]), return_sequences=True))
+    for i in range(1, len(n_hidden)):
+        model.add(LSTM(n_hidden[i], return_sequences=True))
+else:
+    model.add(SimpleRNN(n_hidden[0], input_shape=(X_train_shape[1], X_train_shape[2]), return_sequences=True))
+    for i in range(1, len(n_hidden)):
+        model.add(SimpleRNN(n_hidden[i], return_sequences=True))
 model.add(TimeDistributed(Dense(y_train_shape[2])))
 model.compile(loss='mean_squared_error', optimizer='adam')
 if verbose:

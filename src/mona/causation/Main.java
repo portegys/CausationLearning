@@ -64,9 +64,11 @@ public class Main
    public static Random    random;
    public final static int MAX_TRIES = 100;
 
-   // RNN.
+   // NN.
    public static final String RNN_DATASET_FILENAME = "causation_rnn_dataset.py";
-   public static final String LSTM_FILENAME        = "causation_lstm.py";
+   public static final String NN_FILENAME          = "causation_nn.py";
+   public static final String RNN_FILENAME         = "causation_rnn.py";
+   public static final String ATTENTION_FILENAME   = "causation_attention.py";   
    public static final String RNN_RESULTS_FILENAME = "causation_rnn_results.json";
 
    // Version.
@@ -783,13 +785,13 @@ public class Main
       // Run LSTM.
       try
       {
-         InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(LSTM_FILENAME);
+         InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(RNN_FILENAME);
          if (in == null)
          {
-            System.err.println("Cannot access " + LSTM_FILENAME);
+            System.err.println("Cannot access " + RNN_FILENAME);
             System.exit(1);
          }
-         File             pythonScript = new File(LSTM_FILENAME);
+         File             pythonScript = new File(RNN_FILENAME);
          FileOutputStream out          = new FileOutputStream(pythonScript);
          byte[] buffer = new byte[1024];
          int bytesRead;
@@ -801,10 +803,10 @@ public class Main
       }
       catch (Exception e)
       {
-         System.err.println("Cannot create " + LSTM_FILENAME);
+         System.err.println("Cannot create " + RNN_FILENAME);
          System.exit(1);
       }
-      ProcessBuilder processBuilder = new ProcessBuilder("python", LSTM_FILENAME,
+      ProcessBuilder processBuilder = new ProcessBuilder("python", RNN_FILENAME,
                                                          "-n", (NUM_NEURONS + ""), "-e", (NUM_EPOCHS + ""), "-q");
       processBuilder.inheritIO();
       try
@@ -814,7 +816,7 @@ public class Main
       }
       catch (IOException e)
       {
-         System.err.println("Cannot run " + LSTM_FILENAME);
+         System.err.println("Cannot run " + RNN_FILENAME);
          System.exit(1);
       }
       catch (InterruptedException e) {}

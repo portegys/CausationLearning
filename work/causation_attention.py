@@ -16,9 +16,9 @@ from keras.models import Sequential
 from keras.metrics import mean_squared_error
 import sys, getopt
 
-# define configuration
-rnn = 'LSTM'
-n_neurons = 128
+# define RNN configuration
+network = 'LSTM'
+n_hidden = 128
 n_epochs = 500
 
 # results file name
@@ -28,24 +28,30 @@ results_filename = 'causation_rnn_results.json'
 verbose = True
 
 # get options
-usage = 'causation_attention.py [-r LSTM | Simple ] [-n <neurons>] [-e <epochs>] [-q (quiet)]'
+first_hidden = True
+usage = 'causation_attention.py [-n LSTM | SimpleRNN ] [-h <hidden neurons>] [-e <epochs>] [-q (quiet)]'
 try:
-  opts, args = getopt.getopt(sys.argv[1:],"hqr:n:e:",["rnn=", "neurons=","epochs="])
+  opts, args = getopt.getopt(sys.argv[1:],"?qn:h:e:",["network=", "hidden=","epochs="])
 except getopt.GetoptError:
   print(usage)
   sys.exit(2)
 for opt, arg in opts:
-  if opt == '-h':
+  if opt in ("-?", "--help"):
      print(usage)
-     sys.exit(1)
-  if opt in ("-r", "--rnn"):
-     rnn = arg
-     if rnn != 'LSTM' and rnn != 'Simple':
-         print('Invalid rnn type')
+     sys.exit(0)
+  if opt in ("-r", "--network"):
+     network = arg
+     if network != 'LSTM' and network != 'SimpleRNN':
+         print('Invalid network type')
          print(usage)
          sys.exit(1)
-  elif opt in ("-n", "--neurons"):
-     n_neurons = int(arg)
+  elif opt in ("-h", "--hidden"):
+     if first_hidden:
+         first_hidden = False
+         n_hidden = int(arg)
+     else:
+         print('invalid multiple hidden option')
+         sys.exit(1)
   elif opt in ("-e", "--epochs"):
      n_epochs = int(arg)
   elif opt == "-q":
@@ -84,9 +90,9 @@ class attention_layer(Layer):
         context = K.sum(context, axis=1)
         return context
 
-def create_RNN_with_attention(rnn, input_shape, hidden_units, output_units, activation):
+def create_RNN_with_attention(network, input_shape, hidden_units, output_units, activation):
     x=Input(shape=input_shape)
-    if rnn == 'Simple':
+    if network == 'SimpleRNN':
         RNN_layer = SimpleRNN(hidden_units, return_sequences=True, activation=activation)(x)
     else:
         RNN_layer = LSTM(hidden_units, input_shape=input_shape, return_sequences=True)(x)
@@ -97,8 +103,8 @@ def create_RNN_with_attention(rnn, input_shape, hidden_units, output_units, acti
     return model    
 
 # Create the model
-model = create_RNN_with_attention(rnn=rnn, input_shape=(X_train_shape[1], X_train_shape[2]),
-                                   hidden_units=n_neurons, output_units=y_train_shape[2], activation='tanh')
+model = create_RNN_with_attention(network=network, input_shape=(X_train_shape[1], X_train_shape[2]),
+                                   hidden_units=n_hidden, output_units=y_train_shape[2], activation='tanh')
 if verbose:
     model.summary()
 
