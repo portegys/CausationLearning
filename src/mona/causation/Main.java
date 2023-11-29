@@ -55,9 +55,16 @@ public class Main
    public static float VALID_INTERVENING_EVENTS_PROBABILITY = 0.9f;
    public static int   CAUSATION_INSTANCE_LENGTH           = (MAX_CAUSE_EVENTS + 1) * (MAX_INTERVENING_EVENTS + 1);
    public static int   NUM_CAUSATION_INSTANCES             = 10;
-   public static int   NUM_NEURONS = 128;
+   public static String NETWORK_TYPE = "LSTM";   
    public static int   NUM_EPOCHS  = 500;
-
+   public static final int   DEFAULT_NUM_HIDDEN_NEURONS = 128;   
+   public static ArrayList<Integer> NUM_HIDDEN_NEURONS;   
+   static 
+   {
+       NUM_HIDDEN_NEURONS = new ArrayList<Integer>();
+       NUM_HIDDEN_NEURONS.add(DEFAULT_NUM_HIDDEN_NEURONS);
+   }
+   
    // Random numbers.
    public static final int DEFAULT_RANDOM_SEED = 4517;
    public static int       RANDOM_SEED         = DEFAULT_RANDOM_SEED;
@@ -66,11 +73,13 @@ public class Main
 
    // NN.
    public static final String RNN_DATASET_FILENAME = "causation_rnn_dataset.py";
-   public static final String NN_FILENAME          = "causation_nn.py";
    public static final String RNN_FILENAME         = "causation_rnn.py";
    public static final String ATTENTION_FILENAME   = "causation_attention.py";   
    public static final String RNN_RESULTS_FILENAME = "causation_rnn_results.json";
-
+   public static final String NN_DATASET_FILENAME  = "causation_nn_dataset.py";
+   public static final String NN_FILENAME          = "causation_nn.py";
+   public static final String NN_RESULTS_FILENAME = "causation_nn_results.json";
+   
    // Version.
    public static final String VERSION = "1.0";
 
@@ -213,7 +222,8 @@ public class Main
       "        [-validInterveningEventsProbability <quantity> (default=" + VALID_INTERVENING_EVENTS_PROBABILITY + ")]\n" +
       "        [-causationInstanceLength <length> (default=" + CAUSATION_INSTANCE_LENGTH + ")]\n" +
       "        [-numCausationInstances <quantity> (default=" + NUM_CAUSATION_INSTANCES + ")]\n" +
-      "        [-numNeurons <quantity> (default=" + NUM_NEURONS + ")]\n" +
+      "        [-networkType LSTM | SimpleRNN | Attention | NN (default=" + NETWORK_TYPE + ")]\n" +      
+      "        [-numHiddenNeurons <quantity> (default=" + DEFAULT_NUM_HIDDEN_NEURONS + ") (repeat for additional layers)]\n" +
       "        [-numEpochs <quantity> (default=" + NUM_EPOCHS + ")]\n" +
       "        [-randomSeed <random number seed> (default=" + DEFAULT_RANDOM_SEED + ")]\n" +
       "  Print parameters:\n" +
@@ -468,32 +478,53 @@ public class Main
             }
             continue;
          }
-         if (args[i].equals("-numNeurons"))
+         if (args[i].equals("-networkType"))
          {
             i++;
             if (i >= args.length)
             {
-               System.err.println("Invalid numNeurons option");
+               System.err.println("Invalid networkType option");
                System.err.println(Usage);
                System.exit(1);
             }
-            try
+            NETWORK_TYPE = args[i];
+            if (!NETWORK_TYPE.equals("LSTM") && !NETWORK_TYPE.equals("SimpleRNN") &&
+            		!NETWORK_TYPE.equals("Attention") && !NETWORK_TYPE.equals("NN"))
             {
-               NUM_NEURONS = Integer.parseInt(args[i]);
-            }
-            catch (NumberFormatException e) {
-               System.err.println("Invalid numNeurons option");
-               System.err.println(Usage);
-               System.exit(1);
-            }
-            if (NUM_NEURONS <= 0)
-            {
-               System.err.println("Invalid numNeurons option");
+               System.err.println("Invalid networkType option");
                System.err.println(Usage);
                System.exit(1);
             }
             continue;
          }
+         if (args[i].equals("-numHiddenNeurons"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid numHiddenNeurons option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            int n = -1;
+            try
+            {
+               n = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid numHiddenNeurons option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (n <= 0)
+            {
+               System.err.println("Invalid numHiddenNeurons option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            NUM_HIDDEN_NEURONS.add(n);            
+            continue;
+         }         
          if (args[i].equals("-numEpochs"))
          {
             i++;
@@ -806,8 +837,18 @@ public class Main
          System.err.println("Cannot create " + RNN_FILENAME);
          System.exit(1);
       }
-      ProcessBuilder processBuilder = new ProcessBuilder("python", RNN_FILENAME,
-                                                         "-n", (NUM_NEURONS + ""), "-e", (NUM_EPOCHS + ""), "-q");
+      String[] opts = new String[5 + (NUM_HIDDEN_NEURONS.size() * 2)];
+      opts[0] = "python";
+      opts[1] = RNN_FILENAME;
+      opts[2] = "-e";
+      opts[3] = (NUM_EPOCHS + "");
+      opts[4] = "-q";
+      for (int i = 0, j = NUM_HIDDEN_NEURONS.size(), k = 5; i < j; i++, k += 2)
+      {
+    	  opts[k] = "-h";
+    	  opts[k + 1] = (NUM_HIDDEN_NEURONS.get(i) + "");
+      } 
+      ProcessBuilder processBuilder = new ProcessBuilder(opts);
       processBuilder.inheritIO();
       try
       {
@@ -986,7 +1027,17 @@ public class Main
       System.out.println("CAUSATION_INSTANCE_LENGTH = " + CAUSATION_INSTANCE_LENGTH);
       System.out.println("NUM_CAUSATION_INSTANCES = " + NUM_CAUSATION_INSTANCES);
       System.out.println("CAUSATION_INSTANCE_LENGTH = " + CAUSATION_INSTANCE_LENGTH);
-      System.out.println("NUM_NEURONS = " + NUM_NEURONS);
+      System.out.println("NETWORK_TYPE = " + NETWORK_TYPE);      
+      System.out.print("NUM_HIDDEN_NEURONS = {");
+      for (int i = 0, j = NUM_HIDDEN_NEURONS.size(); i < j; i++)
+      {
+    	  System.out.print(NUM_HIDDEN_NEURONS.get(i));
+    	  if (i < j - 1)
+    	  {
+    		  System.out.print(",");
+    	  }
+      }
+      System.out.println("}");
       System.out.println("NUM_EPOCHS = " + NUM_EPOCHS);
       System.out.println("RANDOM_SEED = " + RANDOM_SEED);
    }

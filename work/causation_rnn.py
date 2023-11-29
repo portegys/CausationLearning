@@ -1,3 +1,5 @@
+# For conditions of distribution and use, see copyright notice in Main.java
+
 # Causation RNN.
 # results written to causation_rnn_results.txt
 import os
@@ -22,12 +24,12 @@ verbose = True
 
 # get options
 first_hidden = True
-usage = 'causation_attention.py [-n LSTM | SimpleRNN ] [-h <hidden neurons> (repeat for additional layers)] [-e <epochs>] [-q (quiet)]'
+usage = 'causation_rnn.py [-n LSTM | SimpleRNN ] [-h <hidden neurons> (repeat for additional layers)] [-e <epochs>] [-q (quiet)]'
 try:
   opts, args = getopt.getopt(sys.argv[1:],"?qn:h:e:",["network=", "hidden=","epochs="])
 except getopt.GetoptError:
   print(usage)
-  sys.exit(2)
+  sys.exit(1)
 for opt, arg in opts:
   if opt in ("-?", "--help"):
      print(usage)
@@ -47,9 +49,15 @@ for opt, arg in opts:
      n_epochs = int(arg)
   elif opt == "-q":
      verbose = False
+  else:
+     print(usage)
+     sys.exit(1)
 
 # prepare data
 from causation_rnn_dataset import X_train_shape, X_train_seq, y_train_shape, y_train_seq
+if X_train_shape[0] == 0:
+    print('Empty train dataset')
+    sys.exit(1)
 seq = array(X_train_seq)
 X = seq.reshape(X_train_shape[0], X_train_shape[1], X_train_shape[2])
 seq = array(y_train_seq)
@@ -107,6 +115,9 @@ for path in range(X_train_shape[0]):
 
 # predict
 from causation_rnn_dataset import X_test_shape, X_test_seq, y_test_shape, y_test_seq
+if X_test_shape[0] == 0:
+    print('Empty test dataset')
+    sys.exit(1)
 seq = array(X_test_seq)
 X = seq.reshape(X_test_shape[0], X_test_shape[1], X_test_shape[2])
 seq = array(y_test_seq)
