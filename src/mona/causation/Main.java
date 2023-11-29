@@ -222,7 +222,7 @@ public class Main
       "        [-validInterveningEventsProbability <quantity> (default=" + VALID_INTERVENING_EVENTS_PROBABILITY + ")]\n" +
       "        [-causationInstanceLength <length> (default=" + CAUSATION_INSTANCE_LENGTH + ")]\n" +
       "        [-numCausationInstances <quantity> (default=" + NUM_CAUSATION_INSTANCES + ")]\n" +
-      "        [-networkType LSTM | SimpleRNN | Attention | NN (default=" + NETWORK_TYPE + ")]\n" +      
+      "        [-networkType \"LSTM\" | \"SimpleRNN\" | \"Attention\" | \"NN\" (default=" + NETWORK_TYPE + ")]\n" +      
       "        [-numHiddenNeurons <quantity> (default=" + DEFAULT_NUM_HIDDEN_NEURONS + ") (repeat for additional layers)]\n" +
       "        [-numEpochs <quantity> (default=" + NUM_EPOCHS + ")]\n" +
       "        [-randomSeed <random number seed> (default=" + DEFAULT_RANDOM_SEED + ")]\n" +
@@ -241,7 +241,8 @@ public class Main
    // 2=error
    public static void main(String[] args)
    {
-      // Get options.
+	  // Get options.	   
+	  boolean firstHidden = true;	   		   
       for (int i = 0; i < args.length; i++)
       {
          if (args[i].equals("-numEventTypes"))
@@ -522,6 +523,11 @@ public class Main
                System.err.println(Usage);
                System.exit(1);
             }
+            if (firstHidden)
+            {
+                firstHidden = false;
+                NUM_HIDDEN_NEURONS.clear();
+            }    
             NUM_HIDDEN_NEURONS.add(n);            
             continue;
          }         
@@ -615,6 +621,12 @@ public class Main
          System.err.println("Not possible to have an invalid number of intervening events");
          System.err.println(Usage);
          System.exit(1);
+      }
+      if (NETWORK_TYPE.equals("Attention") && NUM_HIDDEN_NEURONS.size() > 1)
+      {
+          System.err.println("Attention network limited to single hidden layer");
+          System.err.println(Usage);
+          System.exit(1);
       }
 
       // Initialize random numbers.
@@ -813,7 +825,7 @@ public class Main
          System.exit(1);
       }
 
-      // Run LSTM.
+      // Run network.
       try
       {
          InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(RNN_FILENAME);
