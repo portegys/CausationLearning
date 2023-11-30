@@ -43,19 +43,16 @@ for opt, arg in opts:
      sys.exit(1)
 
 # import dataset
-from causation_nn_dataset import X_train_shape, y_train_shape, X_train, y_train, X_test_shape, y_test_shape, X_test, y_test
+from causation_nn_dataset import X_train_shape, y_train_shape, X_train_seq, y_train_seq, X_test_shape, y_test_shape, X_test_seq, y_test_seq
 if X_train_shape[0] == 0:
     print('Empty train dataset')
     sys.exit(1)
 if X_test_shape[0] == 0:
     print('Empty test dataset')
     sys.exit(1)
-seq = array(X_train)
-print(seq)
-print(len(seq))
-print(X_train_shape)
+seq = array(X_train_seq)
 X = seq.reshape(X_train_shape[0], X_train_shape[1])
-seq = array(y_train)
+seq = array(y_train_seq)
 y = seq.reshape(y_train_shape[0], y_train_shape[1])
 
 # create NN
@@ -69,15 +66,15 @@ if verbose:
     print(model.summary())
 
 # train
-model.fit(X, y, epochs=n_epochs, batch_size=10)
+model.fit(X, y, epochs=n_epochs, batch_size=10, verbose=0)
 if verbose:
     _, accuracy = model.evaluate(X, y)
     print('Accuracy: %.2f' % (accuracy*100))
 
 # validate
-seq = array(X_train)
+seq = array(X_train_seq)
 X = seq.reshape(X_train_shape[0], X_train_shape[1])
-seq = array(y_train)
+seq = array(y_train_seq)
 y = seq.reshape(y_train_shape[0], y_train_shape[1])
 predictions = model.predict(X, batch_size=X_train_shape[0], verbose=0)
 trainErrors = 0
@@ -91,9 +88,9 @@ for response in range(y_train_shape[0]):
         trainTotal += 1
 
 # predict
-seq = array(X_test)
+seq = array(X_test_seq)
 X = seq.reshape(X_test_shape[0], X_test_shape[1])
-seq = array(y_test)
+seq = array(y_test_seq)
 y = seq.reshape(y_test_shape[0], y_test_shape[1])
 testErrors = 0
 testTotal = 0
@@ -106,6 +103,12 @@ if X_test_shape[0] > 0:
             if p != t:
                 testErrors += 1
             testTotal += 1
+trainErrorPct=0
+if trainTotal > 0:
+    trainErrorPct = (float(trainErrors) / float(trainTotal)) * 100.0
+testErrorPct=0
+if testTotal > 0:
+    testErrorPct = (float(testErrors) / float(testTotal)) * 100.0
 
 # Print results.
 if verbose == True:

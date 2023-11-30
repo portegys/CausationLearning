@@ -719,122 +719,233 @@ public class Main
       }
 
       // Learn and evaluate performance.
-      try
+      if (NETWORK_TYPE.equals("NN"))
       {
-         FileWriter  fileWriter  = new FileWriter(RNN_DATASET_FILENAME);
-         PrintWriter printWriter = new PrintWriter(fileWriter);
-         printWriter.println("X_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-                             CAUSATION_INSTANCE_LENGTH + ", " + (NUM_EVENT_TYPES + 1) + " ]");
-         printWriter.print("X_train_seq = [");
-         String X_train = "";
-         for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
-         {
-            X_train += "\n";
-            CausationInstance instance = CausationTrainingInstances.get(i);
-            for (int k = 0; k < instance.events.length; k++)
-            {
-               X_train += oneHot(instance.events[k], (NUM_EVENT_TYPES + 1));
-               X_train += ",";
-            }
-         }
-         if (X_train.endsWith(","))
-         {
-            X_train = X_train.substring(0, X_train.length() - 1);
-         }
-         printWriter.println(X_train);
-         printWriter.println("]");
-         printWriter.println("y_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-                             CAUSATION_INSTANCE_LENGTH + ", " + (NUM_CAUSATIONS + 1) + " ]");
-         printWriter.print("y_train_seq = [");
-         String y_train = "";
-         for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
-         {
-            y_train += "\n";
-            CausationInstance instance = CausationTrainingInstances.get(i);
-            for (int k = 0; k < instance.events.length; k++)
-            {
-               if ((instance.effectEventIndex == k) && instance.valid)
-               {
-                  y_train += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1);
-               }
-               else
-               {
-                  y_train += oneHot(NUM_CAUSATIONS, NUM_CAUSATIONS + 1);
-               }
-               y_train += ",";
-            }
-         }
-         if (y_train.endsWith(","))
-         {
-            y_train = y_train.substring(0, y_train.length() - 1);
-         }
-         printWriter.println(y_train);
-         printWriter.println("]");
-         printWriter.println("X_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-                             CAUSATION_INSTANCE_LENGTH + ", " + (NUM_EVENT_TYPES + 1) + " ]");
-         printWriter.print("X_test_seq = [");
-         String X_test = "";
-         for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
-         {
-            X_test += "\n";
-            CausationInstance instance = CausationTestingInstances.get(i);
-            for (int k = 0; k < instance.events.length; k++)
-            {
-               X_test += oneHot(instance.events[k], (NUM_EVENT_TYPES + 1));
-               X_test += ",";
-            }
-         }
-         if (X_test.endsWith(","))
-         {
-            X_test = X_test.substring(0, X_test.length() - 1);
-         }
-         printWriter.println(X_test);
-         printWriter.println("]");
-         printWriter.println("y_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-                             CAUSATION_INSTANCE_LENGTH + ", " + (NUM_CAUSATIONS + 1) + " ]");
-         printWriter.print("y_test_seq = [");
-         String y_test = "";
-         for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
-         {
-            y_test += "\n";
-            CausationInstance instance = CausationTestingInstances.get(i);
-            for (int k = 0; k < instance.events.length; k++)
-            {
-               if ((instance.effectEventIndex == k) && instance.valid)
-               {
-                  y_test += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1);
-               }
-               else
-               {
-                  y_test += oneHot(NUM_CAUSATIONS, NUM_CAUSATIONS + 1);
-               }
-               y_test += ",";
-            }
-         }
-         if (y_test.endsWith(","))
-         {
-            y_test = y_test.substring(0, y_test.length() - 1);
-         }
-         printWriter.println(y_test);
-         printWriter.println("]");
-         printWriter.close();
-      }
-      catch (IOException e)
-      {
-         System.err.println("Cannot write RNN dataset to file " + RNN_DATASET_FILENAME);
-         System.exit(1);
+	      try
+	      {
+	         FileWriter  fileWriter  = new FileWriter(NN_DATASET_FILENAME);
+	         PrintWriter printWriter = new PrintWriter(fileWriter);
+	         printWriter.println("X_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
+	                             CAUSATION_INSTANCE_LENGTH * (NUM_EVENT_TYPES + 1) + " ]");
+	         printWriter.print("X_train_seq = [");
+	         String X_train = "";
+	         for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
+	         {
+	            X_train += "\n";
+	            CausationInstance instance = CausationTrainingInstances.get(i);
+	            for (int k = 0; k < instance.events.length; k++)
+	            {
+	               X_train += oneHot(instance.events[k], (NUM_EVENT_TYPES + 1));
+	               X_train += ",";
+	            }
+	         }
+	         if (X_train.endsWith(","))
+	         {
+	            X_train = X_train.substring(0, X_train.length() - 1);
+	         }
+	         printWriter.println(X_train);
+	         printWriter.println("]");
+	         printWriter.println("y_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
+	                             (NUM_CAUSATIONS + 1) + " ]");
+	         printWriter.print("y_train_seq = [");
+	         String y_train = "";
+	         for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
+	         {
+	            y_train += "\n";
+	            CausationInstance instance = CausationTrainingInstances.get(i);
+                if (instance.valid)
+                {
+                   y_train += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1) + ",";
+                }
+                else
+                {
+                  y_train += oneHot(NUM_CAUSATIONS, NUM_CAUSATIONS + 1) + ",";
+                }
+	         }
+	         if (y_train.endsWith(","))
+	         {
+	            y_train = y_train.substring(0, y_train.length() - 1);
+	         }
+	         printWriter.println(y_train);
+	         printWriter.println("]");
+	         printWriter.println("X_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
+	                             CAUSATION_INSTANCE_LENGTH * (NUM_EVENT_TYPES + 1) + " ]");
+	         printWriter.print("X_test_seq = [");
+	         String X_test = "";
+	         for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
+	         {
+	            X_test += "\n";
+	            CausationInstance instance = CausationTestingInstances.get(i);
+	            for (int k = 0; k < instance.events.length; k++)
+	            {
+	               X_test += oneHot(instance.events[k], (NUM_EVENT_TYPES + 1));
+	               X_test += ",";
+	            }
+	         }
+	         if (X_test.endsWith(","))
+	         {
+	            X_test = X_test.substring(0, X_test.length() - 1);
+	         }
+	         printWriter.println(X_test);
+	         printWriter.println("]");
+	         printWriter.println("y_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
+	                             (NUM_CAUSATIONS + 1) + " ]");
+	         printWriter.print("y_test_seq = [");
+	         String y_test = "";
+	         for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
+	         {
+	            y_test += "\n";
+	            CausationInstance instance = CausationTestingInstances.get(i);
+                if (instance.valid)
+                {
+                   y_test += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1) + ",";
+                }
+                else
+                {
+                  y_test += oneHot(NUM_CAUSATIONS, NUM_CAUSATIONS + 1) + ",";
+                }
+	         }
+	         if (y_test.endsWith(","))
+	         {
+	            y_test = y_test.substring(0, y_test.length() - 1);
+	         }
+	         printWriter.println(y_test);
+	         printWriter.println("]");
+	         printWriter.close();
+	      }
+	      catch (IOException e)
+	      {
+	         System.err.println("Cannot write NN dataset to file " + NN_DATASET_FILENAME);
+	         System.exit(1);
+	      }    	  
+      } else {
+	      try
+	      {
+	         FileWriter  fileWriter  = new FileWriter(RNN_DATASET_FILENAME);
+	         PrintWriter printWriter = new PrintWriter(fileWriter);
+	         printWriter.println("X_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
+	                             CAUSATION_INSTANCE_LENGTH + ", " + (NUM_EVENT_TYPES + 1) + " ]");
+	         printWriter.print("X_train_seq = [");
+	         String X_train = "";
+	         for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
+	         {
+	            X_train += "\n";
+	            CausationInstance instance = CausationTrainingInstances.get(i);
+	            for (int k = 0; k < instance.events.length; k++)
+	            {
+	               X_train += oneHot(instance.events[k], (NUM_EVENT_TYPES + 1));
+	               X_train += ",";
+	            }
+	         }
+	         if (X_train.endsWith(","))
+	         {
+	            X_train = X_train.substring(0, X_train.length() - 1);
+	         }
+	         printWriter.println(X_train);
+	         printWriter.println("]");
+	         printWriter.println("y_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
+	                             CAUSATION_INSTANCE_LENGTH + ", " + (NUM_CAUSATIONS + 1) + " ]");
+	         printWriter.print("y_train_seq = [");
+	         String y_train = "";
+	         for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
+	         {
+	            y_train += "\n";
+	            CausationInstance instance = CausationTrainingInstances.get(i);
+	            for (int k = 0; k < instance.events.length; k++)
+	            {
+	               if ((instance.effectEventIndex == k) && instance.valid)
+	               {
+	                  y_train += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1);
+	               }
+	               else
+	               {
+	                  y_train += oneHot(NUM_CAUSATIONS, NUM_CAUSATIONS + 1);
+	               }
+	               y_train += ",";
+	            }
+	         }
+	         if (y_train.endsWith(","))
+	         {
+	            y_train = y_train.substring(0, y_train.length() - 1);
+	         }
+	         printWriter.println(y_train);
+	         printWriter.println("]");
+	         printWriter.println("X_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
+	                             CAUSATION_INSTANCE_LENGTH + ", " + (NUM_EVENT_TYPES + 1) + " ]");
+	         printWriter.print("X_test_seq = [");
+	         String X_test = "";
+	         for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
+	         {
+	            X_test += "\n";
+	            CausationInstance instance = CausationTestingInstances.get(i);
+	            for (int k = 0; k < instance.events.length; k++)
+	            {
+	               X_test += oneHot(instance.events[k], (NUM_EVENT_TYPES + 1));
+	               X_test += ",";
+	            }
+	         }
+	         if (X_test.endsWith(","))
+	         {
+	            X_test = X_test.substring(0, X_test.length() - 1);
+	         }
+	         printWriter.println(X_test);
+	         printWriter.println("]");
+	         printWriter.println("y_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
+	                             CAUSATION_INSTANCE_LENGTH + ", " + (NUM_CAUSATIONS + 1) + " ]");
+	         printWriter.print("y_test_seq = [");
+	         String y_test = "";
+	         for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
+	         {
+	            y_test += "\n";
+	            CausationInstance instance = CausationTestingInstances.get(i);
+	            for (int k = 0; k < instance.events.length; k++)
+	            {
+	               if ((instance.effectEventIndex == k) && instance.valid)
+	               {
+	                  y_test += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1);
+	               }
+	               else
+	               {
+	                  y_test += oneHot(NUM_CAUSATIONS, NUM_CAUSATIONS + 1);
+	               }
+	               y_test += ",";
+	            }
+	         }
+	         if (y_test.endsWith(","))
+	         {
+	            y_test = y_test.substring(0, y_test.length() - 1);
+	         }
+	         printWriter.println(y_test);
+	         printWriter.println("]");
+	         printWriter.close();
+	      }
+	      catch (IOException e)
+	      {
+	         System.err.println("Cannot write RNN dataset to file " + RNN_DATASET_FILENAME);
+	         System.exit(1);
+	      }
       }
 
-      // Run network.
+      // Run neural network.
+ 	  String pythonFilename = null;
+ 	  if (NETWORK_TYPE.equals("LSTM") || NETWORK_TYPE.equals("SimpleRNN"))
+ 	 {
+ 		 pythonFilename = RNN_FILENAME;
+ 	  } else if (NETWORK_TYPE.equals("Attention"))
+ 	  {
+ 		 pythonFilename = ATTENTION_FILENAME;
+ 	  } else {
+ 		 pythonFilename = NN_FILENAME;
+ 	  } 	  
       try
       {
-         InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(RNN_FILENAME);
+         InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(pythonFilename);
          if (in == null)
          {
-            System.err.println("Cannot access " + RNN_FILENAME);
+            System.err.println("Cannot access " + pythonFilename);
             System.exit(1);
          }
-         File             pythonScript = new File(RNN_FILENAME);
+         File             pythonScript = new File(pythonFilename);
          FileOutputStream out          = new FileOutputStream(pythonScript);
          byte[] buffer = new byte[1024];
          int bytesRead;
@@ -846,12 +957,12 @@ public class Main
       }
       catch (Exception e)
       {
-         System.err.println("Cannot create " + RNN_FILENAME);
+         System.err.println("Cannot create " + pythonFilename);
          System.exit(1);
       }
       String[] opts = new String[5 + (NUM_HIDDEN_NEURONS.size() * 2)];
       opts[0] = "python";
-      opts[1] = RNN_FILENAME;
+      opts[1] = pythonFilename;
       opts[2] = "-e";
       opts[3] = (NUM_EPOCHS + "");
       opts[4] = "-q";
@@ -869,21 +980,28 @@ public class Main
       }
       catch (IOException e)
       {
-         System.err.println("Cannot run " + RNN_FILENAME);
+         System.err.println("Cannot run " + pythonFilename);
          System.exit(1);
       }
       catch (InterruptedException e) {}
 
-      // Fetch the results.
+     // Fetch the results.
       int   train_prediction_errors = 0;
       int   train_total_predictions = 0;
       float train_error_pct         = 0.0f;
       int   test_prediction_errors  = 0;
       int   test_total_predictions  = 0;
       float test_error_pct          = 0.0f;
+      String resultsFilename = null;
+ 	  if (NETWORK_TYPE.equals("NN"))
+ 	  {
+ 		 resultsFilename = NN_RESULTS_FILENAME;
+ 	  } else {
+ 		 resultsFilename = RNN_RESULTS_FILENAME;
+ 	  } 	        
       try
       {
-         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(RNN_RESULTS_FILENAME)));
+         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(resultsFilename)));
          String         json;
          if ((json = br.readLine()) != null)
          {
@@ -894,62 +1012,62 @@ public class Main
             }
             catch (JSONException e)
             {
-               System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
+               System.err.println("Error parsing results file " + resultsFilename);
                System.exit(1);
             }
             String value = jObj.getString("train_prediction_errors");
             if ((value == null) || value.isEmpty())
             {
-               System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
+               System.err.println("Error parsing results file " + resultsFilename);
                System.exit(1);
             }
             train_prediction_errors = Integer.parseInt(value);
             value = jObj.getString("train_total_predictions");
             if ((value == null) || value.isEmpty())
             {
-               System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
+               System.err.println("Error parsing results file " + resultsFilename);
                System.exit(1);
             }
             train_total_predictions = Integer.parseInt(value);
             value = jObj.getString("train_error_pct");
             if ((value == null) || value.isEmpty())
             {
-               System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
+               System.err.println("Error parsing results file " + resultsFilename);
                System.exit(1);
             }
             train_error_pct = Float.parseFloat(value);
             value           = jObj.getString("test_prediction_errors");
             if ((value == null) || value.isEmpty())
             {
-               System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
+               System.err.println("Error parsing results file " + resultsFilename);
                System.exit(1);
             }
             test_prediction_errors = Integer.parseInt(value);
             value = jObj.getString("test_total_predictions");
             if ((value == null) || value.isEmpty())
             {
-               System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
+               System.err.println("Error parsing results file " + resultsFilename);
                System.exit(1);
             }
             test_total_predictions = Integer.parseInt(value);
             value = jObj.getString("test_error_pct");
             if ((value == null) || value.isEmpty())
             {
-               System.err.println("Error parsing results file " + RNN_RESULTS_FILENAME);
+               System.err.println("Error parsing results file " + resultsFilename);
                System.exit(1);
             }
             test_error_pct = Float.parseFloat(value);
          }
          else
          {
-            System.err.println("Cannot read results file " + RNN_RESULTS_FILENAME);
+            System.err.println("Cannot read results file " + resultsFilename);
             System.exit(1);
          }
          br.close();
       }
       catch (Exception e)
       {
-         System.err.println("Cannot read results file " + RNN_RESULTS_FILENAME + ":" + e.getMessage());
+         System.err.println("Cannot read results file " + resultsFilename + ":" + e.getMessage());
          System.exit(1);
       }
       System.out.println("Train correct paths/total = " + (train_total_predictions - train_prediction_errors) +
