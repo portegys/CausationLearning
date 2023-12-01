@@ -55,7 +55,7 @@ public class Main
    public static float              VALID_INTERVENING_EVENTS_PROBABILITY = 0.9f;
    public static int                CAUSATION_INSTANCE_LENGTH            = (MAX_CAUSE_EVENTS + 1) * (MAX_INTERVENING_EVENTS + 1);
    public static int                NUM_CAUSATION_INSTANCES              = 10;
-   public static String             NETWORK_TYPE = "LSTM";
+   public static String             LEARNER = "LSTM";
    public static int                NUM_EPOCHS   = 500;
    public static final int          DEFAULT_NUM_HIDDEN_NEURONS = 128;
    public static ArrayList<Integer> NUM_HIDDEN_NEURONS;
@@ -79,7 +79,7 @@ public class Main
    public static final String NN_DATASET_FILENAME  = "causation_nn_dataset.py";
    public static final String NN_FILENAME          = "causation_nn.py";
    public static final String NN_RESULTS_FILENAME  = "causation_nn_results.json";
-
+   
    // Version.
    public static final String VERSION = "1.0";
 
@@ -222,7 +222,7 @@ public class Main
       "        [-validInterveningEventsProbability <quantity> (default=" + VALID_INTERVENING_EVENTS_PROBABILITY + ")]\n" +
       "        [-causationInstanceLength <length> (default=" + CAUSATION_INSTANCE_LENGTH + ")]\n" +
       "        [-numCausationInstances <quantity> (default=" + NUM_CAUSATION_INSTANCES + ")]\n" +
-      "        [-networkType \"LSTM\" | \"SimpleRNN\" | \"Attention\" | \"NN\" (default=" + NETWORK_TYPE + ")]\n" +
+      "        [-learner \"LSTM\" | \"SimpleRNN\" | \"Attention\" | \"NN\" | \"GA\" (default=" + LEARNER + ")]\n" +
       "        [-numHiddenNeurons <quantity> (default=" + DEFAULT_NUM_HIDDEN_NEURONS + ") (repeat for additional layers)]\n" +
       "        [-numEpochs <quantity> (default=" + NUM_EPOCHS + ")]\n" +
       "        [-randomSeed <random number seed> (default=" + DEFAULT_RANDOM_SEED + ")]\n" +
@@ -480,20 +480,20 @@ public class Main
             }
             continue;
          }
-         if (args[i].equals("-networkType"))
+         if (args[i].equals("-learner"))
          {
             i++;
             if (i >= args.length)
             {
-               System.err.println("Invalid networkType option");
+               System.err.println("Invalid learner option");
                System.err.println(Usage);
                System.exit(1);
             }
-            NETWORK_TYPE = args[i];
-            if (!NETWORK_TYPE.equals("LSTM") && !NETWORK_TYPE.equals("SimpleRNN") &&
-                !NETWORK_TYPE.equals("Attention") && !NETWORK_TYPE.equals("NN"))
+           LEARNER = args[i];
+            if (!LEARNER.equals("LSTM") && !LEARNER.equals("SimpleRNN") &&
+                !LEARNER.equals("Attention") && !LEARNER.equals("NN") && !LEARNER.equals("GA"))
             {
-               System.err.println("Invalid networkType option");
+               System.err.println("Invalid learner option");
                System.err.println(Usage);
                System.exit(1);
             }
@@ -623,7 +623,7 @@ public class Main
          System.err.println(Usage);
          System.exit(1);
       }
-      if (NETWORK_TYPE.equals("Attention") && (NUM_HIDDEN_NEURONS.size() > 1))
+      if (LEARNER.equals("Attention") && (NUM_HIDDEN_NEURONS.size() > 1))
       {
          System.err.println("Attention network limited to single hidden layer");
          System.err.println(Usage);
@@ -720,7 +720,7 @@ public class Main
       }
 
       // Learn and evaluate performance.
-      if (NETWORK_TYPE.equals("NN"))
+      if (LEARNER.equals("NN"))
       {
          try
          {
@@ -820,7 +820,7 @@ public class Main
             System.exit(1);
          }
       }
-      else
+      else if (LEARNER.equals("LSTM") || LEARNER.equals("SimpleRNN") || LEARNER.equals("Attention"))
       {
          try
          {
@@ -929,161 +929,167 @@ public class Main
          }
       }
 
-      // Run neural network.
-      String pythonFilename = null;
-      if (NETWORK_TYPE.equals("LSTM") || NETWORK_TYPE.equals("SimpleRNN"))
+      // Run.
+      if (LEARNER.equals("GA"))
       {
-         pythonFilename = RNN_FILENAME;
-      }
-      else if (NETWORK_TYPE.equals("Attention"))
-      {
-         pythonFilename = ATTENTION_FILENAME;
-      }
-      else
-      {
-         pythonFilename = NN_FILENAME;
-      }
-      try
-      {
-         InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(pythonFilename);
-         if (in == null)
-         {
-            System.err.println("Cannot access " + pythonFilename);
-            System.exit(1);
-         }
-         File             pythonScript = new File(pythonFilename);
-         FileOutputStream out          = new FileOutputStream(pythonScript);
-         byte[] buffer = new byte[1024];
-         int bytesRead;
-         while ((bytesRead = in.read(buffer)) != -1)
-         {
-            out.write(buffer, 0, bytesRead);
-         }
-         out.close();
-      }
-      catch (Exception e)
-      {
-         System.err.println("Cannot create " + pythonFilename);
-         System.exit(1);
-      }
-      String[] opts = new String[5 + (NUM_HIDDEN_NEURONS.size() * 2)];
-      opts[0]       = "python";
-      opts[1]       = pythonFilename;
-      opts[2]       = "-e";
-      opts[3]       = (NUM_EPOCHS + "");
-      opts[4]       = "-q";
-      for (int i = 0, j = NUM_HIDDEN_NEURONS.size(), k = 5; i < j; i++, k += 2)
-      {
-         opts[k]     = "-h";
-         opts[k + 1] = (NUM_HIDDEN_NEURONS.get(i) + "");
-      }
-      ProcessBuilder processBuilder = new ProcessBuilder(opts);
-      processBuilder.inheritIO();
-      try
-      {
-         Process process = processBuilder.start();
-         process.waitFor();
-      }
-      catch (IOException e)
-      {
-         System.err.println("Cannot run " + pythonFilename);
-         System.exit(1);
-      }
-      catch (InterruptedException e) {}
-
-      // Fetch the results.
-      int    train_prediction_errors = 0;
-      int    train_total_predictions = 0;
-      float  train_error_pct         = 0.0f;
-      int    test_prediction_errors  = 0;
-      int    test_total_predictions  = 0;
-      float  test_error_pct          = 0.0f;
-      String resultsFilename         = null;
-      if (NETWORK_TYPE.equals("NN"))
-      {
-         resultsFilename = NN_RESULTS_FILENAME;
-      }
-      else
-      {
-         resultsFilename = RNN_RESULTS_FILENAME;
-      }
-      try
-      {
-         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(resultsFilename)));
-         String         json;
-         if ((json = br.readLine()) != null)
-         {
-            JSONObject jObj = null;
-            try
-            {
-               jObj = new JSONObject(json);
-            }
-            catch (JSONException e)
-            {
-               System.err.println("Error parsing results file " + resultsFilename);
-               System.exit(1);
-            }
-            String value = jObj.getString("train_prediction_errors");
-            if ((value == null) || value.isEmpty())
-            {
-               System.err.println("Error parsing results file " + resultsFilename);
-               System.exit(1);
-            }
-            train_prediction_errors = Integer.parseInt(value);
-            value = jObj.getString("train_total_predictions");
-            if ((value == null) || value.isEmpty())
-            {
-               System.err.println("Error parsing results file " + resultsFilename);
-               System.exit(1);
-            }
-            train_total_predictions = Integer.parseInt(value);
-            value = jObj.getString("train_error_pct");
-            if ((value == null) || value.isEmpty())
-            {
-               System.err.println("Error parsing results file " + resultsFilename);
-               System.exit(1);
-            }
-            train_error_pct = Float.parseFloat(value);
-            value           = jObj.getString("test_prediction_errors");
-            if ((value == null) || value.isEmpty())
-            {
-               System.err.println("Error parsing results file " + resultsFilename);
-               System.exit(1);
-            }
-            test_prediction_errors = Integer.parseInt(value);
-            value = jObj.getString("test_total_predictions");
-            if ((value == null) || value.isEmpty())
-            {
-               System.err.println("Error parsing results file " + resultsFilename);
-               System.exit(1);
-            }
-            test_total_predictions = Integer.parseInt(value);
-            value = jObj.getString("test_error_pct");
-            if ((value == null) || value.isEmpty())
-            {
-               System.err.println("Error parsing results file " + resultsFilename);
-               System.exit(1);
-            }
-            test_error_pct = Float.parseFloat(value);
-         }
-         else
-         {
-            System.err.println("Cannot read results file " + resultsFilename);
-            System.exit(1);
-         }
-         br.close();
-      }
-      catch (Exception e)
-      {
-         System.err.println("Cannot read results file " + resultsFilename + ":" + e.getMessage());
-         System.exit(1);
-      }
-      System.out.println("Train correct paths/total = " + (train_total_predictions - train_prediction_errors) +
-                         "/" + train_total_predictions + " (" + (100.0 - train_error_pct) + "%), prediction errors/total = " +
-                         train_prediction_errors + "/" + train_total_predictions + " (" + train_error_pct + "%)");
-      System.out.println("Test correct paths/total = " + (test_total_predictions - test_prediction_errors) +
-                         "/" + test_total_predictions + " (" + (100.0 - test_error_pct) + "%), prediction errors/total = " +
-                         test_prediction_errors + "/" + test_total_predictions + " (" + test_error_pct + "%)");
+    	  // Run GA.
+      } else {
+	      // Run neural network.
+	      String pythonFilename = null;
+	      if (LEARNER.equals("LSTM") || LEARNER.equals("SimpleRNN"))
+	      {
+	         pythonFilename = RNN_FILENAME;
+	      }
+	      else if (LEARNER.equals("Attention"))
+	      {
+	         pythonFilename = ATTENTION_FILENAME;
+	      }
+	      else
+	      {
+	         pythonFilename = NN_FILENAME;
+	      }
+	      try
+	      {
+	         InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(pythonFilename);
+	         if (in == null)
+	         {
+	            System.err.println("Cannot access " + pythonFilename);
+	            System.exit(1);
+	         }
+	         File             pythonScript = new File(pythonFilename);
+	         FileOutputStream out          = new FileOutputStream(pythonScript);
+	         byte[] buffer = new byte[1024];
+	         int bytesRead;
+	         while ((bytesRead = in.read(buffer)) != -1)
+	         {
+	            out.write(buffer, 0, bytesRead);
+	         }
+	         out.close();
+	      }
+	      catch (Exception e)
+	      {
+	         System.err.println("Cannot create " + pythonFilename);
+	         System.exit(1);
+	      }
+	      String[] opts = new String[5 + (NUM_HIDDEN_NEURONS.size() * 2)];
+	      opts[0]       = "python";
+	      opts[1]       = pythonFilename;
+	      opts[2]       = "-e";
+	      opts[3]       = (NUM_EPOCHS + "");
+	      opts[4]       = "-q";
+	      for (int i = 0, j = NUM_HIDDEN_NEURONS.size(), k = 5; i < j; i++, k += 2)
+	      {
+	         opts[k]     = "-h";
+	         opts[k + 1] = (NUM_HIDDEN_NEURONS.get(i) + "");
+	      }
+	      ProcessBuilder processBuilder = new ProcessBuilder(opts);
+	      processBuilder.inheritIO();
+	      try
+	      {
+	         Process process = processBuilder.start();
+	         process.waitFor();
+	      }
+	      catch (IOException e)
+	      {
+	         System.err.println("Cannot run " + pythonFilename);
+	         System.exit(1);
+	      }
+	      catch (InterruptedException e) {}
+	
+	      // Fetch the results.
+	      int    train_prediction_errors = 0;
+	      int    train_total_predictions = 0;
+	      float  train_error_pct         = 0.0f;
+	      int    test_prediction_errors  = 0;
+	      int    test_total_predictions  = 0;
+	      float  test_error_pct          = 0.0f;
+	      String resultsFilename         = null;
+	      if (LEARNER.equals("NN"))
+	      {
+	         resultsFilename = NN_RESULTS_FILENAME;
+	      }
+	      else
+	      {
+	         resultsFilename = RNN_RESULTS_FILENAME;
+	      }
+	      try
+	      {
+	         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(resultsFilename)));
+	         String         json;
+	         if ((json = br.readLine()) != null)
+	         {
+	            JSONObject jObj = null;
+	            try
+	            {
+	               jObj = new JSONObject(json);
+	            }
+	            catch (JSONException e)
+	            {
+	               System.err.println("Error parsing results file " + resultsFilename);
+	               System.exit(1);
+	            }
+	            String value = jObj.getString("train_prediction_errors");
+	            if ((value == null) || value.isEmpty())
+	            {
+	               System.err.println("Error parsing results file " + resultsFilename);
+	               System.exit(1);
+	            }
+	            train_prediction_errors = Integer.parseInt(value);
+	            value = jObj.getString("train_total_predictions");
+	            if ((value == null) || value.isEmpty())
+	            {
+	               System.err.println("Error parsing results file " + resultsFilename);
+	               System.exit(1);
+	            }
+	            train_total_predictions = Integer.parseInt(value);
+	            value = jObj.getString("train_error_pct");
+	            if ((value == null) || value.isEmpty())
+	            {
+	               System.err.println("Error parsing results file " + resultsFilename);
+	               System.exit(1);
+	            }
+	            train_error_pct = Float.parseFloat(value);
+	            value           = jObj.getString("test_prediction_errors");
+	            if ((value == null) || value.isEmpty())
+	            {
+	               System.err.println("Error parsing results file " + resultsFilename);
+	               System.exit(1);
+	            }
+	            test_prediction_errors = Integer.parseInt(value);
+	            value = jObj.getString("test_total_predictions");
+	            if ((value == null) || value.isEmpty())
+	            {
+	               System.err.println("Error parsing results file " + resultsFilename);
+	               System.exit(1);
+	            }
+	            test_total_predictions = Integer.parseInt(value);
+	            value = jObj.getString("test_error_pct");
+	            if ((value == null) || value.isEmpty())
+	            {
+	               System.err.println("Error parsing results file " + resultsFilename);
+	               System.exit(1);
+	            }
+	            test_error_pct = Float.parseFloat(value);
+	         }
+	         else
+	         {
+	            System.err.println("Cannot read results file " + resultsFilename);
+	            System.exit(1);
+	         }
+	         br.close();
+	      }
+	      catch (Exception e)
+	      {
+	         System.err.println("Cannot read results file " + resultsFilename + ":" + e.getMessage());
+	         System.exit(1);
+	      }
+	      System.out.println("Train correct paths/total = " + (train_total_predictions - train_prediction_errors) +
+	                         "/" + train_total_predictions + " (" + (100.0 - train_error_pct) + "%), prediction errors/total = " +
+	                         train_prediction_errors + "/" + train_total_predictions + " (" + train_error_pct + "%)");
+	      System.out.println("Test correct paths/total = " + (test_total_predictions - test_prediction_errors) +
+	                         "/" + test_total_predictions + " (" + (100.0 - test_error_pct) + "%), prediction errors/total = " +
+	                         test_prediction_errors + "/" + test_total_predictions + " (" + test_error_pct + "%)");
+	      }
       System.exit(0);
    }
 
@@ -1165,18 +1171,23 @@ public class Main
       System.out.println("CAUSATION_INSTANCE_LENGTH = " + CAUSATION_INSTANCE_LENGTH);
       System.out.println("NUM_CAUSATION_INSTANCES = " + NUM_CAUSATION_INSTANCES);
       System.out.println("CAUSATION_INSTANCE_LENGTH = " + CAUSATION_INSTANCE_LENGTH);
-      System.out.println("NETWORK_TYPE = " + NETWORK_TYPE);
-      System.out.print("NUM_HIDDEN_NEURONS = {");
-      for (int i = 0, j = NUM_HIDDEN_NEURONS.size(); i < j; i++)
+      System.out.println("LEARNER = " + LEARNER);
+      if (LEARNER.equals("GA"))
       {
-         System.out.print(NUM_HIDDEN_NEURONS.get(i));
-         if (i < j - 1)
-         {
-            System.out.print(",");
-         }
+    	  
+      } else {
+	      System.out.print("NUM_HIDDEN_NEURONS = {");
+	      for (int i = 0, j = NUM_HIDDEN_NEURONS.size(); i < j; i++)
+	      {
+	         System.out.print(NUM_HIDDEN_NEURONS.get(i));
+	         if (i < j - 1)
+	         {
+	            System.out.print(",");
+	         }
+	      }
+	      System.out.println("}");
+	      System.out.println("NUM_EPOCHS = " + NUM_EPOCHS);
       }
-      System.out.println("}");
-      System.out.println("NUM_EPOCHS = " + NUM_EPOCHS);
       System.out.println("RANDOM_SEED = " + RANDOM_SEED);
    }
 }

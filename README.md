@@ -1,9 +1,16 @@
 # Causation learning.
 
 Learn causations in event streams that contain cause-and-effect sequences. A cause-and-effect
-sequence has a single effect event and one or more cause events. The cause events occur in
-an arbitrary order. Cause and effect events can be distributed over time, meaning they can 
+sequence has a single effect event and one or more cause events, occurring in an arbitrary order. 
+Cause and effect events can be distributed over time, meaning they can 
 be separated by 0 or more intervening events.
+
+Several learning methods are available:<br>
+LSTM: Long Short-Term Memory neural network.<br>
+Simple RNN: Simple recurrent neural network.<br>
+Attention: LSTM with attention layer.<br>
+NN: Multilayer perceptron (non-recurrent).<br>
+GA: Genetic algorithm.<br>
 
 One aim of this project is to build more generalized mediator neurons for the Mona neural network.
 
@@ -32,7 +39,7 @@ Usage:
         [-validInterveningEventsProbability <quantity> (default=0.9)]
         [-causationInstanceLength <length> (default=9)]
         [-numCausationInstances <quantity> (default=10)]
-        [-networkType "LSTM" | "SimpleRNN" | "Attention" | "NN" (default=LSTM)]
+        [-learner "LSTM" | "SimpleRNN" | "Attention" | "NN" | "GA" (default=LSTM)]
         [-numHiddenNeurons <quantity> (default=128) (repeat for additional layers)]
         [-numEpochs <quantity> (default=500)]
         [-randomSeed <random number seed> (default=4517)]
