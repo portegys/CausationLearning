@@ -50,6 +50,7 @@ public class Main
    public static int                EFFECT_EVENT_TYPE                    = NUM_EVENT_TYPES;
    public static int                NUM_CAUSATIONS                       = 2;
    public static int                MAX_CAUSE_EVENTS                     = 2;
+   public static float              EVENT_OMISSION_PROBABILITY           = 0.1f;
    public static int                MAX_INTERVENING_EVENTS               = 2;
    public static int                MAX_VALID_INTERVENING_EVENTS         = 1;
    public static float              VALID_INTERVENING_EVENTS_PROBABILITY = 0.9f;
@@ -119,9 +120,18 @@ public class Main
          valid          = true;
          Causation causation = Causations.get(causationIndex);
          List < List < Integer >> eventPermutations = permuteList(causation.causeEvents);
-         List<Integer> permutation = eventPermutations.get(random.nextInt(eventPermutations.size()));
+         ArrayList<Integer> permutation = new ArrayList<Integer>();
+         for (Integer i : eventPermutations.get(random.nextInt(eventPermutations.size())))
+         {
+        	 if (random.nextFloat() < EVENT_OMISSION_PROBABILITY)
+        	 {
+        		 valid = false;
+        	 } else {
+        		 permutation.add(i);
+        	 }
+         }
          int           j           = 0;
-         for (int k : permutation)
+         for (int i : permutation)
          {
             int n = 0;
             if (random.nextFloat() < VALID_INTERVENING_EVENTS_PROBABILITY)
@@ -144,12 +154,12 @@ public class Main
                }
                valid = false;
             }
-            for (int q = 0; q < n; q++)
+            for (int k = 0; k < n; k++)
             {
                events[j] = NUM_CAUSE_EVENT_TYPES + random.nextInt(NUM_EVENT_TYPES - NUM_CAUSE_EVENT_TYPES);
                j++;
             }
-            events[j] = k;
+            events[j] = i;
             j++;
          }
          int n = 0;
@@ -1165,6 +1175,7 @@ public class Main
       System.out.println("EFFECT_EVENT_TYPE = " + EFFECT_EVENT_TYPE);
       System.out.println("NUM_CAUSATIONS = " + NUM_CAUSATIONS);
       System.out.println("MAX_CAUSE_EVENTS = " + MAX_CAUSE_EVENTS);
+      System.out.println("EVENT_OMISSION_PROBABILITY = " + EVENT_OMISSION_PROBABILITY);      
       System.out.println("MAX_INTERVENING_EVENTS = " + MAX_INTERVENING_EVENTS);
       System.out.println("MAX_VALID_INTERVENING_EVENTS = " + MAX_VALID_INTERVENING_EVENTS);
       System.out.println("VALID_INTERVENING_EVENTS_PROBABILITY = " + VALID_INTERVENING_EVENTS_PROBABILITY);
