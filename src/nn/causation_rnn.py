@@ -76,42 +76,41 @@ else:
 model.add(TimeDistributed(Dense(y_train_shape[2])))
 model.compile(loss='mean_squared_error', optimizer='adam')
 if verbose:
-    print(model.summary())
+    model.summary()
 
 # train
-model.fit(X, y, epochs=n_epochs, batch_size=X_train_shape[0], verbose=0)
+model.fit(X, y, epochs=n_epochs, batch_size=X_train_shape[0], verbose=int(verbose))
 
 # validate training
 seq = array(X_train_seq)
 X = seq.reshape(X_train_shape[0], X_train_shape[1], X_train_shape[2])
 seq = array(y_train_seq)
 y = seq.reshape(y_train_shape[0], y_train_shape[1], y_train_shape[2])
-predictions = model.predict(X, batch_size=X_train_shape[0], verbose=0)
+predictions = model.predict(X, batch_size=X_train_shape[0], verbose=int(verbose))
 trainOK = 0
-trainErrors = 0
-trainTotal = 0
-for path in range(X_train_shape[0]):
+trainTotal = X_train_shape[0]
+trainSteps = X_train_shape[1]
+if verbose:
+    print('Train:')
+for path in range(trainTotal):
     p = []
-    for step in range(X_train_shape[1]):
-        if not all([ v == 0 for v in y[path][step]]):
-            if y[path][step][-1] == 0:
-                r = argmax(predictions[path][step])
-                p.append(r)
+    for step in range(trainSteps):
+        if X[path][step][-1] == 1:
+            r = argmax(predictions[path][step])
+            p.append(r)
     t = []
-    for step in range(X_train_shape[1]):
-        if not all([ v == 0 for v in y[path][step]]):
-            if y[path][step][-1] == 0:
-                r = argmax(y[path][step])
-                t.append(r)
-    if p == t:
+    for step in range(trainSteps):
+        if X[path][step][-1] == 1:
+            r = argmax(y[path][step])
+            t.append(r)
+    if p[0] == t[0]:
         trainOK += 1
-    else:
-        errs = 0
-        for i in range(len(p)):
-            if p[i] != t[i]:
-                errs += 1
-        trainErrors += errs
-    trainTotal += len(p)
+    if verbose:
+        print('target:', t[0], 'predicted:', p[0], end='')
+        if p[0] == t[0]:
+            print(' OK')
+        else:
+            print(' error')
 
 # predict
 from causation_rnn_dataset import X_test_shape, X_test_seq, y_test_shape, y_test_seq
@@ -123,67 +122,55 @@ X = seq.reshape(X_test_shape[0], X_test_shape[1], X_test_shape[2])
 seq = array(y_test_seq)
 y = seq.reshape(y_test_shape[0], y_test_shape[1], y_test_shape[2])
 testOK = 0
-testErrors = 0
-testTotal = 0
-if X_test_shape[0] > 0:
-    predictions = model.predict(X, batch_size=X_test_shape[0], verbose=0)
-    for path in range(X_test_shape[0]):
-        p = []
-        for step in range(X_test_shape[1]):
-            if not all([ v == 0 for v in y[path][step]]):
-                if y[path][step][-1] == 0:
-                    r = argmax(predictions[path][step])
-                    p.append(r)
-        t = []
-        for step in range(X_test_shape[1]):
-            if not all([ v == 0 for v in y[path][step]]):
-                if y[path][step][-1] == 0:
-                    r = argmax(y[path][step])
-                    t.append(r)
-        if p == t:
-            testOK += 1
-        else:
-            errs = 0
-            for i in range(len(p)):
-                if p[i] != t[i]:
-                    errs += 1
-            testErrors += errs
-        testTotal += len(p)
-trainErrorPct=0
-if trainTotal > 0:
-    trainErrorPct = (float(trainErrors) / float(trainTotal)) * 100.0
-testErrorPct=0
+testTotal = X_test_shape[0]
+testSteps = X_test_shape[1]
 if testTotal > 0:
-    testErrorPct = (float(testErrors) / float(testTotal)) * 100.0
+    predictions = model.predict(X, batch_size=X_test_shape[0], verbose=0)
+    if verbose:
+        print('Test:')
+    for path in range(testTotal):
+        p = []
+        for step in range(testSteps):
+            if X[path][step][-1] == 1:
+                r = argmax(predictions[path][step])
+                p.append(r)
+        t = []
+        for step in range(testSteps):
+            if X[path][step][-1] == 1:
+                r = argmax(y[path][step])
+                t.append(r)
+        if p[0] == t[0]:
+            testOK += 1
+        if verbose:
+            print('target:', t[0], 'predicted:', p[0], end='')
+            if p[0] == t[0]:
+                print(' OK')
+            else:
+                print(' error')
+
+trainPct=0
+if trainTotal > 0:
+    trainPct = (float(trainOK) / float(trainTotal)) * 100.0
+testPct=0
+if testTotal > 0:
+    testPct = (float(testOK) / float(testTotal)) * 100.0
 
 # print results
 if verbose == True:
-    print("Train correct paths/total = ", trainOK, "/", X_train_shape[0], sep='', end='')
-    if X_train_shape[0] > 0:
-        r = (float(trainOK) / float(X_train_shape[0])) * 100.0
-        print(" (", str(round(r, 2)), "%)", sep='', end='')
-    print(", prediction errors/total = ", trainErrors, "/", trainTotal, sep='', end='')
-    if trainTotal > 0:
-        print(" (", str(round(trainErrorPct, 2)), "%)", sep='', end='')
-    print('')
-    print("Test correct paths/total = ", testOK, "/", X_test_shape[0], sep='', end='')
-    if X_test_shape[0] > 0:
-        r = (float(testOK) / float(X_test_shape[0])) * 100.0
-        print(" (", str(round(r, 2)), "%)", sep='', end='')
-    print(", prediction errors/total = ", testErrors, "/", testTotal, sep='', end='')
-    if testTotal > 0:
-        print(" (", str(round(testErrorPct, 2)), "%)", sep='', end='')
-    print('')
+    print("Train correct/total = ", trainOK, "/", trainTotal, sep='', end='')
+    print(" (", str(round(trainPct, 2)), "%)", sep='')
+    print("Test correct/total = ", testOK, "/", testTotal, sep='', end='')
+    print(" (", str(round(testPct, 2)), "%)", sep='')
 
-# Write results to causaation_rnn_results.txt
+# write results to causaation_rnn_results.txt
 with open(results_filename, 'w') as f:
     f.write('{')
-    f.write('\"train_prediction_errors\":\"'+str(trainErrors)+'\",')
+    f.write('\"train_correct_predictions\":\"'+str(trainOK)+'\",')
     f.write('\"train_total_predictions\":\"'+str(trainTotal)+'\",')
-    f.write('\"train_error_pct\":\"'+str(round(trainErrorPct, 2))+'\",')
-    f.write('\"test_prediction_errors\":\"'+str(testErrors)+'\",')
+    f.write('\"train_pct\":\"'+str(round(trainPct, 2))+'\",')
+    f.write('\"test_correct_predictions\":\"'+str(testOK)+'\",')
     f.write('\"test_total_predictions\":\"'+str(testTotal)+'\",')
-    f.write('\"test_error_pct\":\"'+str(round(testErrorPct, 2))+'\"')
+    f.write('\"test_pct\":\"'+str(round(testPct, 2))+'\"')
     f.write('}\n')
     
 sys.exit(0)

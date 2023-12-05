@@ -17,6 +17,9 @@ n_epochs = 500
 # results file name
 results_filename = 'causation_nn_results.json'
 
+# verbosity
+verbose = True
+
 # get options
 first_hidden = True
 usage = 'causation_nn.py [-h <hidden neurons> (repeat for additional layers)] [-e <epochs>] [-q (quiet)]'
@@ -63,77 +66,79 @@ for i in range(1, len(n_hidden)):
 model.add(Dense(y_train_shape[1], activation='sigmoid'))
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 if verbose:
-    print(model.summary())
+    model.summary()
 
 # train
-model.fit(X, y, epochs=n_epochs, batch_size=10, verbose=0)
-if verbose:
-    _, accuracy = model.evaluate(X, y)
-    print('Accuracy: %.2f' % (accuracy*100))
+model.fit(X, y, epochs=n_epochs, batch_size=10, verbose=int(verbose))
 
 # validate
 seq = array(X_train_seq)
 X = seq.reshape(X_train_shape[0], X_train_shape[1])
 seq = array(y_train_seq)
 y = seq.reshape(y_train_shape[0], y_train_shape[1])
-predictions = model.predict(X, batch_size=X_train_shape[0], verbose=0)
-trainErrors = 0
-trainTotal = 0
-for response in range(y_train_shape[0]):
-    if not all([ v == 0 for v in y[response]]):
-        p = argmax(predictions[response])
-        t = argmax(y[response])
-        if p != t:
-            trainErrors += 1
-        trainTotal += 1
+predictions = model.predict(X, batch_size=X_train_shape[0], verbose=int(verbose))
+trainOK = 0
+trainTotal = y_train_shape[0]
+if verbose:
+    print('Train:')
+for response in range(trainTotal):
+    p = argmax(predictions[response])
+    t = argmax(y[response])
+    if p == t:
+        trainOK += 1
+        if verbose:
+            print('target:', t, 'predicted:', p, end='')
+            if p == t:
+                print(' OK')
+            else:
+                print(' error')
 
 # predict
 seq = array(X_test_seq)
 X = seq.reshape(X_test_shape[0], X_test_shape[1])
 seq = array(y_test_seq)
 y = seq.reshape(y_test_shape[0], y_test_shape[1])
-testErrors = 0
-testTotal = 0
-if X_test_shape[0] > 0:
-    predictions = model.predict(X, batch_size=X_test_shape[0], verbose=0)
-    for response in range(y_test_shape[0]):
-        if not all([ v == 0 for v in y[response]]):
-            p = argmax(predictions[response])
-            t = argmax(y[response])
-            if p != t:
-                testErrors += 1
-            testTotal += 1
-trainErrorPct=0
-if trainTotal > 0:
-    trainErrorPct = (float(trainErrors) / float(trainTotal)) * 100.0
-testErrorPct=0
+testOK = 0
+testTotal = y_test_shape[0]
 if testTotal > 0:
-    testErrorPct = (float(testErrors) / float(testTotal)) * 100.0
+    predictions = model.predict(X, batch_size=testTotal, verbose=0)
+    if verbose:
+        print('Test:')
+    for response in range(testTotal):
+        p = argmax(predictions[response])
+        t = argmax(y[response])
+        if p == t:
+            testOK += 1
+        if verbose:
+            print('target:', t, 'predicted:', p, end='')
+            if p == t:
+                print(' OK')
+            else:
+                print(' error')
 
-# Print results.
+trainPct=0
+if trainTotal > 0:
+    trainPct = (float(trainOK) / float(trainTotal)) * 100.0
+testPct=0
+if testTotal > 0:
+    testPct = (float(testOK) / float(testTotal)) * 100.0
+
+# print results
 if verbose == True:
-    print("Train prediction errors/total = ", trainErrors, "/", trainTotal, sep='', end='')
-    trainErrorPct=0
-    if trainTotal > 0:
-        trainErrorPct = (float(trainErrors) / float(trainTotal)) * 100.0
-        print(" (", str(round(trainErrorPct, 2)), "%)", sep='', end='')
-    print('')
-    print("Test prediction errors/total = ", testErrors, "/", testTotal, sep='', end='')
-    testErrorPct=0
-    if testTotal > 0:
-        testErrorPct = (float(testErrors) / float(testTotal)) * 100.0
-        print(" (", str(round(testErrorPct, 2)), "%)", sep='', end='')
-    print('')
+    print("Train correct/total = ", trainOK, "/", trainTotal, sep='', end='')
+    print(" (", str(round(trainPct, 2)), "%)", sep='')
+    print("Test correct/total = ", testOK, "/", testTotal, sep='', end='')
+    print(" (", str(round(testPct, 2)), "%)", sep='')
 
-# Write results to file.
+# write results to causaation_nn_results.txt
 with open(results_filename, 'w') as f:
     f.write('{')
-    f.write('\"train_prediction_errors\":\"'+str(trainErrors)+'\",')
+    f.write('\"train_correct_predictions\":\"'+str(trainOK)+'\",')
     f.write('\"train_total_predictions\":\"'+str(trainTotal)+'\",')
-    f.write('\"train_error_pct\":\"'+str(round(trainErrorPct, 2))+'\",')
-    f.write('\"test_prediction_errors\":\"'+str(testErrors)+'\",')
+    f.write('\"train_pct\":\"'+str(round(trainPct, 2))+'\",')
+    f.write('\"test_correct_predictions\":\"'+str(testOK)+'\",')
     f.write('\"test_total_predictions\":\"'+str(testTotal)+'\",')
-    f.write('\"test_error_pct\":\"'+str(round(testErrorPct, 2))+'\"')
+    f.write('\"test_pct\":\"'+str(round(testPct, 2))+'\"')
     f.write('}\n')
 
 sys.exit(0)

@@ -227,9 +227,10 @@ public class Main
       "        [-numCauseEventTypes <quantity> (default=" + NUM_CAUSE_EVENT_TYPES + ")]\n" +
       "        [-numCausations <quantity> (default=" + NUM_CAUSATIONS + ")]\n" +
       "        [-maxCauseEvents <quantity> (default=" + MAX_CAUSE_EVENTS + ")]\n" +
+      "        [-eventOmissionProbability <probability> (default=" + EVENT_OMISSION_PROBABILITY + ")]\n" +      
       "        [-maxInterveningEvents <quantity> (default=" + MAX_INTERVENING_EVENTS + ")]\n" +
       "        [-maxValidInterveningEvents <quantity> (default=" + MAX_VALID_INTERVENING_EVENTS + ")]\n" +
-      "        [-validInterveningEventsProbability <quantity> (default=" + VALID_INTERVENING_EVENTS_PROBABILITY + ")]\n" +
+      "        [-validInterveningEventsProbability <probability> (default=" + VALID_INTERVENING_EVENTS_PROBABILITY + ")]\n" +
       "        [-causationInstanceLength <length> (default=" + CAUSATION_INSTANCE_LENGTH + ")]\n" +
       "        [-numCausationInstances <quantity> (default=" + NUM_CAUSATION_INSTANCES + ")]\n" +
       "        [-learner \"LSTM\" | \"SimpleRNN\" | \"Attention\" | \"NN\" | \"GA\" (default=" + LEARNER + ")]\n" +
@@ -253,6 +254,7 @@ public class Main
    {
       // Get options.
       boolean firstHidden = true;
+      boolean printParms = false;
 
       for (int i = 0; i < args.length; i++)
       {
@@ -360,6 +362,32 @@ public class Main
             }
             continue;
          }
+         if (args[i].equals("-eventOmissionProbability"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid eventOmissionProbability option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               EVENT_OMISSION_PROBABILITY = Float.parseFloat(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid eventOmissionProbability option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if ((EVENT_OMISSION_PROBABILITY < 0.0f) || (EVENT_OMISSION_PROBABILITY > 1.0f))
+            {
+               System.err.println("Invalid eventOmissionProbability option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            continue;
+         }         
          if (args[i].equals("-maxInterveningEvents"))
          {
             i++;
@@ -590,9 +618,8 @@ public class Main
          }
          if (args[i].equals("-printParameters"))
          {
-            System.out.println("Parameters:");
-            printParameters();
-            System.exit(0);
+            printParms = true;
+            continue;
          }
          if (args[i].equals("-help") || args[i].equals("-h") || args[i].equals("-?"))
          {
@@ -608,6 +635,12 @@ public class Main
          System.err.println(Usage);
          System.exit(1);
       }
+      if (printParms)
+      {
+         System.out.println("Parameters:");
+         printParameters();
+         System.exit(0);
+      }      
       if (NUM_CAUSE_EVENT_TYPES > NUM_EVENT_TYPES)
       {
          System.err.println("Number of cause event types cannot be greater than number of event types");
@@ -1007,12 +1040,12 @@ public class Main
 	      catch (InterruptedException e) {}
 	
 	      // Fetch the results.
-	      int    train_prediction_errors = 0;
+	      int    train_correct_predictions = 0;
 	      int    train_total_predictions = 0;
-	      float  train_error_pct         = 0.0f;
-	      int    test_prediction_errors  = 0;
+	      float  train_pct         = 0.0f;
+	      int    test_correct_predictions  = 0;
 	      int    test_total_predictions  = 0;
-	      float  test_error_pct          = 0.0f;
+	      float  test_pct          = 0.0f;
 	      String resultsFilename         = null;
 	      if (LEARNER.equals("NN"))
 	      {
@@ -1038,13 +1071,13 @@ public class Main
 	               System.err.println("Error parsing results file " + resultsFilename);
 	               System.exit(1);
 	            }
-	            String value = jObj.getString("train_prediction_errors");
+	            String value = jObj.getString("train_correct_predictions");
 	            if ((value == null) || value.isEmpty())
 	            {
 	               System.err.println("Error parsing results file " + resultsFilename);
 	               System.exit(1);
 	            }
-	            train_prediction_errors = Integer.parseInt(value);
+	            train_correct_predictions = Integer.parseInt(value);
 	            value = jObj.getString("train_total_predictions");
 	            if ((value == null) || value.isEmpty())
 	            {
@@ -1052,20 +1085,20 @@ public class Main
 	               System.exit(1);
 	            }
 	            train_total_predictions = Integer.parseInt(value);
-	            value = jObj.getString("train_error_pct");
+	            value = jObj.getString("train_pct");
 	            if ((value == null) || value.isEmpty())
 	            {
 	               System.err.println("Error parsing results file " + resultsFilename);
 	               System.exit(1);
 	            }
-	            train_error_pct = Float.parseFloat(value);
-	            value           = jObj.getString("test_prediction_errors");
+	            train_pct = Float.parseFloat(value);
+	            value           = jObj.getString("test_correct_predictions");
 	            if ((value == null) || value.isEmpty())
 	            {
 	               System.err.println("Error parsing results file " + resultsFilename);
 	               System.exit(1);
 	            }
-	            test_prediction_errors = Integer.parseInt(value);
+	            test_correct_predictions = Integer.parseInt(value);
 	            value = jObj.getString("test_total_predictions");
 	            if ((value == null) || value.isEmpty())
 	            {
@@ -1073,13 +1106,13 @@ public class Main
 	               System.exit(1);
 	            }
 	            test_total_predictions = Integer.parseInt(value);
-	            value = jObj.getString("test_error_pct");
+	            value = jObj.getString("test_pct");
 	            if ((value == null) || value.isEmpty())
 	            {
 	               System.err.println("Error parsing results file " + resultsFilename);
 	               System.exit(1);
 	            }
-	            test_error_pct = Float.parseFloat(value);
+	            test_pct = Float.parseFloat(value);
 	         }
 	         else
 	         {
@@ -1093,12 +1126,10 @@ public class Main
 	         System.err.println("Cannot read results file " + resultsFilename + ":" + e.getMessage());
 	         System.exit(1);
 	      }
-	      System.out.println("Train correct paths/total = " + (train_total_predictions - train_prediction_errors) +
-	                         "/" + train_total_predictions + " (" + (100.0 - train_error_pct) + "%), prediction errors/total = " +
-	                         train_prediction_errors + "/" + train_total_predictions + " (" + train_error_pct + "%)");
-	      System.out.println("Test correct paths/total = " + (test_total_predictions - test_prediction_errors) +
-	                         "/" + test_total_predictions + " (" + (100.0 - test_error_pct) + "%), prediction errors/total = " +
-	                         test_prediction_errors + "/" + test_total_predictions + " (" + test_error_pct + "%)");
+	      System.out.println("Train correct/total = " + train_correct_predictions +
+	                         "/" + train_total_predictions + " (" + train_pct + "%)");
+	      System.out.println("Test correct/total = " + test_correct_predictions  +
+	                         "/" + test_total_predictions + " (" + test_pct + "%)");
 	      }
       System.exit(0);
    }
