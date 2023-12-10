@@ -46,6 +46,8 @@ for opt, arg in opts:
      sys.exit(1)
 
 # import dataset
+if verbose:
+    print('Importing dataset from causation_nn_dataset.py')
 from causation_nn_dataset import X_train_shape, y_train_shape, X_train_seq, y_train_seq, X_test_shape, y_test_shape, X_test_seq, y_test_seq
 if X_train_shape[0] == 0:
     print('Empty train dataset')
@@ -69,9 +71,9 @@ if verbose:
     model.summary()
 
 # train
-model.fit(X, y, epochs=n_epochs, batch_size=10, verbose=int(verbose))
+model.fit(X, y, epochs=n_epochs, batch_size=X_train_shape[0], verbose=int(verbose))
 
-# validate
+# validate training
 seq = array(X_train_seq)
 X = seq.reshape(X_train_shape[0], X_train_shape[1])
 seq = array(y_train_seq)
@@ -130,7 +132,9 @@ if verbose == True:
     print("Test correct/total = ", testOK, "/", testTotal, sep='', end='')
     print(" (", str(round(testPct, 2)), "%)", sep='')
 
-# write results to causaation_nn_results.txt
+# write results
+if verbose:
+    print('Writing results to causation_nn_results.json')
 with open(results_filename, 'w') as f:
     f.write('{')
     f.write('\"train_correct_predictions\":\"'+str(trainOK)+'\",')

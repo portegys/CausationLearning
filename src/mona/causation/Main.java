@@ -75,8 +75,10 @@ public class Main
    // NN.
    public static final String RNN_DATASET_FILENAME = "causation_rnn_dataset.py";
    public static final String RNN_FILENAME         = "causation_rnn.py";
+   public static final String RNN_RESULTS_FILENAME = "causation_rnn_results.json";   
+   public static final String ATTENTION_DATASET_FILENAME = "causation_attention_dataset.py";
    public static final String ATTENTION_FILENAME   = "causation_attention.py";
-   public static final String RNN_RESULTS_FILENAME = "causation_rnn_results.json";
+   public static final String ATTENTION_RESULTS_FILENAME = "causation_attention_results.json";
    public static final String NN_DATASET_FILENAME  = "causation_nn_dataset.py";
    public static final String NN_FILENAME          = "causation_nn.py";
    public static final String NN_RESULTS_FILENAME  = "causation_nn_results.json";
@@ -863,7 +865,107 @@ public class Main
             System.exit(1);
          }
       }
-      else if (LEARNER.equals("LSTM") || LEARNER.equals("SimpleRNN") || LEARNER.equals("Attention"))
+      else if (LEARNER.equals("Attention"))
+      {
+         try
+         {
+            FileWriter  fileWriter  = new FileWriter(ATTENTION_DATASET_FILENAME);
+            PrintWriter printWriter = new PrintWriter(fileWriter);
+            printWriter.println("X_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
+                                CAUSATION_INSTANCE_LENGTH + ", " + (NUM_EVENT_TYPES + 1) + " ]");
+            printWriter.print("X_train_seq = [");
+            String X_train = "";
+            for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
+            {
+               X_train += "\n";
+               CausationInstance instance = CausationTrainingInstances.get(i);
+               for (int k = 0; k < instance.events.length; k++)
+               {
+                  X_train += oneHot(instance.events[k], (NUM_EVENT_TYPES + 1));
+                  X_train += ",";
+               }
+            }
+            if (X_train.endsWith(","))
+            {
+               X_train = X_train.substring(0, X_train.length() - 1);
+            }
+            printWriter.println(X_train);
+            printWriter.println("]");            
+            printWriter.println("y_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
+                    (NUM_CAUSATIONS + 1) + " ]");
+			printWriter.print("y_train_seq = [");
+			String y_train = "";
+			for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
+			{
+			   y_train += "\n";
+			   CausationInstance instance = CausationTrainingInstances.get(i);
+			   if (instance.valid)
+			   {
+			      y_train += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1) + ",";
+			   }
+			   else
+			   {
+			      y_train += oneHot(NUM_CAUSATIONS, NUM_CAUSATIONS + 1) + ",";
+			   }
+			}
+			if (y_train.endsWith(","))
+			{
+			   y_train = y_train.substring(0, y_train.length() - 1);
+			}
+			printWriter.println(y_train);
+			printWriter.println("]");            
+            printWriter.println("X_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
+                                CAUSATION_INSTANCE_LENGTH + ", " + (NUM_EVENT_TYPES + 1) + " ]");
+            printWriter.print("X_test_seq = [");
+            String X_test = "";
+            for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
+            {
+               X_test += "\n";
+               CausationInstance instance = CausationTestingInstances.get(i);
+               for (int k = 0; k < instance.events.length; k++)
+               {
+                  X_test += oneHot(instance.events[k], (NUM_EVENT_TYPES + 1));
+                  X_test += ",";
+               }
+            }
+            if (X_test.endsWith(","))
+            {
+               X_test = X_test.substring(0, X_test.length() - 1);
+            }
+            printWriter.println(X_test);
+            printWriter.println("]");
+            printWriter.println("y_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
+                    (NUM_CAUSATIONS + 1) + " ]");
+			printWriter.print("y_test_seq = [");
+			String y_test = "";
+			for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
+			{
+			   y_test += "\n";
+			   CausationInstance instance = CausationTestingInstances.get(i);
+			   if (instance.valid)
+			   {
+			      y_test += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1) + ",";
+			   }
+			   else
+			   {
+			      y_test += oneHot(NUM_CAUSATIONS, NUM_CAUSATIONS + 1) + ",";
+			   }
+			}
+			if (y_test.endsWith(","))
+			{
+			   y_test = y_test.substring(0, y_test.length() - 1);
+			}
+			printWriter.println(y_test);
+			printWriter.println("]");
+            printWriter.close();
+         }
+         catch (IOException e)
+         {
+            System.err.println("Cannot write RNN dataset to file " + ATTENTION_DATASET_FILENAME);
+            System.exit(1);
+         }
+      }
+      else if (LEARNER.equals("LSTM") || LEARNER.equals("SimpleRNN"))
       {
          try
          {
@@ -971,7 +1073,7 @@ public class Main
             System.exit(1);
          }
       }
-
+      
       // Run.
       if (LEARNER.equals("GA"))
       {
@@ -1051,6 +1153,10 @@ public class Main
 	      {
 	         resultsFilename = NN_RESULTS_FILENAME;
 	      }
+	      else if (LEARNER.equals("Attention"))
+	      {
+	         resultsFilename = ATTENTION_RESULTS_FILENAME;
+	      }	      
 	      else
 	      {
 	         resultsFilename = RNN_RESULTS_FILENAME;

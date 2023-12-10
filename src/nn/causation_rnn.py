@@ -53,7 +53,9 @@ for opt, arg in opts:
      print(usage)
      sys.exit(1)
 
-# prepare data
+# import dataset
+if verbose:
+    print('Importing dataset from causation_rnn_dataset.py')
 from causation_rnn_dataset import X_train_shape, X_train_seq, y_train_shape, y_train_seq
 if X_train_shape[0] == 0:
     print('Empty train dataset')
@@ -162,7 +164,9 @@ if verbose == True:
     print("Test correct/total = ", testOK, "/", testTotal, sep='', end='')
     print(" (", str(round(testPct, 2)), "%)", sep='')
 
-# write results to causaation_rnn_results.txt
+# write results
+if verbose:
+    print('Writing results to causation_rnn_results.json')
 with open(results_filename, 'w') as f:
     f.write('{')
     f.write('\"train_correct_predictions\":\"'+str(trainOK)+'\",')
