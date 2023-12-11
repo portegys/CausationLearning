@@ -71,23 +71,19 @@ num_samples, time_steps, input_dim, output_dim = X_train_shape[0], X_train_shape
 model_input = Input(shape=(time_steps, input_dim))
 x = LSTM(n_hidden, return_sequences=True)(model_input)
 x = Attention(units=n_attention)(x)
-x = Dense(y_train_shape[1])(x)
+x = Dense(output_dim)(x)
 model = Model(model_input, x)
 model.compile(loss='mae', optimizer='adam')
 if verbose:
     model.summary()
 
 # train
-model.fit(X, y, epochs=n_epochs, batch_size=X_train_shape[0], verbose=int(verbose))
+model.fit(X, y, epochs=n_epochs, batch_size=num_samples, verbose=int(verbose))
 
 # validate training
-seq = array(X_train_seq)
-X = seq.reshape(X_train_shape[0], X_train_shape[1], X_train_shape[2])
-seq = array(y_train_seq)
-y = seq.reshape(y_train_shape[0], y_train_shape[1])
-predictions = model.predict(X, batch_size=X_train_shape[0], verbose=int(verbose))
+predictions = model.predict(X, batch_size=num_samples, verbose=int(verbose))
 trainOK = 0
-trainTotal = y_train_shape[0]
+trainTotal = num_samples
 if verbose:
     print('Train:')
 for response in range(trainTotal):
@@ -111,10 +107,11 @@ seq = array(X_test_seq)
 X = seq.reshape(X_test_shape[0], X_test_shape[1], X_test_shape[2])
 seq = array(y_test_seq)
 y = seq.reshape(y_test_shape[0], y_test_shape[1])
+num_samples = X_test_shape[0]
 testOK = 0
-testTotal = y_test_shape[0]
+testTotal = num_samples
 if testTotal > 0:
-    predictions = model.predict(X, batch_size=testTotal, verbose=0)
+    predictions = model.predict(X, batch_size=num_samples, verbose=0)
     if verbose:
         print('Test:')
     for response in range(testTotal):

@@ -80,7 +80,7 @@ seq = array(y_train_seq)
 y = seq.reshape(y_train_shape[0], y_train_shape[1])
 predictions = model.predict(X, batch_size=X_train_shape[0], verbose=int(verbose))
 trainOK = 0
-trainTotal = y_train_shape[0]
+trainTotal = X_train_shape[0]
 if verbose:
     print('Train:')
 for response in range(trainTotal):
@@ -101,7 +101,7 @@ X = seq.reshape(X_test_shape[0], X_test_shape[1])
 seq = array(y_test_seq)
 y = seq.reshape(y_test_shape[0], y_test_shape[1])
 testOK = 0
-testTotal = y_test_shape[0]
+testTotal = X_test_shape[0]
 if testTotal > 0:
     predictions = model.predict(X, batch_size=testTotal, verbose=0)
     if verbose:
