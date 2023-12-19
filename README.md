@@ -29,7 +29,7 @@ causation.sh or causation.bat
 
 Usage:
 <pre>
-    java mona.causation.Main
+    java mona.causation.CausationLearning
         [-numEventTypes <quantity> (default=10)]
         [-numCauseEventTypes <quantity> (default=5)]
         [-numCausations <quantity> (default=2)]
@@ -44,9 +44,9 @@ Usage:
         [-numEpochs <quantity> (default=500)]
         [-randomSeed <random number seed> (default=4517)]
   Print parameters:
-    java mona.causation.Main -printParameters
+    java mona.causation.CausationLearning -printParameters
   Version:
-    java mona.causation.Main -version
+    java mona.causation.CausationLearning -version
 Exit codes:
   0=success
   1=error

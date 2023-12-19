@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Tom Portegys (portegys@gmail.com). All rights reserved.
+ * Copyright (c) 2023-2024 Tom Portegys (portegys@gmail.com). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
@@ -22,7 +22,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Main.
+// Causation learning.
 
 package mona.causation;
 
@@ -42,19 +42,10 @@ import java.util.Random;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Main
+public class CausationLearning
 {
    // Parameters.
-   public static int                NUM_EVENT_TYPES                      = 10;
-   public static int                NUM_CAUSE_EVENT_TYPES                = 5;
-   public static int                EFFECT_EVENT_TYPE                    = NUM_EVENT_TYPES;
    public static int                NUM_CAUSATIONS                       = 2;
-   public static int                MAX_CAUSE_EVENTS                     = 2;
-   public static float              EVENT_OMISSION_PROBABILITY           = 0.1f;
-   public static int                MAX_INTERVENING_EVENTS               = 2;
-   public static int                MAX_VALID_INTERVENING_EVENTS         = 1;
-   public static float              VALID_INTERVENING_EVENTS_PROBABILITY = 0.9f;
-   public static int                CAUSATION_INSTANCE_LENGTH            = (MAX_CAUSE_EVENTS + 1) * (MAX_INTERVENING_EVENTS + 1);
    public static int                NUM_CAUSATION_INSTANCES              = 10;
    public static String             LEARNER = "LSTM";
    public static int                NUM_EPOCHS   = 500;
@@ -87,162 +78,41 @@ public class Main
    public static final String VERSION = "1.0";
 
    // Causations.
-   public static class Causation
-   {
-      public ArrayList<Integer> causeEvents;
-      public Causation()
-      {
-         causeEvents = new ArrayList<Integer>();
-      }
-
-
-      public void print()
-      {
-         System.out.print("causes: { ");
-         for (int i : causeEvents)
-         {
-            System.out.print(i + " ");
-         }
-         System.out.println("}, effect: " + EFFECT_EVENT_TYPE);
-      }
-   };
    public static ArrayList<Causation> Causations;
 
    // Causation instances.
-   public static class CausationInstance
-   {
-      public int[]   events;
-      public int     causationIndex;
-      public int     effectEventIndex;
-      public boolean valid;
-      public CausationInstance()
-      {
-         events         = new int[CAUSATION_INSTANCE_LENGTH];
-         causationIndex = random.nextInt(NUM_CAUSATIONS);
-         valid          = true;
-         Causation causation = Causations.get(causationIndex);
-         List < List < Integer >> eventPermutations = permuteList(causation.causeEvents);
-         ArrayList<Integer> permutation = new ArrayList<Integer>();
-         for (Integer i : eventPermutations.get(random.nextInt(eventPermutations.size())))
-         {
-        	 if (random.nextFloat() < EVENT_OMISSION_PROBABILITY)
-        	 {
-        		 valid = false;
-        	 } else {
-        		 permutation.add(i);
-        	 }
-         }
-         int           j           = 0;
-         for (int i : permutation)
-         {
-            int n = 0;
-            if (random.nextFloat() < VALID_INTERVENING_EVENTS_PROBABILITY)
-            {
-               if (MAX_INTERVENING_EVENTS > 0)
-               {
-                  n = random.nextInt(MAX_VALID_INTERVENING_EVENTS + 1);
-               }
-            }
-            else
-            {
-               if ((MAX_INTERVENING_EVENTS - MAX_VALID_INTERVENING_EVENTS) == 1)
-               {
-                  n = MAX_VALID_INTERVENING_EVENTS + 1;
-               }
-               else
-               {
-                  n = random.nextInt(MAX_INTERVENING_EVENTS - (MAX_VALID_INTERVENING_EVENTS + 1)) +
-                      (MAX_VALID_INTERVENING_EVENTS + 1);
-               }
-               valid = false;
-            }
-            for (int k = 0; k < n; k++)
-            {
-               events[j] = NUM_CAUSE_EVENT_TYPES + random.nextInt(NUM_EVENT_TYPES - NUM_CAUSE_EVENT_TYPES);
-               j++;
-            }
-            events[j] = i;
-            j++;
-         }
-         int n = 0;
-         if (random.nextFloat() < VALID_INTERVENING_EVENTS_PROBABILITY)
-         {
-            if (MAX_INTERVENING_EVENTS > 0)
-            {
-               n = random.nextInt(MAX_VALID_INTERVENING_EVENTS + 1);
-            }
-         }
-         else
-         {
-            if ((MAX_INTERVENING_EVENTS - MAX_VALID_INTERVENING_EVENTS) == 1)
-            {
-               n = MAX_VALID_INTERVENING_EVENTS + 1;
-            }
-            else
-            {
-               n = random.nextInt(MAX_INTERVENING_EVENTS - (MAX_VALID_INTERVENING_EVENTS + 1)) +
-                   (MAX_VALID_INTERVENING_EVENTS + 1);
-            }
-            valid = false;
-         }
-         for (int q = 0; q < n; q++)
-         {
-            events[j] = NUM_CAUSE_EVENT_TYPES + random.nextInt(NUM_EVENT_TYPES - NUM_CAUSE_EVENT_TYPES);
-            j++;
-         }
-         events[j]        = EFFECT_EVENT_TYPE;
-         effectEventIndex = j;
-         j++;
-         for ( ; j < CAUSATION_INSTANCE_LENGTH; j++)
-         {
-            events[j] = NUM_CAUSE_EVENT_TYPES + random.nextInt(NUM_EVENT_TYPES - NUM_CAUSE_EVENT_TYPES);
-         }
-      }
-
-
-      public void print()
-      {
-         System.out.print("events: { ");
-         for (int i : events)
-         {
-            System.out.print(i + " ");
-         }
-         System.out.print("}, effect event index=" + effectEventIndex);
-         if (valid)
-         {
-            System.out.println(", valid=true");
-         }
-         else
-         {
-            System.out.println(", valid=false");
-         }
-      }
-   };
    public static ArrayList<CausationInstance> CausationTrainingInstances;
    public static ArrayList<CausationInstance> CausationTestingInstances;
-
+   
+   // GA.
+   public static EvolveCausations CausationGA;
+   
    // Usage.
    public static final String Usage =
       "Usage:\n" +
-      "    java mona.causation.Main\n" +
-      "        [-numEventTypes <quantity> (default=" + NUM_EVENT_TYPES + ")]\n" +
-      "        [-numCauseEventTypes <quantity> (default=" + NUM_CAUSE_EVENT_TYPES + ")]\n" +
+      "    java mona.causation.CausationLearning\n" +
+      "        [-numEventTypes <quantity> (default=" + Causation.NUM_EVENT_TYPES + ")]\n" +
+      "        [-numCauseEventTypes <quantity> (default=" + Causation.NUM_CAUSE_EVENT_TYPES + ")]\n" +
       "        [-numCausations <quantity> (default=" + NUM_CAUSATIONS + ")]\n" +
-      "        [-maxCauseEvents <quantity> (default=" + MAX_CAUSE_EVENTS + ")]\n" +
-      "        [-eventOmissionProbability <probability> (default=" + EVENT_OMISSION_PROBABILITY + ")]\n" +      
-      "        [-maxInterveningEvents <quantity> (default=" + MAX_INTERVENING_EVENTS + ")]\n" +
-      "        [-maxValidInterveningEvents <quantity> (default=" + MAX_VALID_INTERVENING_EVENTS + ")]\n" +
-      "        [-validInterveningEventsProbability <probability> (default=" + VALID_INTERVENING_EVENTS_PROBABILITY + ")]\n" +
-      "        [-causationInstanceLength <length> (default=" + CAUSATION_INSTANCE_LENGTH + ")]\n" +
+      "        [-maxCauseEvents <quantity> (default=" + Causation.MAX_CAUSE_EVENTS + ")]\n" +
+      "        [-eventOmissionProbability <probability> (default=" + CausationInstance.EVENT_OMISSION_PROBABILITY + ")]\n" +      
+      "        [-maxInterveningEvents <quantity> (default=" + Causation.MAX_INTERVENING_EVENTS + ")]\n" +
+      "        [-maxValidInterveningEvents <quantity> (default=" + Causation.MAX_VALID_INTERVENING_EVENTS + ")]\n" +
+      "        [-validInterveningEventsProbability <probability> (default=" + CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY + ")]\n" +
+      "        [-causationInstanceLength <length> (default=" + Causation.CAUSATION_INSTANCE_LENGTH + ")]\n" +
       "        [-numCausationInstances <quantity> (default=" + NUM_CAUSATION_INSTANCES + ")]\n" +
-      "        [-learner \"LSTM\" | \"SimpleRNN\" | \"Attention\" | \"NN\" | \"GA\" (default=" + LEARNER + ")]\n" +
-      "        [-numHiddenNeurons <quantity> (default=" + DEFAULT_NUM_HIDDEN_NEURONS + ") (repeat for additional layers)]\n" +
-      "        [-numEpochs <quantity> (default=" + NUM_EPOCHS + ")]\n" +
+      "        [-learner \"LSTM\" | \"SimpleRNN\" | \"Attention\" | \"NN\" | \n" +
+      "            [-numHiddenNeurons <quantity> (default=" + DEFAULT_NUM_HIDDEN_NEURONS + ") (repeat for additional layers)]\n" +
+      "            [-numEpochs <quantity> (default=" + NUM_EPOCHS + ")]\n" +
+      "         -learner \"GA\" (default=" + LEARNER + ")]\n" +
+      "            [-generations <quantity> (default=" + EvolveCausations.GENERATIONS + ")]\n" +
+      "            [-populationSize <quantity> (default=" + EvolveCausations.POPULATION_SIZE + ")]\n" +
+      "            [-mutationRate <probability> (default=" + EvolveCausations.MUTATION_RATE + ")]\n" +      
       "        [-randomSeed <random number seed> (default=" + DEFAULT_RANDOM_SEED + ")]\n" +
       "  Print parameters:\n" +
-      "    java mona.causation.Main -printParameters\n" +
+      "    java mona.causation.CausationLearning -printParameters\n" +
       "  Version:\n" +
-      "    java mona.causation.Main -version\n" +
+      "    java mona.causation.CausationLearning -version\n" +
       "Exit codes:\n" +
       "  0=success\n" +
       "  1=error";
@@ -255,6 +125,11 @@ public class Main
    public static void main(String[] args)
    {
       // Get options.
+	  boolean gotNumHidden = false;
+	  boolean gotNumEpochs = false;
+	  boolean gotGenerations = false;
+	  boolean gotPopulationSize = false;
+	  boolean gotMutationRate = false;
       boolean firstHidden = true;
       boolean printParms = false;
 
@@ -271,14 +146,14 @@ public class Main
             }
             try
             {
-               NUM_EVENT_TYPES = Integer.parseInt(args[i]);
+            	Causation.NUM_EVENT_TYPES = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid numEventTypes option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if (NUM_EVENT_TYPES <= 0)
+            if (Causation.NUM_EVENT_TYPES <= 0)
             {
                System.err.println("Invalid numEventTypes option");
                System.err.println(Usage);
@@ -297,14 +172,14 @@ public class Main
             }
             try
             {
-               NUM_CAUSE_EVENT_TYPES = Integer.parseInt(args[i]);
+            	Causation.NUM_CAUSE_EVENT_TYPES = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid numCauseEventTypes option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if (NUM_CAUSE_EVENT_TYPES <= 0)
+            if (Causation.NUM_CAUSE_EVENT_TYPES <= 0)
             {
                System.err.println("Invalid numCauseEventTypes option");
                System.err.println(Usage);
@@ -349,14 +224,14 @@ public class Main
             }
             try
             {
-               MAX_CAUSE_EVENTS = Integer.parseInt(args[i]);
+            	Causation.MAX_CAUSE_EVENTS = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid maxCauseEvents option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if (MAX_CAUSE_EVENTS <= 0)
+            if (Causation.MAX_CAUSE_EVENTS <= 0)
             {
                System.err.println("Invalid maxCauseEvents option");
                System.err.println(Usage);
@@ -375,14 +250,15 @@ public class Main
             }
             try
             {
-               EVENT_OMISSION_PROBABILITY = Float.parseFloat(args[i]);
+            	CausationInstance.EVENT_OMISSION_PROBABILITY = Float.parseFloat(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid eventOmissionProbability option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if ((EVENT_OMISSION_PROBABILITY < 0.0f) || (EVENT_OMISSION_PROBABILITY > 1.0f))
+            if ((CausationInstance.EVENT_OMISSION_PROBABILITY < 0.0f) || 
+            		(CausationInstance.EVENT_OMISSION_PROBABILITY > 1.0f))
             {
                System.err.println("Invalid eventOmissionProbability option");
                System.err.println(Usage);
@@ -401,14 +277,14 @@ public class Main
             }
             try
             {
-               MAX_INTERVENING_EVENTS = Integer.parseInt(args[i]);
+            	Causation.MAX_INTERVENING_EVENTS = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid maxInterveningEvents option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if (MAX_INTERVENING_EVENTS < 0)
+            if (Causation.MAX_INTERVENING_EVENTS < 0)
             {
                System.err.println("Invalid maxInterveningEvents option");
                System.err.println(Usage);
@@ -427,14 +303,14 @@ public class Main
             }
             try
             {
-               MAX_VALID_INTERVENING_EVENTS = Integer.parseInt(args[i]);
+            	Causation.MAX_VALID_INTERVENING_EVENTS = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid maxValidInterveningEvents option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if (MAX_VALID_INTERVENING_EVENTS < 0)
+            if (Causation.MAX_VALID_INTERVENING_EVENTS < 0)
             {
                System.err.println("Invalid maxValidInterveningEvents option");
                System.err.println(Usage);
@@ -453,14 +329,15 @@ public class Main
             }
             try
             {
-               VALID_INTERVENING_EVENTS_PROBABILITY = Float.parseFloat(args[i]);
+            	CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY = Float.parseFloat(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid validInterveningEventsProbability option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if ((VALID_INTERVENING_EVENTS_PROBABILITY < 0.0f) || (VALID_INTERVENING_EVENTS_PROBABILITY > 1.0f))
+            if ((CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY < 0.0f) || 
+            		(CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY > 1.0f))
             {
                System.err.println("Invalid validInterveningEventsProbability option");
                System.err.println(Usage);
@@ -479,14 +356,14 @@ public class Main
             }
             try
             {
-               CAUSATION_INSTANCE_LENGTH = Integer.parseInt(args[i]);
+            	Causation.CAUSATION_INSTANCE_LENGTH = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid causationInstanceLength option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if (CAUSATION_INSTANCE_LENGTH < 0)
+            if (Causation.CAUSATION_INSTANCE_LENGTH < 0)
             {
                System.err.println("Invalid causationInstanceLength option");
                System.err.println(Usage);
@@ -570,6 +447,7 @@ public class Main
                NUM_HIDDEN_NEURONS.clear();
             }
             NUM_HIDDEN_NEURONS.add(n);
+            gotNumHidden = true;           
             continue;
          }
          if (args[i].equals("-numEpochs"))
@@ -596,8 +474,90 @@ public class Main
                System.err.println(Usage);
                System.exit(1);
             }
+            gotNumEpochs = true;            
             continue;
          }
+         if (args[i].equals("-generations"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid generations option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               EvolveCausations.GENERATIONS = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid generations option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (EvolveCausations.GENERATIONS < 0)
+            {
+               System.err.println("Invalid generations option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            gotGenerations = true;            
+            continue;
+         } 
+         if (args[i].equals("-populationSize"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid populationSize option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               EvolveCausations.POPULATION_SIZE = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid populationSize option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (EvolveCausations.POPULATION_SIZE < 0)
+            {
+               System.err.println("Invalid populationSize option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            gotPopulationSize = true;            
+            continue;
+         }
+         if (args[i].equals("-mutationRate"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid mutationRate option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               EvolveCausations.MUTATION_RATE = Float.parseFloat(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid mutationRate option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if ((EvolveCausations.MUTATION_RATE < 0.0f) || (EvolveCausations.MUTATION_RATE > 1.0f))
+            {
+               System.err.println("Invalid mutationRate option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            gotMutationRate = true;
+            continue;
+         }         
          if (args[i].equals("-randomSeed"))
          {
             i++;
@@ -643,26 +603,28 @@ public class Main
          printParameters();
          System.exit(0);
       }      
-      if (NUM_CAUSE_EVENT_TYPES > NUM_EVENT_TYPES)
+      if (Causation.NUM_CAUSE_EVENT_TYPES > Causation.NUM_EVENT_TYPES)
       {
          System.err.println("Number of cause event types cannot be greater than number of event types");
          System.err.println(Usage);
          System.exit(1);
       }
-      if ((MAX_INTERVENING_EVENTS > 0) && (NUM_CAUSE_EVENT_TYPES == NUM_EVENT_TYPES))
+      if ((Causation.MAX_INTERVENING_EVENTS > 0) && 
+    		  (Causation.NUM_CAUSE_EVENT_TYPES == Causation.NUM_EVENT_TYPES))
       {
          System.err.println("Number of cause event types cannot be equal to the number of event types");
          System.err.println(Usage);
          System.exit(1);
       }
-      if (MAX_VALID_INTERVENING_EVENTS > MAX_INTERVENING_EVENTS)
+      if (Causation.MAX_VALID_INTERVENING_EVENTS > Causation.MAX_INTERVENING_EVENTS)
       {
          System.err.println("Max valid intervening events cannot be greater than max intervening events");
          System.err.println(Usage);
          System.exit(1);
       }
-      if ((VALID_INTERVENING_EVENTS_PROBABILITY < 1.0f) &&
-          ((MAX_INTERVENING_EVENTS == 0) || (MAX_VALID_INTERVENING_EVENTS == MAX_INTERVENING_EVENTS)))
+      if ((CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY < 1.0f) &&
+          ((Causation.MAX_INTERVENING_EVENTS == 0) || 
+           (Causation.MAX_VALID_INTERVENING_EVENTS == Causation.MAX_INTERVENING_EVENTS)))
       {
          System.err.println("Not possible to have an invalid number of intervening events");
          System.err.println(Usage);
@@ -673,6 +635,22 @@ public class Main
          System.err.println("Attention network limited to single hidden layer");
          System.err.println(Usage);
          System.exit(1);
+      }
+      if (LEARNER.equals("GA"))
+      {
+    	  if (gotNumHidden || gotNumEpochs)
+    	  {
+	         System.err.println("Incompatible learner options");
+	         System.err.println(Usage);
+	         System.exit(1);    		  
+    	  }
+      } else {
+    	  if (gotGenerations || gotPopulationSize || gotMutationRate)
+    	  {
+	         System.err.println("Incompatible learner options");
+	         System.err.println(Usage);
+	         System.exit(1);    		  
+    	  }    	  
       }
 
       // Initialize random numbers.
@@ -688,10 +666,10 @@ public class Main
          for ( ; t < MAX_TRIES; t++)
          {
             causation.causeEvents.clear();
-            int n = random.nextInt(MAX_CAUSE_EVENTS) + 1;
+            int n = random.nextInt(Causation.MAX_CAUSE_EVENTS) + 1;
             for (int j = 0; j < n; j++)
             {
-               causation.causeEvents.add(random.nextInt(NUM_CAUSE_EVENT_TYPES));
+               causation.causeEvents.add(random.nextInt(Causation.NUM_CAUSE_EVENT_TYPES));
             }
             Collections.sort(causation.causeEvents);
             boolean duplicate = false;
@@ -731,12 +709,16 @@ public class Main
       CausationTrainingInstances = new ArrayList<CausationInstance>();
       for (int i = 0; i < NUM_CAUSATION_INSTANCES; i++)
       {
-         CausationTrainingInstances.add(new CausationInstance());
+    	 int n = random.nextInt(NUM_CAUSATIONS);
+    	 Causation causation = Causations.get(n);    	  
+         CausationTrainingInstances.add(new CausationInstance(causation, n, random));
       }
       CausationTestingInstances = new ArrayList<CausationInstance>();
       for (int i = 0; i < NUM_CAUSATION_INSTANCES; i++)
       {
-         CausationTestingInstances.add(new CausationInstance());
+     	 int n = random.nextInt(NUM_CAUSATIONS);    	  
+     	 Causation causation = Causations.get(n);    	  
+         CausationTestingInstances.add(new CausationInstance(causation, n, random));
       }
 
       // Print causations.
@@ -772,7 +754,7 @@ public class Main
             FileWriter  fileWriter  = new FileWriter(NN_DATASET_FILENAME);
             PrintWriter printWriter = new PrintWriter(fileWriter);
             printWriter.println("X_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-                                CAUSATION_INSTANCE_LENGTH * (NUM_EVENT_TYPES + 1) + " ]");
+                                Causation.CAUSATION_INSTANCE_LENGTH * (Causation.NUM_EVENT_TYPES + 1) + " ]");
             printWriter.print("X_train_seq = [");
             String X_train = "";
             for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
@@ -781,7 +763,7 @@ public class Main
                CausationInstance instance = CausationTrainingInstances.get(i);
                for (int k = 0; k < instance.events.length; k++)
                {
-                  X_train += oneHot(instance.events[k], (NUM_EVENT_TYPES + 1));
+                  X_train += oneHot(instance.events[k], (Causation.NUM_EVENT_TYPES + 1));
                   X_train += ",";
                }
             }
@@ -815,7 +797,7 @@ public class Main
             printWriter.println(y_train);
             printWriter.println("]");
             printWriter.println("X_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-                                CAUSATION_INSTANCE_LENGTH * (NUM_EVENT_TYPES + 1) + " ]");
+                                Causation.CAUSATION_INSTANCE_LENGTH * (Causation.NUM_EVENT_TYPES + 1) + " ]");
             printWriter.print("X_test_seq = [");
             String X_test = "";
             for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
@@ -824,7 +806,7 @@ public class Main
                CausationInstance instance = CausationTestingInstances.get(i);
                for (int k = 0; k < instance.events.length; k++)
                {
-                  X_test += oneHot(instance.events[k], (NUM_EVENT_TYPES + 1));
+                  X_test += oneHot(instance.events[k], (Causation.NUM_EVENT_TYPES + 1));
                   X_test += ",";
                }
             }
@@ -872,7 +854,7 @@ public class Main
             FileWriter  fileWriter  = new FileWriter(ATTENTION_DATASET_FILENAME);
             PrintWriter printWriter = new PrintWriter(fileWriter);
             printWriter.println("X_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-                                CAUSATION_INSTANCE_LENGTH + ", " + (NUM_EVENT_TYPES + 1) + " ]");
+            		Causation.CAUSATION_INSTANCE_LENGTH + ", " + (Causation.NUM_EVENT_TYPES + 1) + " ]");
             printWriter.print("X_train_seq = [");
             String X_train = "";
             for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
@@ -881,7 +863,7 @@ public class Main
                CausationInstance instance = CausationTrainingInstances.get(i);
                for (int k = 0; k < instance.events.length; k++)
                {
-                  X_train += oneHot(instance.events[k], (NUM_EVENT_TYPES + 1));
+                  X_train += oneHot(instance.events[k], (Causation.NUM_EVENT_TYPES + 1));
                   X_train += ",";
                }
             }
@@ -915,7 +897,7 @@ public class Main
 			printWriter.println(y_train);
 			printWriter.println("]");            
             printWriter.println("X_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-                                CAUSATION_INSTANCE_LENGTH + ", " + (NUM_EVENT_TYPES + 1) + " ]");
+            		Causation.CAUSATION_INSTANCE_LENGTH + ", " + (Causation.NUM_EVENT_TYPES + 1) + " ]");
             printWriter.print("X_test_seq = [");
             String X_test = "";
             for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
@@ -924,7 +906,7 @@ public class Main
                CausationInstance instance = CausationTestingInstances.get(i);
                for (int k = 0; k < instance.events.length; k++)
                {
-                  X_test += oneHot(instance.events[k], (NUM_EVENT_TYPES + 1));
+                  X_test += oneHot(instance.events[k], (Causation.NUM_EVENT_TYPES + 1));
                   X_test += ",";
                }
             }
@@ -972,7 +954,7 @@ public class Main
             FileWriter  fileWriter  = new FileWriter(RNN_DATASET_FILENAME);
             PrintWriter printWriter = new PrintWriter(fileWriter);
             printWriter.println("X_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-                                CAUSATION_INSTANCE_LENGTH + ", " + (NUM_EVENT_TYPES + 1) + " ]");
+            		Causation.CAUSATION_INSTANCE_LENGTH + ", " + (Causation.NUM_EVENT_TYPES + 1) + " ]");
             printWriter.print("X_train_seq = [");
             String X_train = "";
             for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
@@ -981,7 +963,7 @@ public class Main
                CausationInstance instance = CausationTrainingInstances.get(i);
                for (int k = 0; k < instance.events.length; k++)
                {
-                  X_train += oneHot(instance.events[k], (NUM_EVENT_TYPES + 1));
+                  X_train += oneHot(instance.events[k], (Causation.NUM_EVENT_TYPES + 1));
                   X_train += ",";
                }
             }
@@ -992,7 +974,7 @@ public class Main
             printWriter.println(X_train);
             printWriter.println("]");
             printWriter.println("y_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-                                CAUSATION_INSTANCE_LENGTH + ", " + (NUM_CAUSATIONS + 1) + " ]");
+            		Causation.CAUSATION_INSTANCE_LENGTH + ", " + (NUM_CAUSATIONS + 1) + " ]");
             printWriter.print("y_train_seq = [");
             String y_train = "";
             for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
@@ -1019,7 +1001,7 @@ public class Main
             printWriter.println(y_train);
             printWriter.println("]");
             printWriter.println("X_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-                                CAUSATION_INSTANCE_LENGTH + ", " + (NUM_EVENT_TYPES + 1) + " ]");
+            		Causation.CAUSATION_INSTANCE_LENGTH + ", " + (Causation.NUM_EVENT_TYPES + 1) + " ]");
             printWriter.print("X_test_seq = [");
             String X_test = "";
             for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
@@ -1028,7 +1010,7 @@ public class Main
                CausationInstance instance = CausationTestingInstances.get(i);
                for (int k = 0; k < instance.events.length; k++)
                {
-                  X_test += oneHot(instance.events[k], (NUM_EVENT_TYPES + 1));
+                  X_test += oneHot(instance.events[k], (Causation.NUM_EVENT_TYPES + 1));
                   X_test += ",";
                }
             }
@@ -1039,7 +1021,7 @@ public class Main
             printWriter.println(X_test);
             printWriter.println("]");
             printWriter.println("y_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-                                CAUSATION_INSTANCE_LENGTH + ", " + (NUM_CAUSATIONS + 1) + " ]");
+            		Causation.CAUSATION_INSTANCE_LENGTH + ", " + (NUM_CAUSATIONS + 1) + " ]");
             printWriter.print("y_test_seq = [");
             String y_test = "";
             for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
@@ -1072,12 +1054,16 @@ public class Main
             System.err.println("Cannot write RNN dataset to file " + RNN_DATASET_FILENAME);
             System.exit(1);
          }
+      } else {
+    	  // GA.
+    	  CausationGA = new EvolveCausations();  	  
       }
       
       // Run.
       if (LEARNER.equals("GA"))
       {
     	  // Run GA.
+    	  CausationGA.run();
       } else {
 	      // Run neural network.
 	      String pythonFilename = null;
@@ -1236,7 +1222,7 @@ public class Main
 	                         "/" + train_total_predictions + " (" + train_pct + "%)");
 	      System.out.println("Test correct/total = " + test_correct_predictions  +
 	                         "/" + test_total_predictions + " (" + test_pct + "%)");
-	      }
+	  }
       System.exit(0);
    }
 
@@ -1264,65 +1250,25 @@ public class Main
       return(encoding);
    }
 
-
-   // Permute list of numbers.
-   public static List < List < Integer >> permuteList(List<Integer> input)
-   {
-      int[] num      = new int[input.size()];
-      boolean[] used = new boolean[num.length];
-      for (int i = 0; i < used.length; i++)
-      {
-         num[i]  = input.get(i);
-         used[i] = false;
-      }
-      List < List < Integer >> output = new ArrayList < List < Integer >> ();
-      ArrayList<Integer> temp = new ArrayList<Integer>();
-      permuteHelper(num, 0, used, output, temp);
-      return(output);
-   }
-
-   private static void permuteHelper(int[] num, int level, boolean[] used, List < List < Integer >> output, ArrayList<Integer> temp)
-   {
-      if (level == num.length)
-      {
-         output.add(new ArrayList<Integer>(temp));
-      }
-      else
-      {
-         for (int i = 0; i < num.length; i++)
-         {
-            if (!used[i])
-            {
-               temp.add(num[i]);
-               used[i] = true;
-               permuteHelper(num, level + 1, used, output, temp);
-               used[i] = false;
-               temp.remove(temp.size() - 1);
-            }
-         }
-      }
-   }
-
-
-   // Print.
+   // Print parameters.
    public static void printParameters()
    {
-      System.out.println("NUM_EVENT_TYPES = " + NUM_EVENT_TYPES);
-      System.out.println("NUM_CAUSE_EVENT_TYPES = " + NUM_CAUSE_EVENT_TYPES);
-      System.out.println("EFFECT_EVENT_TYPE = " + EFFECT_EVENT_TYPE);
+      System.out.println("NUM_EVENT_TYPES = " + Causation.NUM_EVENT_TYPES);
+      System.out.println("NUM_CAUSE_EVENT_TYPES = " + Causation.NUM_CAUSE_EVENT_TYPES);
+      System.out.println("EFFECT_EVENT_TYPE = " + Causation.EFFECT_EVENT_TYPE);
       System.out.println("NUM_CAUSATIONS = " + NUM_CAUSATIONS);
-      System.out.println("MAX_CAUSE_EVENTS = " + MAX_CAUSE_EVENTS);
-      System.out.println("EVENT_OMISSION_PROBABILITY = " + EVENT_OMISSION_PROBABILITY);      
-      System.out.println("MAX_INTERVENING_EVENTS = " + MAX_INTERVENING_EVENTS);
-      System.out.println("MAX_VALID_INTERVENING_EVENTS = " + MAX_VALID_INTERVENING_EVENTS);
-      System.out.println("VALID_INTERVENING_EVENTS_PROBABILITY = " + VALID_INTERVENING_EVENTS_PROBABILITY);
-      System.out.println("CAUSATION_INSTANCE_LENGTH = " + CAUSATION_INSTANCE_LENGTH);
+      System.out.println("MAX_CAUSE_EVENTS = " + Causation.MAX_CAUSE_EVENTS);
+      System.out.println("EVENT_OMISSION_PROBABILITY = " + CausationInstance.EVENT_OMISSION_PROBABILITY);      
+      System.out.println("MAX_INTERVENING_EVENTS = " + Causation.MAX_INTERVENING_EVENTS);
+      System.out.println("MAX_VALID_INTERVENING_EVENTS = " + Causation.MAX_VALID_INTERVENING_EVENTS);
+      System.out.println("VALID_INTERVENING_EVENTS_PROBABILITY = " + CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY);
+      System.out.println("CAUSATION_INSTANCE_LENGTH = " + Causation.CAUSATION_INSTANCE_LENGTH);
       System.out.println("NUM_CAUSATION_INSTANCES = " + NUM_CAUSATION_INSTANCES);
-      System.out.println("CAUSATION_INSTANCE_LENGTH = " + CAUSATION_INSTANCE_LENGTH);
+      System.out.println("CAUSATION_INSTANCE_LENGTH = " + Causation.CAUSATION_INSTANCE_LENGTH);
       System.out.println("LEARNER = " + LEARNER);
       if (LEARNER.equals("GA"))
       {
-    	  
+    	  EvolveCausations.printParameters();
       } else {
 	      System.out.print("NUM_HIDDEN_NEURONS = {");
 	      for (int i = 0, j = NUM_HIDDEN_NEURONS.size(); i < j; i++)
