@@ -16,15 +16,15 @@ public class CausationInstance
 	   public static float              VALID_INTERVENING_EVENTS_PROBABILITY = 0.9f;
 	   
 	  public Causation causation;
-	  public int causationIndex;
+	  public int causationID;
       public int[]   events;
       public int     effectEventIndex;
       public boolean valid;
       
-      public CausationInstance(Causation causation, int causationIndex, Random random)
+      public CausationInstance(Causation causation, int causationID, Random random)
       {
     	  this.causation = causation;
-    	  this.causationIndex = causationIndex;
+    	  this.causationID = causationID;
          events         = new int[Causation.CAUSATION_INSTANCE_LENGTH];
          valid          = true;
          List < List < Integer >> eventPermutations = permuteList(causation.causeEvents);
@@ -150,7 +150,8 @@ public class CausationInstance
 
       public void print()
       {
-         System.out.print("events: { ");
+          System.out.print("causation ID=" + causationID);    	  
+         System.out.print(", events: { ");
          for (int i : events)
          {
             System.out.print(i + " ");

@@ -6,16 +6,15 @@
 
 package mona.causation;
 
-import java.util.*;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Random;
 
 public class Gene
 {
    // Mutation rate.
-   double mutationRate;
-
-   // Probability of random mutation.
-   double randomMutationRate;
+   float mutationRate;
 
    // Random numbers.
    int    randomSeed;
@@ -24,7 +23,7 @@ public class Gene
    // Value types.
    enum VALUE_TYPE
    {
-      INTEGER_VALUE, FLOAT_VALUE, DOUBLE_VALUE
+      INTEGER_VALUE, FLOAT_VALUE
    };
 
    // Mutable value.
@@ -32,86 +31,58 @@ public class Gene
    String     name;
    int        ivalue, imin, imax, idelta;
    float      fvalue, fmin, fmax, fdelta;
-   double     dvalue, dmin, dmax, ddelta;
 
    // Constructors.
-   Gene(double mutationRate, double randomMutationRate, int randomSeed)
+   Gene(float mutationRate, int randomSeed)
    {
-      type                    = VALUE_TYPE.DOUBLE_VALUE;
+      type                    = VALUE_TYPE.FLOAT_VALUE;
       name                    = null;
       ivalue                  = imin = imax = idelta = 0;
       fvalue                  = fmin = fmax = fdelta = 0.0f;
-      dvalue                  = dmin = dmax = ddelta = 0.0;
       this.mutationRate       = mutationRate;
-      this.randomMutationRate = randomMutationRate;
       this.randomSeed         = randomSeed;
       randomizer              = new Random(randomSeed);
    }
 
 
    Gene(String name, int value, int min, int max, int delta,
-        double mutationRate, double randomMutationRate, int randomSeed)
+        float mutationRate, int randomSeed)
    {
       type                    = VALUE_TYPE.INTEGER_VALUE;
       this.name               = new String(name);
       ivalue                  = imin = imax = idelta = 0;
       fvalue                  = fmin = fmax = fdelta = 0.0f;
-      dvalue                  = dmin = dmax = ddelta = 0.0;
       ivalue                  = value;
       imin                    = min;
       imax                    = max;
       idelta                  = delta;
       this.mutationRate       = mutationRate;
-      this.randomMutationRate = randomMutationRate;
       this.randomSeed         = randomSeed;
       randomizer              = new Random(randomSeed);
    }
 
 
    Gene(String name, float value, float min, float max, float delta,
-        double mutationRate, double randomMutationRate, int randomSeed)
+        float mutationRate, int randomSeed)
    {
       type                    = VALUE_TYPE.FLOAT_VALUE;
       this.name               = new String(name);
       ivalue                  = imin = imax = idelta = 0;
       fvalue                  = fmin = fmax = fdelta = 0.0f;
-      dvalue                  = dmin = dmax = ddelta = 0.0;
       fvalue                  = value;
       fmin                    = min;
       fmax                    = max;
       fdelta                  = delta;
       this.mutationRate       = mutationRate;
-      this.randomMutationRate = randomMutationRate;
       this.randomSeed         = randomSeed;
       randomizer              = new Random(randomSeed);
    }
-
-
-   Gene(String name, double value, double min, double max, double delta,
-        double mutationRate, double randomMutationRate, int randomSeed)
-   {
-      type                    = VALUE_TYPE.DOUBLE_VALUE;
-      this.name               = new String(name);
-      ivalue                  = imin = imax = idelta = 0;
-      fvalue                  = fmin = fmax = fdelta = 0.0f;
-      dvalue                  = dmin = dmax = ddelta = 0.0;
-      dvalue                  = value;
-      dmin                    = min;
-      dmax                    = max;
-      ddelta                  = delta;
-      this.mutationRate       = mutationRate;
-      this.randomMutationRate = randomMutationRate;
-      this.randomSeed         = randomSeed;
-      randomizer              = new Random(randomSeed);
-   }
-
 
    // Mutate gene.
    void mutate()
    {
       int    i;
       float  f;
-      double d;
 
       if (randomizer.nextDouble() > mutationRate)
       {
@@ -121,7 +92,7 @@ public class Gene
       switch (type)
       {
       case INTEGER_VALUE:
-         if (randomizer.nextDouble() <= randomMutationRate)
+         if (randomizer.nextDouble() <= mutationRate)
          {
             i = imax - imin;
             if (i > 0)
@@ -151,7 +122,7 @@ public class Gene
          break;
 
       case FLOAT_VALUE:
-         if (randomizer.nextDouble() <= randomMutationRate)
+         if (randomizer.nextDouble() <= mutationRate)
          {
             fvalue = (randomizer.nextFloat() * (fmax - fmin)) + fmin;
          }
@@ -171,28 +142,6 @@ public class Gene
             fvalue = f;
          }
          break;
-
-      case DOUBLE_VALUE:
-         if (randomizer.nextDouble() <= randomMutationRate)
-         {
-            dvalue = (randomizer.nextDouble() * (dmax - dmin)) + dmin;
-         }
-         else
-         {
-            d = dvalue;
-            if (randomizer.nextBoolean())
-            {
-               d += ddelta;
-               if (d > dmax) { d = dmax; }
-            }
-            else
-            {
-               d -= ddelta;
-               if (d < dmin) { d = dmin; }
-            }
-            dvalue = d;
-         }
-         break;
       }
    }
 
@@ -208,10 +157,6 @@ public class Gene
 
       case FLOAT_VALUE:
          fvalue = from.fvalue;
-         break;
-
-      case DOUBLE_VALUE:
-         dvalue = from.dvalue;
          break;
       }
    }
@@ -231,10 +176,6 @@ public class Gene
       case 1:
          fvalue = Utility.loadFloat(reader);
          break;
-
-      case 2:
-         dvalue = Utility.loadDouble(reader);
-         break;
       }
    }
 
@@ -253,11 +194,6 @@ public class Gene
          Utility.saveInt(writer, 1);
          Utility.saveFloat(writer, fvalue);
          break;
-
-      case DOUBLE_VALUE:
-         Utility.saveInt(writer, 2);
-         Utility.saveDouble(writer, dvalue);
-         break;
       }
       writer.flush();
    }
@@ -274,10 +210,6 @@ public class Gene
 
       case FLOAT_VALUE:
          System.out.println(name + "=" + fvalue);
-         break;
-
-      case DOUBLE_VALUE:
-         System.out.println(name + "=" + dvalue);
          break;
       }
    }

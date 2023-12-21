@@ -37,7 +37,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -107,6 +106,7 @@ public class CausationLearning
       "         -learner \"GA\" (default=" + LEARNER + ")]\n" +
       "            [-generations <quantity> (default=" + EvolveCausations.GENERATIONS + ")]\n" +
       "            [-populationSize <quantity> (default=" + EvolveCausations.POPULATION_SIZE + ")]\n" +
+      "            [-fitPopulationSize <quantity> (default=" + EvolveCausations.FIT_POPULATION_SIZE + ")]\n" +      
       "            [-mutationRate <probability> (default=" + EvolveCausations.MUTATION_RATE + ")]\n" +      
       "        [-randomSeed <random number seed> (default=" + DEFAULT_RANDOM_SEED + ")]\n" +
       "  Print parameters:\n" +
@@ -129,6 +129,7 @@ public class CausationLearning
 	  boolean gotNumEpochs = false;
 	  boolean gotGenerations = false;
 	  boolean gotPopulationSize = false;
+	  boolean gotFitPopulationSize = false;
 	  boolean gotMutationRate = false;
       boolean firstHidden = true;
       boolean printParms = false;
@@ -531,6 +532,33 @@ public class CausationLearning
             gotPopulationSize = true;            
             continue;
          }
+         if (args[i].equals("-fitPopulationSize"))
+         {
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid fitPopulationSize option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            try
+            {
+               EvolveCausations.FIT_POPULATION_SIZE = Integer.parseInt(args[i]);
+            }
+            catch (NumberFormatException e) {
+               System.err.println("Invalid fitPopulationSize option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (EvolveCausations.FIT_POPULATION_SIZE < 0)
+            {
+               System.err.println("Invalid fitPopulationSize option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            gotFitPopulationSize = true;            
+            continue;
+         }         
          if (args[i].equals("-mutationRate"))
          {
             i++;
@@ -644,8 +672,14 @@ public class CausationLearning
 	         System.err.println(Usage);
 	         System.exit(1);    		  
     	  }
+          if (EvolveCausations.FIT_POPULATION_SIZE > EvolveCausations.POPULATION_SIZE)
+          {
+             System.err.println("Fit population size cannot exceed population size");
+             System.err.println(Usage);
+             System.exit(1);
+          }    	  
       } else {
-    	  if (gotGenerations || gotPopulationSize || gotMutationRate)
+    	  if (gotGenerations || gotPopulationSize || gotFitPopulationSize || gotMutationRate)
     	  {
 	         System.err.println("Incompatible learner options");
 	         System.err.println(Usage);
@@ -661,17 +695,10 @@ public class CausationLearning
       Causations = new ArrayList<Causation>();
       for (int i = 0; i < NUM_CAUSATIONS; i++)
       {
-         Causation causation = new Causation();
          int       t         = 0;
          for ( ; t < MAX_TRIES; t++)
          {
-            causation.causeEvents.clear();
-            int n = random.nextInt(Causation.MAX_CAUSE_EVENTS) + 1;
-            for (int j = 0; j < n; j++)
-            {
-               causation.causeEvents.add(random.nextInt(Causation.NUM_CAUSE_EVENT_TYPES));
-            }
-            Collections.sort(causation.causeEvents);
+             Causation causation = new Causation(random);
             boolean duplicate = false;
             for (Causation c : Causations)
             {
@@ -735,14 +762,14 @@ public class CausationLearning
       for (int i = 0; i < CausationTrainingInstances.size(); i++)
       {
          CausationInstance instance = CausationTrainingInstances.get(i);
-         System.out.print("[" + i + "] causation number=" + instance.causationIndex + ", ");
+         System.out.print("[" + i + "] causation ID=" + instance.causationID + ", ");
          instance.print();
       }
       System.out.println("Causation testing instances:");
       for (int i = 0; i < CausationTestingInstances.size(); i++)
       {
          CausationInstance instance = CausationTestingInstances.get(i);
-         System.out.print("[" + i + "] causation number=" + instance.causationIndex + ", ");
+         System.out.print("[" + i + "] causation ID=" + instance.causationID + ", ");
          instance.print();
       }
 
@@ -783,7 +810,7 @@ public class CausationLearning
                CausationInstance instance = CausationTrainingInstances.get(i);
                if (instance.valid)
                {
-                  y_train += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1) + ",";
+                  y_train += oneHot(instance.causationID, NUM_CAUSATIONS + 1) + ",";
                }
                else
                {
@@ -826,7 +853,7 @@ public class CausationLearning
                CausationInstance instance = CausationTestingInstances.get(i);
                if (instance.valid)
                {
-                  y_test += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1) + ",";
+                  y_test += oneHot(instance.causationID, NUM_CAUSATIONS + 1) + ",";
                }
                else
                {
@@ -883,7 +910,7 @@ public class CausationLearning
 			   CausationInstance instance = CausationTrainingInstances.get(i);
 			   if (instance.valid)
 			   {
-			      y_train += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1) + ",";
+			      y_train += oneHot(instance.causationID, NUM_CAUSATIONS + 1) + ",";
 			   }
 			   else
 			   {
@@ -926,7 +953,7 @@ public class CausationLearning
 			   CausationInstance instance = CausationTestingInstances.get(i);
 			   if (instance.valid)
 			   {
-			      y_test += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1) + ",";
+			      y_test += oneHot(instance.causationID, NUM_CAUSATIONS + 1) + ",";
 			   }
 			   else
 			   {
@@ -985,7 +1012,7 @@ public class CausationLearning
                {
                   if ((instance.effectEventIndex == k) && instance.valid)
                   {
-                     y_train += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1);
+                     y_train += oneHot(instance.causationID, NUM_CAUSATIONS + 1);
                   }
                   else
                   {
@@ -1032,7 +1059,7 @@ public class CausationLearning
                {
                   if ((instance.effectEventIndex == k) && instance.valid)
                   {
-                     y_test += oneHot(instance.causationIndex, NUM_CAUSATIONS + 1);
+                     y_test += oneHot(instance.causationID, NUM_CAUSATIONS + 1);
                   }
                   else
                   {
@@ -1056,7 +1083,7 @@ public class CausationLearning
          }
       } else {
     	  // GA.
-    	  CausationGA = new EvolveCausations();  	  
+    	  CausationGA = new EvolveCausations(CausationTrainingInstances, CausationTestingInstances);    	  
       }
       
       // Run.

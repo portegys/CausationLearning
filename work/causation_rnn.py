@@ -1,4 +1,4 @@
-# For conditions of distribution and use, see copyright notice in Main.java
+# For conditions of distribution and use, see copyright notice in CausationLearning.java
 
 # Causation RNN.
 # results written to causation_rnn_results.txt

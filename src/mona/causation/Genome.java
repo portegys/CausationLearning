@@ -6,32 +6,31 @@
 
 package mona.causation;
 
-import java.util.*;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class Genome
 {
    // Genes.
-   Vector<Gene> genes;
+   ArrayList<Gene> genes;
 
    // Mutation rate.
-   double mutationRate;
-
-   // Probability of random mutation.
-   double randomMutationRate;
+   float mutationRate;
 
    // Random numbers.
    int    randomSeed;
    Random randomizer;
 
    // Constructor.
-   Genome(double mutationRate, double randomMutationRate, int randomSeed)
+   Genome(float mutationRate, int randomSeed)
    {
       this.mutationRate       = mutationRate;
-      this.randomMutationRate = randomMutationRate;
       this.randomSeed         = randomSeed;
       randomizer = new Random(randomSeed);
-      genes      = new Vector<Gene>();
+      genes      = new ArrayList<Gene>();
    }
 
 
@@ -79,7 +78,7 @@ public class Genome
 
 
    // Get genome as key-value pairs.
-   void getKeyValues(Vector<String> keys, Vector<Object> values)
+   void getKeyValues(ArrayList<String> keys, ArrayList<Object> values)
    {
       Gene gene;
 
@@ -97,10 +96,6 @@ public class Genome
 
          case FLOAT_VALUE:
             values.add(gene.fvalue + "");
-            break;
-
-         case DOUBLE_VALUE:
-            values.add(gene.dvalue + "");
             break;
          }
       }
