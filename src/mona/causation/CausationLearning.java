@@ -44,10 +44,10 @@ import org.json.JSONObject;
 public class CausationLearning
 {
    // Parameters.
-   public static int                NUM_CAUSATIONS                       = 2;
-   public static int                NUM_CAUSATION_INSTANCES              = 10;
-   public static String             LEARNER = "LSTM";
-   public static int                NUM_EPOCHS   = 500;
+   public static int                NUM_CAUSATIONS          = 2;
+   public static int                NUM_CAUSATION_INSTANCES = 10;
+   public static String             LEARNER    = "LSTM";
+   public static int                NUM_EPOCHS = 500;
    public static final int          DEFAULT_NUM_HIDDEN_NEURONS = 128;
    public static ArrayList<Integer> NUM_HIDDEN_NEURONS;
    static
@@ -63,16 +63,16 @@ public class CausationLearning
    public final static int MAX_TRIES = 100;
 
    // NN.
-   public static final String RNN_DATASET_FILENAME = "causation_rnn_dataset.py";
-   public static final String RNN_FILENAME         = "causation_rnn.py";
-   public static final String RNN_RESULTS_FILENAME = "causation_rnn_results.json";   
+   public static final String RNN_DATASET_FILENAME       = "causation_rnn_dataset.py";
+   public static final String RNN_FILENAME               = "causation_rnn.py";
+   public static final String RNN_RESULTS_FILENAME       = "causation_rnn_results.json";
    public static final String ATTENTION_DATASET_FILENAME = "causation_attention_dataset.py";
-   public static final String ATTENTION_FILENAME   = "causation_attention.py";
+   public static final String ATTENTION_FILENAME         = "causation_attention.py";
    public static final String ATTENTION_RESULTS_FILENAME = "causation_attention_results.json";
-   public static final String NN_DATASET_FILENAME  = "causation_nn_dataset.py";
-   public static final String NN_FILENAME          = "causation_nn.py";
-   public static final String NN_RESULTS_FILENAME  = "causation_nn_results.json";
-   
+   public static final String NN_DATASET_FILENAME        = "causation_nn_dataset.py";
+   public static final String NN_FILENAME         = "causation_nn.py";
+   public static final String NN_RESULTS_FILENAME = "causation_nn_results.json";
+
    // Version.
    public static final String VERSION = "1.0";
 
@@ -82,10 +82,10 @@ public class CausationLearning
    // Causation instances.
    public static ArrayList<CausationInstance> CausationTrainingInstances;
    public static ArrayList<CausationInstance> CausationTestingInstances;
-   
+
    // GA.
-   public static EvolveCausations CausationGA;
-   
+   public static EvolveCausations CausationsGA;
+
    // Usage.
    public static final String Usage =
       "Usage:\n" +
@@ -94,7 +94,7 @@ public class CausationLearning
       "        [-numCauseEventTypes <quantity> (default=" + Causation.NUM_CAUSE_EVENT_TYPES + ")]\n" +
       "        [-numCausations <quantity> (default=" + NUM_CAUSATIONS + ")]\n" +
       "        [-maxCauseEvents <quantity> (default=" + Causation.MAX_CAUSE_EVENTS + ")]\n" +
-      "        [-eventOmissionProbability <probability> (default=" + CausationInstance.EVENT_OMISSION_PROBABILITY + ")]\n" +      
+      "        [-eventOmissionProbability <probability> (default=" + CausationInstance.EVENT_OMISSION_PROBABILITY + ")]\n" +
       "        [-maxInterveningEvents <quantity> (default=" + Causation.MAX_INTERVENING_EVENTS + ")]\n" +
       "        [-maxValidInterveningEvents <quantity> (default=" + Causation.MAX_VALID_INTERVENING_EVENTS + ")]\n" +
       "        [-validInterveningEventsProbability <probability> (default=" + CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY + ")]\n" +
@@ -106,8 +106,8 @@ public class CausationLearning
       "         -learner \"GA\" (default=" + LEARNER + ")]\n" +
       "            [-generations <quantity> (default=" + EvolveCausations.GENERATIONS + ")]\n" +
       "            [-populationSize <quantity> (default=" + EvolveCausations.POPULATION_SIZE + ")]\n" +
-      "            [-fitPopulationSize <quantity> (default=" + EvolveCausations.FIT_POPULATION_SIZE + ")]\n" +      
-      "            [-mutationRate <probability> (default=" + EvolveCausations.MUTATION_RATE + ")]\n" +      
+      "            [-fitPopulationSize <quantity> (default=" + EvolveCausations.FIT_POPULATION_SIZE + ")]\n" +
+      "            [-mutationRate <probability> (default=" + EvolveCausations.MUTATION_RATE + ")]\n" +
       "        [-randomSeed <random number seed> (default=" + DEFAULT_RANDOM_SEED + ")]\n" +
       "  Print parameters:\n" +
       "    java mona.causation.CausationLearning -printParameters\n" +
@@ -125,14 +125,14 @@ public class CausationLearning
    public static void main(String[] args)
    {
       // Get options.
-	  boolean gotNumHidden = false;
-	  boolean gotNumEpochs = false;
-	  boolean gotGenerations = false;
-	  boolean gotPopulationSize = false;
-	  boolean gotFitPopulationSize = false;
-	  boolean gotMutationRate = false;
-      boolean firstHidden = true;
-      boolean printParms = false;
+      boolean gotNumHidden         = false;
+      boolean gotNumEpochs         = false;
+      boolean gotGenerations       = false;
+      boolean gotPopulationSize    = false;
+      boolean gotFitPopulationSize = false;
+      boolean gotMutationRate      = false;
+      boolean firstHidden          = true;
+      boolean printParms           = false;
 
       for (int i = 0; i < args.length; i++)
       {
@@ -147,7 +147,7 @@ public class CausationLearning
             }
             try
             {
-            	Causation.NUM_EVENT_TYPES = Integer.parseInt(args[i]);
+               Causation.NUM_EVENT_TYPES = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid numEventTypes option");
@@ -173,7 +173,7 @@ public class CausationLearning
             }
             try
             {
-            	Causation.NUM_CAUSE_EVENT_TYPES = Integer.parseInt(args[i]);
+               Causation.NUM_CAUSE_EVENT_TYPES = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid numCauseEventTypes option");
@@ -225,7 +225,7 @@ public class CausationLearning
             }
             try
             {
-            	Causation.MAX_CAUSE_EVENTS = Integer.parseInt(args[i]);
+               Causation.MAX_CAUSE_EVENTS = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid maxCauseEvents option");
@@ -251,22 +251,22 @@ public class CausationLearning
             }
             try
             {
-            	CausationInstance.EVENT_OMISSION_PROBABILITY = Float.parseFloat(args[i]);
+               CausationInstance.EVENT_OMISSION_PROBABILITY = Float.parseFloat(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid eventOmissionProbability option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if ((CausationInstance.EVENT_OMISSION_PROBABILITY < 0.0f) || 
-            		(CausationInstance.EVENT_OMISSION_PROBABILITY > 1.0f))
+            if ((CausationInstance.EVENT_OMISSION_PROBABILITY < 0.0f) ||
+                (CausationInstance.EVENT_OMISSION_PROBABILITY > 1.0f))
             {
                System.err.println("Invalid eventOmissionProbability option");
                System.err.println(Usage);
                System.exit(1);
             }
             continue;
-         }         
+         }
          if (args[i].equals("-maxInterveningEvents"))
          {
             i++;
@@ -278,7 +278,7 @@ public class CausationLearning
             }
             try
             {
-            	Causation.MAX_INTERVENING_EVENTS = Integer.parseInt(args[i]);
+               Causation.MAX_INTERVENING_EVENTS = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid maxInterveningEvents option");
@@ -304,7 +304,7 @@ public class CausationLearning
             }
             try
             {
-            	Causation.MAX_VALID_INTERVENING_EVENTS = Integer.parseInt(args[i]);
+               Causation.MAX_VALID_INTERVENING_EVENTS = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid maxValidInterveningEvents option");
@@ -330,15 +330,15 @@ public class CausationLearning
             }
             try
             {
-            	CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY = Float.parseFloat(args[i]);
+               CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY = Float.parseFloat(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid validInterveningEventsProbability option");
                System.err.println(Usage);
                System.exit(1);
             }
-            if ((CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY < 0.0f) || 
-            		(CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY > 1.0f))
+            if ((CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY < 0.0f) ||
+                (CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY > 1.0f))
             {
                System.err.println("Invalid validInterveningEventsProbability option");
                System.err.println(Usage);
@@ -357,7 +357,7 @@ public class CausationLearning
             }
             try
             {
-            	Causation.CAUSATION_INSTANCE_LENGTH = Integer.parseInt(args[i]);
+               Causation.CAUSATION_INSTANCE_LENGTH = Integer.parseInt(args[i]);
             }
             catch (NumberFormatException e) {
                System.err.println("Invalid causationInstanceLength option");
@@ -407,7 +407,7 @@ public class CausationLearning
                System.err.println(Usage);
                System.exit(1);
             }
-           LEARNER = args[i];
+            LEARNER = args[i];
             if (!LEARNER.equals("LSTM") && !LEARNER.equals("SimpleRNN") &&
                 !LEARNER.equals("Attention") && !LEARNER.equals("NN") && !LEARNER.equals("GA"))
             {
@@ -448,7 +448,7 @@ public class CausationLearning
                NUM_HIDDEN_NEURONS.clear();
             }
             NUM_HIDDEN_NEURONS.add(n);
-            gotNumHidden = true;           
+            gotNumHidden = true;
             continue;
          }
          if (args[i].equals("-numEpochs"))
@@ -475,7 +475,7 @@ public class CausationLearning
                System.err.println(Usage);
                System.exit(1);
             }
-            gotNumEpochs = true;            
+            gotNumEpochs = true;
             continue;
          }
          if (args[i].equals("-generations"))
@@ -502,9 +502,9 @@ public class CausationLearning
                System.err.println(Usage);
                System.exit(1);
             }
-            gotGenerations = true;            
+            gotGenerations = true;
             continue;
-         } 
+         }
          if (args[i].equals("-populationSize"))
          {
             i++;
@@ -529,7 +529,7 @@ public class CausationLearning
                System.err.println(Usage);
                System.exit(1);
             }
-            gotPopulationSize = true;            
+            gotPopulationSize = true;
             continue;
          }
          if (args[i].equals("-fitPopulationSize"))
@@ -556,9 +556,9 @@ public class CausationLearning
                System.err.println(Usage);
                System.exit(1);
             }
-            gotFitPopulationSize = true;            
+            gotFitPopulationSize = true;
             continue;
-         }         
+         }
          if (args[i].equals("-mutationRate"))
          {
             i++;
@@ -585,7 +585,7 @@ public class CausationLearning
             }
             gotMutationRate = true;
             continue;
-         }         
+         }
          if (args[i].equals("-randomSeed"))
          {
             i++;
@@ -630,15 +630,15 @@ public class CausationLearning
          System.out.println("Parameters:");
          printParameters();
          System.exit(0);
-      }      
+      }
       if (Causation.NUM_CAUSE_EVENT_TYPES > Causation.NUM_EVENT_TYPES)
       {
          System.err.println("Number of cause event types cannot be greater than number of event types");
          System.err.println(Usage);
          System.exit(1);
       }
-      if ((Causation.MAX_INTERVENING_EVENTS > 0) && 
-    		  (Causation.NUM_CAUSE_EVENT_TYPES == Causation.NUM_EVENT_TYPES))
+      if ((Causation.MAX_INTERVENING_EVENTS > 0) &&
+          (Causation.NUM_CAUSE_EVENT_TYPES == Causation.NUM_EVENT_TYPES))
       {
          System.err.println("Number of cause event types cannot be equal to the number of event types");
          System.err.println(Usage);
@@ -651,7 +651,7 @@ public class CausationLearning
          System.exit(1);
       }
       if ((CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY < 1.0f) &&
-          ((Causation.MAX_INTERVENING_EVENTS == 0) || 
+          ((Causation.MAX_INTERVENING_EVENTS == 0) ||
            (Causation.MAX_VALID_INTERVENING_EVENTS == Causation.MAX_INTERVENING_EVENTS)))
       {
          System.err.println("Not possible to have an invalid number of intervening events");
@@ -666,25 +666,27 @@ public class CausationLearning
       }
       if (LEARNER.equals("GA"))
       {
-    	  if (gotNumHidden || gotNumEpochs)
-    	  {
-	         System.err.println("Incompatible learner options");
-	         System.err.println(Usage);
-	         System.exit(1);    		  
-    	  }
-          if (EvolveCausations.FIT_POPULATION_SIZE > EvolveCausations.POPULATION_SIZE)
-          {
-             System.err.println("Fit population size cannot exceed population size");
-             System.err.println(Usage);
-             System.exit(1);
-          }    	  
-      } else {
-    	  if (gotGenerations || gotPopulationSize || gotFitPopulationSize || gotMutationRate)
-    	  {
-	         System.err.println("Incompatible learner options");
-	         System.err.println(Usage);
-	         System.exit(1);    		  
-    	  }    	  
+         if (gotNumHidden || gotNumEpochs)
+         {
+            System.err.println("Incompatible learner options");
+            System.err.println(Usage);
+            System.exit(1);
+         }
+         if (EvolveCausations.FIT_POPULATION_SIZE > EvolveCausations.POPULATION_SIZE)
+         {
+            System.err.println("Fit population size cannot exceed population size");
+            System.err.println(Usage);
+            System.exit(1);
+         }
+      }
+      else
+      {
+         if (gotGenerations || gotPopulationSize || gotFitPopulationSize || gotMutationRate)
+         {
+            System.err.println("Incompatible learner options");
+            System.err.println(Usage);
+            System.exit(1);
+         }
       }
 
       // Initialize random numbers.
@@ -695,11 +697,11 @@ public class CausationLearning
       Causations = new ArrayList<Causation>();
       for (int i = 0; i < NUM_CAUSATIONS; i++)
       {
-         int       t         = 0;
+         int t = 0;
          for ( ; t < MAX_TRIES; t++)
          {
-             Causation causation = new Causation(random);
-            boolean duplicate = false;
+            Causation causation = new Causation(random);
+            boolean   duplicate = false;
             for (Causation c : Causations)
             {
                if (c.causeEvents.size() == causation.causeEvents.size())
@@ -736,15 +738,15 @@ public class CausationLearning
       CausationTrainingInstances = new ArrayList<CausationInstance>();
       for (int i = 0; i < NUM_CAUSATION_INSTANCES; i++)
       {
-    	 int n = random.nextInt(NUM_CAUSATIONS);
-    	 Causation causation = Causations.get(n);    	  
+         int       n         = random.nextInt(NUM_CAUSATIONS);
+         Causation causation = Causations.get(n);
          CausationTrainingInstances.add(new CausationInstance(causation, n, random));
       }
       CausationTestingInstances = new ArrayList<CausationInstance>();
       for (int i = 0; i < NUM_CAUSATION_INSTANCES; i++)
       {
-     	 int n = random.nextInt(NUM_CAUSATIONS);    	  
-     	 Causation causation = Causations.get(n);    	  
+         int       n         = random.nextInt(NUM_CAUSATIONS);
+         Causation causation = Causations.get(n);
          CausationTestingInstances.add(new CausationInstance(causation, n, random));
       }
 
@@ -881,7 +883,7 @@ public class CausationLearning
             FileWriter  fileWriter  = new FileWriter(ATTENTION_DATASET_FILENAME);
             PrintWriter printWriter = new PrintWriter(fileWriter);
             printWriter.println("X_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-            		Causation.CAUSATION_INSTANCE_LENGTH + ", " + (Causation.NUM_EVENT_TYPES + 1) + " ]");
+                                Causation.CAUSATION_INSTANCE_LENGTH + ", " + (Causation.NUM_EVENT_TYPES + 1) + " ]");
             printWriter.print("X_train_seq = [");
             String X_train = "";
             for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
@@ -899,32 +901,32 @@ public class CausationLearning
                X_train = X_train.substring(0, X_train.length() - 1);
             }
             printWriter.println(X_train);
-            printWriter.println("]");            
+            printWriter.println("]");
             printWriter.println("y_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-                    (NUM_CAUSATIONS + 1) + " ]");
-			printWriter.print("y_train_seq = [");
-			String y_train = "";
-			for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
-			{
-			   y_train += "\n";
-			   CausationInstance instance = CausationTrainingInstances.get(i);
-			   if (instance.valid)
-			   {
-			      y_train += oneHot(instance.causationID, NUM_CAUSATIONS + 1) + ",";
-			   }
-			   else
-			   {
-			      y_train += oneHot(NUM_CAUSATIONS, NUM_CAUSATIONS + 1) + ",";
-			   }
-			}
-			if (y_train.endsWith(","))
-			{
-			   y_train = y_train.substring(0, y_train.length() - 1);
-			}
-			printWriter.println(y_train);
-			printWriter.println("]");            
+                                (NUM_CAUSATIONS + 1) + " ]");
+            printWriter.print("y_train_seq = [");
+            String y_train = "";
+            for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
+            {
+               y_train += "\n";
+               CausationInstance instance = CausationTrainingInstances.get(i);
+               if (instance.valid)
+               {
+                  y_train += oneHot(instance.causationID, NUM_CAUSATIONS + 1) + ",";
+               }
+               else
+               {
+                  y_train += oneHot(NUM_CAUSATIONS, NUM_CAUSATIONS + 1) + ",";
+               }
+            }
+            if (y_train.endsWith(","))
+            {
+               y_train = y_train.substring(0, y_train.length() - 1);
+            }
+            printWriter.println(y_train);
+            printWriter.println("]");
             printWriter.println("X_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-            		Causation.CAUSATION_INSTANCE_LENGTH + ", " + (Causation.NUM_EVENT_TYPES + 1) + " ]");
+                                Causation.CAUSATION_INSTANCE_LENGTH + ", " + (Causation.NUM_EVENT_TYPES + 1) + " ]");
             printWriter.print("X_test_seq = [");
             String X_test = "";
             for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
@@ -944,28 +946,28 @@ public class CausationLearning
             printWriter.println(X_test);
             printWriter.println("]");
             printWriter.println("y_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-                    (NUM_CAUSATIONS + 1) + " ]");
-			printWriter.print("y_test_seq = [");
-			String y_test = "";
-			for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
-			{
-			   y_test += "\n";
-			   CausationInstance instance = CausationTestingInstances.get(i);
-			   if (instance.valid)
-			   {
-			      y_test += oneHot(instance.causationID, NUM_CAUSATIONS + 1) + ",";
-			   }
-			   else
-			   {
-			      y_test += oneHot(NUM_CAUSATIONS, NUM_CAUSATIONS + 1) + ",";
-			   }
-			}
-			if (y_test.endsWith(","))
-			{
-			   y_test = y_test.substring(0, y_test.length() - 1);
-			}
-			printWriter.println(y_test);
-			printWriter.println("]");
+                                (NUM_CAUSATIONS + 1) + " ]");
+            printWriter.print("y_test_seq = [");
+            String y_test = "";
+            for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
+            {
+               y_test += "\n";
+               CausationInstance instance = CausationTestingInstances.get(i);
+               if (instance.valid)
+               {
+                  y_test += oneHot(instance.causationID, NUM_CAUSATIONS + 1) + ",";
+               }
+               else
+               {
+                  y_test += oneHot(NUM_CAUSATIONS, NUM_CAUSATIONS + 1) + ",";
+               }
+            }
+            if (y_test.endsWith(","))
+            {
+               y_test = y_test.substring(0, y_test.length() - 1);
+            }
+            printWriter.println(y_test);
+            printWriter.println("]");
             printWriter.close();
          }
          catch (IOException e)
@@ -981,7 +983,7 @@ public class CausationLearning
             FileWriter  fileWriter  = new FileWriter(RNN_DATASET_FILENAME);
             PrintWriter printWriter = new PrintWriter(fileWriter);
             printWriter.println("X_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-            		Causation.CAUSATION_INSTANCE_LENGTH + ", " + (Causation.NUM_EVENT_TYPES + 1) + " ]");
+                                Causation.CAUSATION_INSTANCE_LENGTH + ", " + (Causation.NUM_EVENT_TYPES + 1) + " ]");
             printWriter.print("X_train_seq = [");
             String X_train = "";
             for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
@@ -1001,7 +1003,7 @@ public class CausationLearning
             printWriter.println(X_train);
             printWriter.println("]");
             printWriter.println("y_train_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-            		Causation.CAUSATION_INSTANCE_LENGTH + ", " + (NUM_CAUSATIONS + 1) + " ]");
+                                Causation.CAUSATION_INSTANCE_LENGTH + ", " + (NUM_CAUSATIONS + 1) + " ]");
             printWriter.print("y_train_seq = [");
             String y_train = "";
             for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
@@ -1028,7 +1030,7 @@ public class CausationLearning
             printWriter.println(y_train);
             printWriter.println("]");
             printWriter.println("X_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-            		Causation.CAUSATION_INSTANCE_LENGTH + ", " + (Causation.NUM_EVENT_TYPES + 1) + " ]");
+                                Causation.CAUSATION_INSTANCE_LENGTH + ", " + (Causation.NUM_EVENT_TYPES + 1) + " ]");
             printWriter.print("X_test_seq = [");
             String X_test = "";
             for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
@@ -1048,7 +1050,7 @@ public class CausationLearning
             printWriter.println(X_test);
             printWriter.println("]");
             printWriter.println("y_test_shape = [ " + NUM_CAUSATION_INSTANCES + ", " +
-            		Causation.CAUSATION_INSTANCE_LENGTH + ", " + (NUM_CAUSATIONS + 1) + " ]");
+                                Causation.CAUSATION_INSTANCE_LENGTH + ", " + (NUM_CAUSATIONS + 1) + " ]");
             printWriter.print("y_test_seq = [");
             String y_test = "";
             for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
@@ -1081,175 +1083,180 @@ public class CausationLearning
             System.err.println("Cannot write RNN dataset to file " + RNN_DATASET_FILENAME);
             System.exit(1);
          }
-      } else {
-    	  // GA.
-    	  CausationGA = new EvolveCausations(CausationTrainingInstances, CausationTestingInstances);    	  
       }
-      
+      else
+      {
+         // GA.
+         CausationsGA = new EvolveCausations(NUM_CAUSATIONS,
+                                             CausationTrainingInstances, CausationTestingInstances, random);
+      }
+
       // Run.
       if (LEARNER.equals("GA"))
       {
-    	  // Run GA.
-    	  CausationGA.run();
-      } else {
-	      // Run neural network.
-	      String pythonFilename = null;
-	      if (LEARNER.equals("LSTM") || LEARNER.equals("SimpleRNN"))
-	      {
-	         pythonFilename = RNN_FILENAME;
-	      }
-	      else if (LEARNER.equals("Attention"))
-	      {
-	         pythonFilename = ATTENTION_FILENAME;
-	      }
-	      else
-	      {
-	         pythonFilename = NN_FILENAME;
-	      }
-	      try
-	      {
-	         InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(pythonFilename);
-	         if (in == null)
-	         {
-	            System.err.println("Cannot access " + pythonFilename);
-	            System.exit(1);
-	         }
-	         File             pythonScript = new File(pythonFilename);
-	         FileOutputStream out          = new FileOutputStream(pythonScript);
-	         byte[] buffer = new byte[1024];
-	         int bytesRead;
-	         while ((bytesRead = in.read(buffer)) != -1)
-	         {
-	            out.write(buffer, 0, bytesRead);
-	         }
-	         out.close();
-	      }
-	      catch (Exception e)
-	      {
-	         System.err.println("Cannot create " + pythonFilename);
-	         System.exit(1);
-	      }
-	      String[] opts = new String[5 + (NUM_HIDDEN_NEURONS.size() * 2)];
-	      opts[0]       = "python";
-	      opts[1]       = pythonFilename;
-	      opts[2]       = "-e";
-	      opts[3]       = (NUM_EPOCHS + "");
-	      opts[4]       = "-q";
-	      for (int i = 0, j = NUM_HIDDEN_NEURONS.size(), k = 5; i < j; i++, k += 2)
-	      {
-	         opts[k]     = "-h";
-	         opts[k + 1] = (NUM_HIDDEN_NEURONS.get(i) + "");
-	      }
-	      ProcessBuilder processBuilder = new ProcessBuilder(opts);
-	      processBuilder.inheritIO();
-	      try
-	      {
-	         Process process = processBuilder.start();
-	         process.waitFor();
-	      }
-	      catch (IOException e)
-	      {
-	         System.err.println("Cannot run " + pythonFilename);
-	         System.exit(1);
-	      }
-	      catch (InterruptedException e) {}
-	
-	      // Fetch the results.
-	      int    train_correct_predictions = 0;
-	      int    train_total_predictions = 0;
-	      float  train_pct         = 0.0f;
-	      int    test_correct_predictions  = 0;
-	      int    test_total_predictions  = 0;
-	      float  test_pct          = 0.0f;
-	      String resultsFilename         = null;
-	      if (LEARNER.equals("NN"))
-	      {
-	         resultsFilename = NN_RESULTS_FILENAME;
-	      }
-	      else if (LEARNER.equals("Attention"))
-	      {
-	         resultsFilename = ATTENTION_RESULTS_FILENAME;
-	      }	      
-	      else
-	      {
-	         resultsFilename = RNN_RESULTS_FILENAME;
-	      }
-	      try
-	      {
-	         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(resultsFilename)));
-	         String         json;
-	         if ((json = br.readLine()) != null)
-	         {
-	            JSONObject jObj = null;
-	            try
-	            {
-	               jObj = new JSONObject(json);
-	            }
-	            catch (JSONException e)
-	            {
-	               System.err.println("Error parsing results file " + resultsFilename);
-	               System.exit(1);
-	            }
-	            String value = jObj.getString("train_correct_predictions");
-	            if ((value == null) || value.isEmpty())
-	            {
-	               System.err.println("Error parsing results file " + resultsFilename);
-	               System.exit(1);
-	            }
-	            train_correct_predictions = Integer.parseInt(value);
-	            value = jObj.getString("train_total_predictions");
-	            if ((value == null) || value.isEmpty())
-	            {
-	               System.err.println("Error parsing results file " + resultsFilename);
-	               System.exit(1);
-	            }
-	            train_total_predictions = Integer.parseInt(value);
-	            value = jObj.getString("train_pct");
-	            if ((value == null) || value.isEmpty())
-	            {
-	               System.err.println("Error parsing results file " + resultsFilename);
-	               System.exit(1);
-	            }
-	            train_pct = Float.parseFloat(value);
-	            value           = jObj.getString("test_correct_predictions");
-	            if ((value == null) || value.isEmpty())
-	            {
-	               System.err.println("Error parsing results file " + resultsFilename);
-	               System.exit(1);
-	            }
-	            test_correct_predictions = Integer.parseInt(value);
-	            value = jObj.getString("test_total_predictions");
-	            if ((value == null) || value.isEmpty())
-	            {
-	               System.err.println("Error parsing results file " + resultsFilename);
-	               System.exit(1);
-	            }
-	            test_total_predictions = Integer.parseInt(value);
-	            value = jObj.getString("test_pct");
-	            if ((value == null) || value.isEmpty())
-	            {
-	               System.err.println("Error parsing results file " + resultsFilename);
-	               System.exit(1);
-	            }
-	            test_pct = Float.parseFloat(value);
-	         }
-	         else
-	         {
-	            System.err.println("Cannot read results file " + resultsFilename);
-	            System.exit(1);
-	         }
-	         br.close();
-	      }
-	      catch (Exception e)
-	      {
-	         System.err.println("Cannot read results file " + resultsFilename + ":" + e.getMessage());
-	         System.exit(1);
-	      }
-	      System.out.println("Train correct/total = " + train_correct_predictions +
-	                         "/" + train_total_predictions + " (" + train_pct + "%)");
-	      System.out.println("Test correct/total = " + test_correct_predictions  +
-	                         "/" + test_total_predictions + " (" + test_pct + "%)");
-	  }
+         // Run GA.
+         CausationsGA.run();
+      }
+      else
+      {
+         // Run neural network.
+         String pythonFilename = null;
+         if (LEARNER.equals("LSTM") || LEARNER.equals("SimpleRNN"))
+         {
+            pythonFilename = RNN_FILENAME;
+         }
+         else if (LEARNER.equals("Attention"))
+         {
+            pythonFilename = ATTENTION_FILENAME;
+         }
+         else
+         {
+            pythonFilename = NN_FILENAME;
+         }
+         try
+         {
+            InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(pythonFilename);
+            if (in == null)
+            {
+               System.err.println("Cannot access " + pythonFilename);
+               System.exit(1);
+            }
+            File             pythonScript = new File(pythonFilename);
+            FileOutputStream out          = new FileOutputStream(pythonScript);
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = in.read(buffer)) != -1)
+            {
+               out.write(buffer, 0, bytesRead);
+            }
+            out.close();
+         }
+         catch (Exception e)
+         {
+            System.err.println("Cannot create " + pythonFilename);
+            System.exit(1);
+         }
+         String[] opts = new String[5 + (NUM_HIDDEN_NEURONS.size() * 2)];
+         opts[0]       = "python";
+         opts[1]       = pythonFilename;
+         opts[2]       = "-e";
+         opts[3]       = (NUM_EPOCHS + "");
+         opts[4]       = "-q";
+         for (int i = 0, j = NUM_HIDDEN_NEURONS.size(), k = 5; i < j; i++, k += 2)
+         {
+            opts[k]     = "-h";
+            opts[k + 1] = (NUM_HIDDEN_NEURONS.get(i) + "");
+         }
+         ProcessBuilder processBuilder = new ProcessBuilder(opts);
+         processBuilder.inheritIO();
+         try
+         {
+            Process process = processBuilder.start();
+            process.waitFor();
+         }
+         catch (IOException e)
+         {
+            System.err.println("Cannot run " + pythonFilename);
+            System.exit(1);
+         }
+         catch (InterruptedException e) {}
+
+         // Fetch the results.
+         int    train_correct_predictions = 0;
+         int    train_total_predictions   = 0;
+         float  train_pct = 0.0f;
+         int    test_correct_predictions = 0;
+         int    test_total_predictions   = 0;
+         float  test_pct        = 0.0f;
+         String resultsFilename = null;
+         if (LEARNER.equals("NN"))
+         {
+            resultsFilename = NN_RESULTS_FILENAME;
+         }
+         else if (LEARNER.equals("Attention"))
+         {
+            resultsFilename = ATTENTION_RESULTS_FILENAME;
+         }
+         else
+         {
+            resultsFilename = RNN_RESULTS_FILENAME;
+         }
+         try
+         {
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(resultsFilename)));
+            String         json;
+            if ((json = br.readLine()) != null)
+            {
+               JSONObject jObj = null;
+               try
+               {
+                  jObj = new JSONObject(json);
+               }
+               catch (JSONException e)
+               {
+                  System.err.println("Error parsing results file " + resultsFilename);
+                  System.exit(1);
+               }
+               String value = jObj.getString("train_correct_predictions");
+               if ((value == null) || value.isEmpty())
+               {
+                  System.err.println("Error parsing results file " + resultsFilename);
+                  System.exit(1);
+               }
+               train_correct_predictions = Integer.parseInt(value);
+               value = jObj.getString("train_total_predictions");
+               if ((value == null) || value.isEmpty())
+               {
+                  System.err.println("Error parsing results file " + resultsFilename);
+                  System.exit(1);
+               }
+               train_total_predictions = Integer.parseInt(value);
+               value = jObj.getString("train_pct");
+               if ((value == null) || value.isEmpty())
+               {
+                  System.err.println("Error parsing results file " + resultsFilename);
+                  System.exit(1);
+               }
+               train_pct = Float.parseFloat(value);
+               value     = jObj.getString("test_correct_predictions");
+               if ((value == null) || value.isEmpty())
+               {
+                  System.err.println("Error parsing results file " + resultsFilename);
+                  System.exit(1);
+               }
+               test_correct_predictions = Integer.parseInt(value);
+               value = jObj.getString("test_total_predictions");
+               if ((value == null) || value.isEmpty())
+               {
+                  System.err.println("Error parsing results file " + resultsFilename);
+                  System.exit(1);
+               }
+               test_total_predictions = Integer.parseInt(value);
+               value = jObj.getString("test_pct");
+               if ((value == null) || value.isEmpty())
+               {
+                  System.err.println("Error parsing results file " + resultsFilename);
+                  System.exit(1);
+               }
+               test_pct = Float.parseFloat(value);
+            }
+            else
+            {
+               System.err.println("Cannot read results file " + resultsFilename);
+               System.exit(1);
+            }
+            br.close();
+         }
+         catch (Exception e)
+         {
+            System.err.println("Cannot read results file " + resultsFilename + ":" + e.getMessage());
+            System.exit(1);
+         }
+         System.out.println("Train correct/total = " + train_correct_predictions +
+                            "/" + train_total_predictions + " (" + train_pct + "%)");
+         System.out.println("Test correct/total = " + test_correct_predictions +
+                            "/" + test_total_predictions + " (" + test_pct + "%)");
+      }
       System.exit(0);
    }
 
@@ -1277,6 +1284,7 @@ public class CausationLearning
       return(encoding);
    }
 
+
    // Print parameters.
    public static void printParameters()
    {
@@ -1285,7 +1293,7 @@ public class CausationLearning
       System.out.println("EFFECT_EVENT_TYPE = " + Causation.EFFECT_EVENT_TYPE);
       System.out.println("NUM_CAUSATIONS = " + NUM_CAUSATIONS);
       System.out.println("MAX_CAUSE_EVENTS = " + Causation.MAX_CAUSE_EVENTS);
-      System.out.println("EVENT_OMISSION_PROBABILITY = " + CausationInstance.EVENT_OMISSION_PROBABILITY);      
+      System.out.println("EVENT_OMISSION_PROBABILITY = " + CausationInstance.EVENT_OMISSION_PROBABILITY);
       System.out.println("MAX_INTERVENING_EVENTS = " + Causation.MAX_INTERVENING_EVENTS);
       System.out.println("MAX_VALID_INTERVENING_EVENTS = " + Causation.MAX_VALID_INTERVENING_EVENTS);
       System.out.println("VALID_INTERVENING_EVENTS_PROBABILITY = " + CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY);
@@ -1295,19 +1303,21 @@ public class CausationLearning
       System.out.println("LEARNER = " + LEARNER);
       if (LEARNER.equals("GA"))
       {
-    	  EvolveCausations.printParameters();
-      } else {
-	      System.out.print("NUM_HIDDEN_NEURONS = {");
-	      for (int i = 0, j = NUM_HIDDEN_NEURONS.size(); i < j; i++)
-	      {
-	         System.out.print(NUM_HIDDEN_NEURONS.get(i));
-	         if (i < j - 1)
-	         {
-	            System.out.print(",");
-	         }
-	      }
-	      System.out.println("}");
-	      System.out.println("NUM_EPOCHS = " + NUM_EPOCHS);
+         EvolveCausations.printParameters();
+      }
+      else
+      {
+         System.out.print("NUM_HIDDEN_NEURONS = {");
+         for (int i = 0, j = NUM_HIDDEN_NEURONS.size(); i < j; i++)
+         {
+            System.out.print(NUM_HIDDEN_NEURONS.get(i));
+            if (i < j - 1)
+            {
+               System.out.print(",");
+            }
+         }
+         System.out.println("}");
+         System.out.println("NUM_EPOCHS = " + NUM_EPOCHS);
       }
       System.out.println("RANDOM_SEED = " + RANDOM_SEED);
    }

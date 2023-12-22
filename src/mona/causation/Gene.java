@@ -35,54 +35,55 @@ public class Gene
    // Constructors.
    Gene(float mutationRate, int randomSeed)
    {
-      type                    = VALUE_TYPE.FLOAT_VALUE;
-      name                    = null;
-      ivalue                  = imin = imax = idelta = 0;
-      fvalue                  = fmin = fmax = fdelta = 0.0f;
-      this.mutationRate       = mutationRate;
-      this.randomSeed         = randomSeed;
-      randomizer              = new Random(randomSeed);
+      type              = VALUE_TYPE.FLOAT_VALUE;
+      name              = null;
+      ivalue            = imin = imax = idelta = 0;
+      fvalue            = fmin = fmax = fdelta = 0.0f;
+      this.mutationRate = mutationRate;
+      this.randomSeed   = randomSeed;
+      randomizer        = new Random(randomSeed);
    }
 
 
    Gene(String name, int value, int min, int max, int delta,
         float mutationRate, int randomSeed)
    {
-      type                    = VALUE_TYPE.INTEGER_VALUE;
-      this.name               = new String(name);
-      ivalue                  = imin = imax = idelta = 0;
-      fvalue                  = fmin = fmax = fdelta = 0.0f;
-      ivalue                  = value;
-      imin                    = min;
-      imax                    = max;
-      idelta                  = delta;
-      this.mutationRate       = mutationRate;
-      this.randomSeed         = randomSeed;
-      randomizer              = new Random(randomSeed);
+      type              = VALUE_TYPE.INTEGER_VALUE;
+      this.name         = new String(name);
+      ivalue            = imin = imax = idelta = 0;
+      fvalue            = fmin = fmax = fdelta = 0.0f;
+      ivalue            = value;
+      imin              = min;
+      imax              = max;
+      idelta            = delta;
+      this.mutationRate = mutationRate;
+      this.randomSeed   = randomSeed;
+      randomizer        = new Random(randomSeed);
    }
 
 
    Gene(String name, float value, float min, float max, float delta,
         float mutationRate, int randomSeed)
    {
-      type                    = VALUE_TYPE.FLOAT_VALUE;
-      this.name               = new String(name);
-      ivalue                  = imin = imax = idelta = 0;
-      fvalue                  = fmin = fmax = fdelta = 0.0f;
-      fvalue                  = value;
-      fmin                    = min;
-      fmax                    = max;
-      fdelta                  = delta;
-      this.mutationRate       = mutationRate;
-      this.randomSeed         = randomSeed;
-      randomizer              = new Random(randomSeed);
+      type              = VALUE_TYPE.FLOAT_VALUE;
+      this.name         = new String(name);
+      ivalue            = imin = imax = idelta = 0;
+      fvalue            = fmin = fmax = fdelta = 0.0f;
+      fvalue            = value;
+      fmin              = min;
+      fmax              = max;
+      fdelta            = delta;
+      this.mutationRate = mutationRate;
+      this.randomSeed   = randomSeed;
+      randomizer        = new Random(randomSeed);
    }
+
 
    // Mutate gene.
    void mutate()
    {
-      int    i;
-      float  f;
+      int   i;
+      float f;
 
       if (randomizer.nextDouble() > mutationRate)
       {

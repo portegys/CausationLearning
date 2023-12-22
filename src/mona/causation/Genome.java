@@ -27,10 +27,10 @@ public class Genome
    // Constructor.
    Genome(float mutationRate, int randomSeed)
    {
-      this.mutationRate       = mutationRate;
-      this.randomSeed         = randomSeed;
-      randomizer = new Random(randomSeed);
-      genes      = new ArrayList<Gene>();
+      this.mutationRate = mutationRate;
+      this.randomSeed   = randomSeed;
+      randomizer        = new Random(randomSeed);
+      genes             = new ArrayList<Gene>();
    }
 
 
