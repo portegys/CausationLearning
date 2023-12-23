@@ -664,6 +664,12 @@ public class CausationLearning
          System.err.println(Usage);
          System.exit(1);
       }
+      if (NUM_CAUSATION_INSTANCES < NUM_CAUSATIONS)
+      {
+          System.err.println("Number of causation instances cannot be less than number of causations");
+          System.err.println(Usage);
+          System.exit(1);
+      }
       if (LEARNER.equals("GA"))
       {
          if (gotNumHidden || gotNumEpochs)
@@ -678,6 +684,12 @@ public class CausationLearning
             System.err.println(Usage);
             System.exit(1);
          }
+         if (EvolveCausations.POPULATION_SIZE < NUM_CAUSATIONS)
+         {
+            System.err.println("Population size cannot be less than number of causations");
+            System.err.println(Usage);
+            System.exit(1);
+         }         
       }
       else
       {
@@ -736,24 +748,22 @@ public class CausationLearning
 
       // Generate causation instances.
       CausationTrainingInstances = new ArrayList<CausationInstance>();
-      for (int i = 0; i < NUM_CAUSATION_INSTANCES; i++)
+      for (int i = 0, j = random.nextInt(NUM_CAUSATIONS); i < NUM_CAUSATION_INSTANCES; i++, j = (j + 1) % NUM_CAUSATIONS)
       {
     	  Causation causation = null;
     	 if (NUM_CAUSATIONS > 0)
     	 {
-	         int       n         = random.nextInt(NUM_CAUSATIONS);
-	         causation = Causations.get(n);
+	         causation = Causations.get(j);
     	 }
          CausationTrainingInstances.add(new CausationInstance(causation, random));
       }
       CausationTestingInstances = new ArrayList<CausationInstance>();
-      for (int i = 0; i < NUM_CAUSATION_INSTANCES; i++)
+      for (int i = 0, j = random.nextInt(NUM_CAUSATIONS); i < NUM_CAUSATION_INSTANCES; i++, j = (j + 1) % NUM_CAUSATIONS)
       {
     	  Causation causation = null;
     	 if (NUM_CAUSATIONS > 0)
     	 {
-	         int       n         = random.nextInt(NUM_CAUSATIONS);
-	         causation = Causations.get(n);
+	         causation = Causations.get(j);
     	 }
          CausationTestingInstances.add(new CausationInstance(causation, random));
       }

@@ -44,7 +44,7 @@ public class EvolveCausations
       Populations = new Population[NumCausations];
       for (int i = 0; i < numCausations; i++)
       {
-         Populations[i] = new Population(randomizer);
+         Populations[i] = new Population(i, randomizer);
       }
       Generation  = 0;
       Generations = -1;
@@ -68,6 +68,7 @@ public class EvolveCausations
          log("Generation=" + Generation);
          for (int i = 0; i < NumCausations; i++)
          {
+             log("Population=" + i);        	 
             Populations[i].evolve(Generation);
          }
       }
@@ -78,19 +79,29 @@ public class EvolveCausations
    // Population.
    public class Population
    {
+	  int causationID;
       ArrayList<Member> members;
       int               IDdispenser;
 
-      public Population(Random randomizer)
+      public Population(int causationID, Random randomizer)
       {
+    	  this.causationID = causationID;
          members     = new ArrayList<Member>();
          IDdispenser = 0;
-         for (int i = 0; i < POPULATION_SIZE; i++)
+         ArrayList<CausationInstance> instances = new ArrayList<CausationInstance>();
+         for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
          {
-            members.add(new Member(IDdispenser++, 0, randomizer));
+        	 CausationInstance instance = CausationTrainingInstances.get(i);
+        	 if (instance.causation.ID == causationID)
+        	 {
+        		 instances.add(instance);
+        	 }
+         }
+         for (int i = 0, j = instances.size(), k = randomizer.nextInt(j); i < POPULATION_SIZE; i++, k = (k + 1) % j)
+         {       	
+        	 members.add(new Member(IDdispenser++, instances.get(k), 0, randomizer));
          }
       }
-
 
       // Evolve.
       void evolve(int generation)
@@ -218,6 +229,7 @@ public class EvolveCausations
    public class Member
    {
       int   ID;
+      int causationID;
       int   generation;
       float fitness;
 
@@ -225,22 +237,15 @@ public class EvolveCausations
       CausationGenome genome;
 
       // Constructors.
-      Member(int ID, int generation, Random randomizer)
+      Member(int ID, CausationInstance causationInstance, int generation, Random randomizer)
       {
          this.ID         = ID;
+         this.causationID = causationInstance.causation.ID;
          this.generation = generation;
          fitness         = 0.0f;
 
          // Create genome.
-         if (CausationTrainingInstances.size() > 0)
-         {
-            int n = randomizer.nextInt(CausationTrainingInstances.size());
-            genome = new CausationGenome(CausationTrainingInstances.get(n), randomizer);
-         }
-         else
-         {
-            genome = new CausationGenome(null, randomizer);
-         }
+         genome = new CausationGenome(causationInstance, randomizer);
       }
 
 
@@ -248,6 +253,7 @@ public class EvolveCausations
       Member(int ID, int generation, Random randomizer, Member member)
       {
          this.ID         = ID;
+         this.causationID = member.causationID;
          this.generation = generation;
          fitness         = 0.0f;
 
