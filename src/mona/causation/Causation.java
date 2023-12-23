@@ -17,29 +17,40 @@ public class Causation
    public static int MAX_CAUSE_EVENTS             = 2;
    public static int MAX_INTERVENING_EVENTS       = 2;
    public static int MAX_VALID_INTERVENING_EVENTS = 1;
-   public static int CAUSATION_INSTANCE_LENGTH    = (MAX_CAUSE_EVENTS + 1) * MAX_INTERVENING_EVENTS;
+   public static int CAUSATION_INSTANCE_LENGTH    = (MAX_CAUSE_EVENTS + 1) * (MAX_INTERVENING_EVENTS + 1);
+   public static void setCausationParms()
+   {
+	   EFFECT_EVENT_TYPE            = NUM_EVENT_TYPES;
+	   CAUSATION_INSTANCE_LENGTH    = (MAX_CAUSE_EVENTS + 1) * (MAX_INTERVENING_EVENTS + 1);	   
+   }
 
+   public int ID;
    public ArrayList<Integer> causeEvents;
 
-   public Causation(Random random)
-   {
+   public Causation(int ID, Random random)
+   {	   
+	  this.ID = ID;
       causeEvents = new ArrayList<Integer>();
       int n = 0;
       if (MAX_CAUSE_EVENTS > 0)
       {
          n = random.nextInt(MAX_CAUSE_EVENTS) + 1;
       }
-      for (int i = 0; i < n; i++)
+      if (NUM_CAUSE_EVENT_TYPES > 0)
       {
-         causeEvents.add(random.nextInt(NUM_CAUSE_EVENT_TYPES));
+	      for (int i = 0; i < n; i++)
+	      {
+	         causeEvents.add(random.nextInt(NUM_CAUSE_EVENT_TYPES));
+	      }
+	      Collections.sort(causeEvents);
       }
-      Collections.sort(causeEvents);
    }
 
 
    public void print()
    {
-      System.out.print("causes: { ");
+	  System.out.println("ID=" + ID);
+      System.out.print("cause events: { ");
       for (int i : causeEvents)
       {
          System.out.print(i + " ");

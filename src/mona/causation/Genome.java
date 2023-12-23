@@ -101,28 +101,6 @@ public class Genome
       }
    }
 
-
-   // Load values.
-   void loadValues(DataInputStream reader) throws IOException
-   {
-      for (int i = 0; i < genes.size(); i++)
-      {
-         genes.get(i).loadValue(reader);
-      }
-   }
-
-
-   // Save values.
-   void saveValues(PrintWriter writer) throws IOException
-   {
-      for (int i = 0; i < genes.size(); i++)
-      {
-         genes.get(i).saveValue(writer);
-      }
-      writer.flush();
-   }
-
-
    // Print genome.
    void print()
    {

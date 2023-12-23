@@ -162,44 +162,6 @@ public class Gene
       }
    }
 
-
-   // Load value.
-   void loadValue(DataInputStream reader) throws IOException
-   {
-      int itype = Utility.loadInt(reader);
-
-      switch (itype)
-      {
-      case 0:
-         ivalue = Utility.loadInt(reader);
-         break;
-
-      case 1:
-         fvalue = Utility.loadFloat(reader);
-         break;
-      }
-   }
-
-
-   // Save value.
-   void saveValue(PrintWriter writer) throws IOException
-   {
-      switch (type)
-      {
-      case INTEGER_VALUE:
-         Utility.saveInt(writer, 0);
-         Utility.saveInt(writer, ivalue);
-         break;
-
-      case FLOAT_VALUE:
-         Utility.saveInt(writer, 1);
-         Utility.saveFloat(writer, fvalue);
-         break;
-      }
-      writer.flush();
-   }
-
-
    // Print gene.
    void print()
    {

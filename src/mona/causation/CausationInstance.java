@@ -16,21 +16,19 @@ public class CausationInstance
    public static float VALID_INTERVENING_EVENTS_PROBABILITY = 0.9f;
 
    public Causation causation;
-   public int       causationID;
    public int[]     events;
    public int       effectEventIndex;
    public boolean   valid;
 
-   public CausationInstance(Causation causation, int causationID, Random random)
+   public CausationInstance(Causation causation, Random random)
    {
       this.causation   = causation;
-      this.causationID = causationID;
       events           = new int[Causation.CAUSATION_INSTANCE_LENGTH];
       valid            = true;
-      List < List < Integer >> eventPermutations = permuteList(causation.causeEvents);
-      int n = 0;
-      if (eventPermutations.size() > 0)
+	  int n = 0;      
+      if (causation != null && Causation.MAX_CAUSE_EVENTS > 0)
       {
+    	  List < List < Integer >> eventPermutations = permuteList(causation.causeEvents);
          ArrayList<Integer> permutation = new ArrayList<Integer>();
          for (Integer i : eventPermutations.get(random.nextInt(eventPermutations.size())))
          {
@@ -99,7 +97,7 @@ public class CausationInstance
          }
          valid = false;
       }
-      for (int q = 0; q < i; q++)
+      for (int k = 0; k < i; k++)
       {
          events[n] = Causation.NUM_CAUSE_EVENT_TYPES +
                      random.nextInt(Causation.NUM_EVENT_TYPES - Causation.NUM_CAUSE_EVENT_TYPES);
@@ -157,7 +155,12 @@ public class CausationInstance
 
    public void print()
    {
-      System.out.print("causation ID=" + causationID);
+	  if (causation != null)
+	  {
+		  System.out.print("causation ID=" + causation.ID);
+	  } else {
+		  System.out.print("causation ID=null");
+	  }
       System.out.print(", events: { ");
       for (int i : events)
       {

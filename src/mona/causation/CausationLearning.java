@@ -36,7 +36,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Random;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -154,7 +153,7 @@ public class CausationLearning
                System.err.println(Usage);
                System.exit(1);
             }
-            if (Causation.NUM_EVENT_TYPES <= 0)
+            if (Causation.NUM_EVENT_TYPES < 0)
             {
                System.err.println("Invalid numEventTypes option");
                System.err.println(Usage);
@@ -180,7 +179,7 @@ public class CausationLearning
                System.err.println(Usage);
                System.exit(1);
             }
-            if (Causation.NUM_CAUSE_EVENT_TYPES <= 0)
+            if (Causation.NUM_CAUSE_EVENT_TYPES < 0)
             {
                System.err.println("Invalid numCauseEventTypes option");
                System.err.println(Usage);
@@ -232,7 +231,7 @@ public class CausationLearning
                System.err.println(Usage);
                System.exit(1);
             }
-            if (Causation.MAX_CAUSE_EVENTS <= 0)
+            if (Causation.MAX_CAUSE_EVENTS < 0)
             {
                System.err.println("Invalid maxCauseEvents option");
                System.err.println(Usage);
@@ -625,6 +624,7 @@ public class CausationLearning
          System.err.println(Usage);
          System.exit(1);
       }
+      Causation.setCausationParms();      
       if (printParms)
       {
          System.out.println("Parameters:");
@@ -700,7 +700,7 @@ public class CausationLearning
          int t = 0;
          for ( ; t < MAX_TRIES; t++)
          {
-            Causation causation = new Causation(random);
+            Causation causation = new Causation(i, random);
             boolean   duplicate = false;
             for (Causation c : Causations)
             {
@@ -738,16 +738,24 @@ public class CausationLearning
       CausationTrainingInstances = new ArrayList<CausationInstance>();
       for (int i = 0; i < NUM_CAUSATION_INSTANCES; i++)
       {
-         int       n         = random.nextInt(NUM_CAUSATIONS);
-         Causation causation = Causations.get(n);
-         CausationTrainingInstances.add(new CausationInstance(causation, n, random));
+    	  Causation causation = null;
+    	 if (NUM_CAUSATIONS > 0)
+    	 {
+	         int       n         = random.nextInt(NUM_CAUSATIONS);
+	         causation = Causations.get(n);
+    	 }
+         CausationTrainingInstances.add(new CausationInstance(causation, random));
       }
       CausationTestingInstances = new ArrayList<CausationInstance>();
       for (int i = 0; i < NUM_CAUSATION_INSTANCES; i++)
       {
-         int       n         = random.nextInt(NUM_CAUSATIONS);
-         Causation causation = Causations.get(n);
-         CausationTestingInstances.add(new CausationInstance(causation, n, random));
+    	  Causation causation = null;
+    	 if (NUM_CAUSATIONS > 0)
+    	 {
+	         int       n         = random.nextInt(NUM_CAUSATIONS);
+	         causation = Causations.get(n);
+    	 }
+         CausationTestingInstances.add(new CausationInstance(causation, random));
       }
 
       // Print causations.
@@ -764,14 +772,14 @@ public class CausationLearning
       for (int i = 0; i < CausationTrainingInstances.size(); i++)
       {
          CausationInstance instance = CausationTrainingInstances.get(i);
-         System.out.print("[" + i + "] causation ID=" + instance.causationID + ", ");
+         System.out.print("[" + i + "] " );
          instance.print();
       }
       System.out.println("Causation testing instances:");
       for (int i = 0; i < CausationTestingInstances.size(); i++)
       {
          CausationInstance instance = CausationTestingInstances.get(i);
-         System.out.print("[" + i + "] causation ID=" + instance.causationID + ", ");
+         System.out.print("[" + i + "] " );
          instance.print();
       }
 
@@ -810,9 +818,9 @@ public class CausationLearning
             {
                y_train += "\n";
                CausationInstance instance = CausationTrainingInstances.get(i);
-               if (instance.valid)
+               if (instance.valid && instance.causation != null)
                {
-                  y_train += oneHot(instance.causationID, NUM_CAUSATIONS + 1) + ",";
+                  y_train += oneHot(instance.causation.ID, NUM_CAUSATIONS + 1) + ",";
                }
                else
                {
@@ -853,9 +861,9 @@ public class CausationLearning
             {
                y_test += "\n";
                CausationInstance instance = CausationTestingInstances.get(i);
-               if (instance.valid)
+               if (instance.valid && instance.causation != null)
                {
-                  y_test += oneHot(instance.causationID, NUM_CAUSATIONS + 1) + ",";
+                  y_test += oneHot(instance.causation.ID, NUM_CAUSATIONS + 1) + ",";
                }
                else
                {
@@ -910,9 +918,9 @@ public class CausationLearning
             {
                y_train += "\n";
                CausationInstance instance = CausationTrainingInstances.get(i);
-               if (instance.valid)
+               if (instance.valid && instance.causation != null)
                {
-                  y_train += oneHot(instance.causationID, NUM_CAUSATIONS + 1) + ",";
+                  y_train += oneHot(instance.causation.ID, NUM_CAUSATIONS + 1) + ",";
                }
                else
                {
@@ -953,9 +961,9 @@ public class CausationLearning
             {
                y_test += "\n";
                CausationInstance instance = CausationTestingInstances.get(i);
-               if (instance.valid)
+               if (instance.valid && instance.causation != null)
                {
-                  y_test += oneHot(instance.causationID, NUM_CAUSATIONS + 1) + ",";
+                  y_test += oneHot(instance.causation.ID, NUM_CAUSATIONS + 1) + ",";
                }
                else
                {
@@ -1012,9 +1020,9 @@ public class CausationLearning
                CausationInstance instance = CausationTrainingInstances.get(i);
                for (int k = 0; k < instance.events.length; k++)
                {
-                  if ((instance.effectEventIndex == k) && instance.valid)
+                  if ((instance.effectEventIndex == k) && instance.valid && instance.causation != null)
                   {
-                     y_train += oneHot(instance.causationID, NUM_CAUSATIONS + 1);
+                     y_train += oneHot(instance.causation.ID, NUM_CAUSATIONS + 1);
                   }
                   else
                   {
@@ -1059,9 +1067,9 @@ public class CausationLearning
                CausationInstance instance = CausationTestingInstances.get(i);
                for (int k = 0; k < instance.events.length; k++)
                {
-                  if ((instance.effectEventIndex == k) && instance.valid)
+                  if ((instance.effectEventIndex == k) && instance.valid && instance.causation != null)
                   {
-                     y_test += oneHot(instance.causationID, NUM_CAUSATIONS + 1);
+                     y_test += oneHot(instance.causation.ID, NUM_CAUSATIONS + 1);
                   }
                   else
                   {

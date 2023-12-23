@@ -121,7 +121,8 @@ public class EvolveCausations
       // Prune unfit members.
       void prune()
       {
-         log("Select:");
+         log("Prune:");
+         /*
          Member[] fitPopulation = new Member[FIT_POPULATION_SIZE];
          max = 0.0;
          for (int i = 0; i < FIT_POPULATION_SIZE; i++)
@@ -162,6 +163,7 @@ public class EvolveCausations
          }
          ForagerFittest[Generation] = ForagerPopulation[0].fitness;
          ForagerAverage[Generation] = d / (double)EvolveCommon.FORAGER_FIT_POPULATION_SIZE;
+         */
       }
 
 
@@ -169,6 +171,7 @@ public class EvolveCausations
       void mutate()
       {
          log("Mutate:");
+         /*
          for (int i = 0; i < EvolveCommon.FORAGER_NUM_MUTANTS; i++)
          {
             // Select a fit member to mutate.
@@ -182,8 +185,8 @@ public class EvolveCausations
                 " -> member=" + (EvolveCommon.FORAGER_FIT_POPULATION_SIZE + i) +
                 ", " + mutant.getInfo());
          }
+         */
       }
-
 
       // Print population properties.
       void printProperties()
@@ -192,10 +195,10 @@ public class EvolveCausations
          printProperties();
       }
 
-
       // Print evolution statistics.
       void printStatistics()
       {
+    	  /*
          System.out.println("Evolution statistics:");
          System.out.println("Generation\tFittest");
          for (int i = 0; i < Generation; i++)
@@ -207,6 +210,7 @@ public class EvolveCausations
          {
             System.out.println(i + "\t\t" + Average[i]);
          }
+         */
       }
    };
 
