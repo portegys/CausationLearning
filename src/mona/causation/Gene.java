@@ -78,7 +78,26 @@ public class Gene
       randomizer        = new Random(randomSeed);
    }
 
-
+   // Copy.
+   Gene copy()
+   {
+	  Gene gene = new Gene(mutationRate, randomSeed);
+      gene.type              = type;
+      if (gene.name != null)
+      {
+    	  gene.name              = new String(name);
+      }
+      gene.ivalue            = ivalue;
+      gene.imin = imin;
+      gene.imax = imax;
+      gene.idelta = idelta;
+      gene.fvalue = fvalue;
+      gene.fmin = fmin;
+      gene.fmax = fmax;
+      gene.fdelta = fdelta;
+      return gene;
+   }
+   
    // Mutate gene.
    void mutate()
    {

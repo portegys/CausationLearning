@@ -6,8 +6,8 @@
 
 package mona.causation;
 
-import java.util.*;
-import java.io.*;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class EvolveCausations
 {
@@ -27,12 +27,11 @@ public class EvolveCausations
    // Causation populations.
    Population[] Populations;
 
-   // Generations.
+   // Generation.
    int Generation;
-   int Generations;
 
    // Log.
-   public static boolean LOG = false;
+   public static boolean LOG = true;
 
    // Constructor.
    public EvolveCausations(int numCausations, ArrayList<CausationInstance> causationTrainingInstances,
@@ -47,7 +46,6 @@ public class EvolveCausations
          Populations[i] = new Population(i, randomizer);
       }
       Generation  = 0;
-      Generations = -1;
    }
 
 
@@ -63,7 +61,7 @@ public class EvolveCausations
 
       // Evolution loop.
       log("Begin evolve:");
-      for (Generation = 0; Generation < Generations; Generation++)
+      for (Generation = 0; Generation < GENERATIONS; Generation++)
       {
          log("Generation=" + Generation);
          for (int i = 0; i < NumCausations; i++)
@@ -82,10 +80,12 @@ public class EvolveCausations
 	  int causationID;
       ArrayList<Member> members;
       int               IDdispenser;
+      Random randomizer;
 
       public Population(int causationID, Random randomizer)
       {
     	  this.causationID = causationID;
+    	  this.randomizer = randomizer;
          members     = new ArrayList<Member>();
          IDdispenser = 0;
          ArrayList<CausationInstance> instances = new ArrayList<CausationInstance>();
@@ -107,7 +107,7 @@ public class EvolveCausations
       void evolve(int generation)
       {
          // Evaluate member fitness.
-         evaluate(generation);
+         evaluate();
 
          // Prune unfit members.
          prune();
@@ -118,13 +118,14 @@ public class EvolveCausations
 
 
       // Evaluate member fitness.
-      void evaluate(int generation)
+      void evaluate()
       {
          log("Evaluate:");
          for (int i = 0; i < POPULATION_SIZE; i++)
          {
-            // eval fitness.
-            log("    member=" + i + ", " + members.get(i).getInfo());
+        	 Member member = members.get(i);
+        	 member.evaluate();
+            log("    member=" + i + ", " + member.getInfo());
          }
       }
 
@@ -133,15 +134,14 @@ public class EvolveCausations
       void prune()
       {
          log("Prune:");
-         /*
          Member[] fitPopulation = new Member[FIT_POPULATION_SIZE];
-         max = 0.0;
+         float max = 0.0f;
          for (int i = 0; i < FIT_POPULATION_SIZE; i++)
          {
             int m = -1;
-            for (j = 0; j < POPULATION_SIZE; j++)
+            for (int j = 0; j < POPULATION_SIZE; j++)
             {
-               member = ForagerPopulation[j];
+               Member member = members.get(j);
                if (member == null)
                {
                   continue;
@@ -152,29 +152,16 @@ public class EvolveCausations
                   max = member.fitness;
                }
             }
-            member = ForagerPopulation[m];
-            ForagerPopulation[m] = null;
+            Member member = members.get(m);
+            members.set(m, null);
             fitPopulation[i]     = member;
             log("    " + member.getInfo());
          }
-         for (i = 0; i < EvolveCommon.FORAGER_POPULATION_SIZE; i++)
+         members.clear();
+         for (int i = 0; i < FIT_POPULATION_SIZE; i++)
          {
-            if (ForagerPopulation[i] != null)
-            {
-               ForagerPopulation[i].clear();
-               ForagerPopulation[i] = null;
-            }
+        	members.add(fitPopulation[i]); 
          }
-         d = 0.0;
-         for (i = 0; i < EvolveCommon.FORAGER_FIT_POPULATION_SIZE; i++)
-         {
-            ForagerPopulation[i] = fitPopulation[i];
-            fitPopulation[i]     = null;
-            d += ForagerPopulation[i].fitness;
-         }
-         ForagerFittest[Generation] = ForagerPopulation[0].fitness;
-         ForagerAverage[Generation] = d / (double)EvolveCommon.FORAGER_FIT_POPULATION_SIZE;
-         */
       }
 
 
@@ -182,46 +169,27 @@ public class EvolveCausations
       void mutate()
       {
          log("Mutate:");
-         /*
-         for (int i = 0; i < EvolveCommon.FORAGER_NUM_MUTANTS; i++)
+         if (FIT_POPULATION_SIZE > 0)
          {
-            // Select a fit member to mutate.
-            j      = Randomizer.nextInt(EvolveCommon.FORAGER_FIT_POPULATION_SIZE);
-            member = ForagerPopulation[j];
-
-            // Create mutant member.
-            mutant = new EvolveCommon.Member(member, member.generation + 1, Randomizer);
-            ForagerPopulation[EvolveCommon.FORAGER_FIT_POPULATION_SIZE + i] = mutant;
-            log("    member=" + j + ", " + member.getInfo() +
-                " -> member=" + (EvolveCommon.FORAGER_FIT_POPULATION_SIZE + i) +
-                ", " + mutant.getInfo());
+	         for (int i = 0, j = randomizer.nextInt(FIT_POPULATION_SIZE), k = FIT_POPULATION_SIZE; 
+	        		 i < FIT_POPULATION_SIZE && k < POPULATION_SIZE; i++, j = (j + 1) % FIT_POPULATION_SIZE, k++)
+	         {
+	        	 Member member = members.get(j);
+	        	 Member child = new Member(IDdispenser++, Generation + 1, member);
+	        	 members.add(child);
+	            log("    member=" + i + ", " + child.getInfo());
+	         } 
          }
-         */
       }
 
-      // Print population properties.
-      void printProperties()
+      // Print.
+      void print()
       {
-         System.out.println("Population properties:");
-         printProperties();
-      }
-
-      // Print evolution statistics.
-      void printStatistics()
-      {
-    	  /*
-         System.out.println("Evolution statistics:");
-         System.out.println("Generation\tFittest");
-         for (int i = 0; i < Generation; i++)
-         {
-            System.out.println(i + "\t\t" + Fittest[i]);
-         }
-         System.out.println("Generation\tAverage");
-         for (int i = 0; i < Generation; i++)
-         {
-            System.out.println(i + "\t\t" + Average[i]);
-         }
-         */
+          System.out.println("Population:");    	  
+    	  for (int i = 0; i < POPULATION_SIZE; i++)
+    	  {
+    		  members.get(i).print();
+    	  }
       }
    };
 
@@ -229,8 +197,8 @@ public class EvolveCausations
    public class Member
    {
       int   ID;
-      int causationID;
       int   generation;
+      Random randomizer;      
       float fitness;
 
       // Genome.
@@ -240,8 +208,8 @@ public class EvolveCausations
       Member(int ID, CausationInstance causationInstance, int generation, Random randomizer)
       {
          this.ID         = ID;
-         this.causationID = causationInstance.causation.ID;
          this.generation = generation;
+         this.randomizer = randomizer;
          fitness         = 0.0f;
 
          // Create genome.
@@ -250,21 +218,33 @@ public class EvolveCausations
 
 
       // Construct mutation of given member.
-      Member(int ID, int generation, Random randomizer, Member member)
+      Member(int ID, int generation, Member member)
       {
          this.ID         = ID;
-         this.causationID = member.causationID;
          this.generation = generation;
+         this.randomizer = member.randomizer;
          fitness         = 0.0f;
 
-         // Create and mutate genome.
-         genome.copyValues(member.genome);
-         genome.mutate();
+         // Copy and mutate genome.
+         genome = new CausationGenome(randomizer);
+         genome.copyGenome(member.genome);
+         mutate();
+      }
+      
+      // Evaluate.
+      void evaluate()
+      {
+    	  // TODO.
+      }
+      
+      // Mutate.
+      void mutate()
+      {
+          // TODO.
       }
 
-
-      // Print properties.
-      void printProperties()
+      // Print.
+      void print()
       {
          System.out.println(getInfo());
          System.out.println("genome:");
@@ -282,7 +262,7 @@ public class EvolveCausations
    // Causation genome.
    public static class CausationGenome extends Genome
    {
-      // Constructor.
+      // Constructors.
       CausationGenome(CausationInstance causationInstance, Random randomizer)
       {
          super(MUTATION_RATE, randomizer.nextInt());
@@ -323,6 +303,21 @@ public class EvolveCausations
                }
             }
          }
+      }
+      
+      CausationGenome(Random randomizer)
+      {
+         super(MUTATION_RATE, randomizer.nextInt());
+      } 
+      
+      // Copy genome.
+      void copyGenome(Genome genome)
+      {
+    	  genes.clear();
+    	  for (Gene gene : genome.genes)
+    	  {
+    		  genes.add(gene.copy());
+    	  }
       }
    }
 
