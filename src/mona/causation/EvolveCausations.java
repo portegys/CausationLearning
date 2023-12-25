@@ -7,6 +7,7 @@
 package mona.causation;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class EvolveCausations
@@ -17,12 +18,11 @@ public class EvolveCausations
    public static int   FIT_POPULATION_SIZE = 10;
    public static float MUTATION_RATE       = 0.25f;
 
-   // Number of causations.
-   int NumCausations;
+   // Causations.
+   ArrayList<Causation> Causations;
 
-   // Training and test causation instances.
-   ArrayList<CausationInstance> CausationTrainingInstances;
-   ArrayList<CausationInstance> CausationTestingInstances;
+   // Causation instances.
+   ArrayList<CausationInstance> CausationInstances;
 
    // Causation populations.
    Population[] Populations;
@@ -34,14 +34,11 @@ public class EvolveCausations
    public static boolean LOG = true;
 
    // Constructor.
-   public EvolveCausations(int numCausations, ArrayList<CausationInstance> causationTrainingInstances,
-                           ArrayList<CausationInstance> causationTestingInstances, Random randomizer)
+   public EvolveCausations(ArrayList<Causation> causations, Random randomizer)
    {
-      NumCausations = numCausations;
-      CausationTrainingInstances = causationTrainingInstances;
-      CausationTestingInstances  = causationTestingInstances;
-      Populations = new Population[NumCausations];
-      for (int i = 0; i < numCausations; i++)
+      Causations = causations;
+      Populations = new Population[Causations.size()];
+      for (int i = 0; i < Populations.length; i++)
       {
          Populations[i] = new Population(i, randomizer);
       }
@@ -50,8 +47,10 @@ public class EvolveCausations
 
 
    // Run.
-   public void run()
+   public void run(ArrayList<CausationInstance> causationInstances)
    {
+	   CausationInstances = causationInstances;
+	   
       // Log run.
       log("Parameters:");
       log("  GENERATIONS=" + GENERATIONS);
@@ -64,7 +63,7 @@ public class EvolveCausations
       for (Generation = 0; Generation < GENERATIONS; Generation++)
       {
          log("Generation=" + Generation);
-         for (int i = 0; i < NumCausations; i++)
+         for (int i = 0; i < Populations.length; i++)
          {
              log("Population=" + i);        	 
             Populations[i].evolve(Generation);
@@ -73,6 +72,23 @@ public class EvolveCausations
       log("End evolve");
    }
 
+   // Test.
+   public ArrayList<Float> test(ArrayList<CausationInstance> causationInstances)
+   {
+	   CausationInstances = causationInstances;
+	   ArrayList<Float> causationFitnesses = new ArrayList<Float>();
+	   
+      log("Begin testing:");
+         for (int i = 0; i < Populations.length; i++)
+         {
+             log("Population=" + i);        	 
+            Populations[i].test();
+            causationFitnesses.add(Populations[i].members.get(0).fitness);
+            Populations[i].print();
+         }
+      log("End testing");
+      return causationFitnesses;
+   }
 
    // Population.
    public class Population
@@ -89,9 +105,9 @@ public class EvolveCausations
          members     = new ArrayList<Member>();
          IDdispenser = 0;
          ArrayList<CausationInstance> instances = new ArrayList<CausationInstance>();
-         for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
+         for (int i = 0, j = CausationInstances.size(); i < j; i++)
          {
-        	 CausationInstance instance = CausationTrainingInstances.get(i);
+        	 CausationInstance instance = CausationInstances.get(i);
         	 if (instance.causation.ID == causationID)
         	 {
         		 instances.add(instance);
@@ -129,15 +145,14 @@ public class EvolveCausations
          }
       }
 
-
       // Prune unfit members.
       void prune()
       {
          log("Prune:");
          Member[] fitPopulation = new Member[FIT_POPULATION_SIZE];
-         float max = 0.0f;
          for (int i = 0; i < FIT_POPULATION_SIZE; i++)
          {
+            float max = 0.0f;        	 
             int m = -1;
             for (int j = 0; j < POPULATION_SIZE; j++)
             {
@@ -181,6 +196,46 @@ public class EvolveCausations
 	         } 
          }
       }
+      
+      // Test member fitness.
+      void test()
+      {
+         log("Test:");
+         for (int i = 0; i < POPULATION_SIZE; i++)
+         {
+        	 Member member = members.get(i);
+        	 member.evaluate();
+            log("    member=" + i + ", " + member.getInfo());
+         }
+         
+         Member[] population = new Member[POPULATION_SIZE];
+         for (int i = 0; i < POPULATION_SIZE; i++)
+         {
+            float max = 0.0f;        	 
+            int m = -1;
+            for (int j = 0; j < POPULATION_SIZE; j++)
+            {
+               Member member = members.get(j);
+               if (member == null)
+               {
+                  continue;
+               }
+               if ((m == -1) || (member.fitness > max))
+               {
+                  m   = j;
+                  max = member.fitness;
+               }
+            }
+            Member member = members.get(m);
+            members.set(m, null);
+            population[i]     = member;
+         }
+         members.clear();
+         for (int i = 0; i < POPULATION_SIZE; i++)
+         {
+        	members.add(population[i]); 
+         }         
+      }
 
       // Print.
       void print()
@@ -197,6 +252,7 @@ public class EvolveCausations
    public class Member
    {
       int   ID;
+      int causationID;
       int   generation;
       Random randomizer;      
       float fitness;
@@ -208,6 +264,7 @@ public class EvolveCausations
       Member(int ID, CausationInstance causationInstance, int generation, Random randomizer)
       {
          this.ID         = ID;
+         causationID = causationInstance.causation.ID; 
          this.generation = generation;
          this.randomizer = randomizer;
          fitness         = 0.0f;
@@ -234,7 +291,51 @@ public class EvolveCausations
       // Evaluate.
       void evaluate()
       {
+    	  List < List < Integer >> causationPermutations = 
+    			  CausationLearning.permuteList(Causations.get(causationID).causeEvents);
+    	  fitness = 0.0f;
+    	  for (CausationInstance instance : CausationInstances)
+    	  {
+    		  boolean match = false;
+    		  for (List<Integer> permutation : causationPermutations)
+    		  {
+    			  int[] causeEvents = new int[permutation.size()];
+    			  for (int i = 0; i < causeEvents.length; i++)
+    			  {
+    				  causeEvents[i] = permutation.get(i);
+    			  }
+    			  if ((match = matchEventStream(instance.events, 0, causeEvents)))
+    			  {
+    				  break;
+    			  }
+    		  }
+    		  if (match)
+    		  {
+    			  if (instance.valid && instance.causation.ID == causationID)
+    			  {
+    				  fitness += 1.0f;
+    			  } else {
+    				  fitness -= 1.0f;
+    			  }
+    		  } else {
+    			  if (instance.valid && instance.causation.ID == causationID)
+    			  {
+    				  fitness -= 1.0f;
+    			  }    			  
+    		  }
+    	  }    	  
+      }
+      
+      // Match event stream in causation instance.
+      boolean matchEventStream(int[] instanceEvents, int startIndex, int[] causeEvents)
+      {
+    	  if (instanceEvents[startIndex] == Causation.EFFECT_EVENT_TYPE) 
+    	  {
+    		  return false;
+    	  }
     	  // TODO.
+    	  
+    	  return matchEventStream(instanceEvents, startIndex + 1, causeEvents);
       }
       
       // Mutate.

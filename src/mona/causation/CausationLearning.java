@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1105,15 +1106,22 @@ public class CausationLearning
       else
       {
          // GA.
-         CausationsGA = new EvolveCausations(NUM_CAUSATIONS,
-                                             CausationTrainingInstances, CausationTestingInstances, random);
+         CausationsGA = new EvolveCausations(Causations, random);
       }
 
       // Run.
       if (LEARNER.equals("GA"))
       {
          // Run GA.
-         CausationsGA.run();
+         CausationsGA.run(CausationTrainingInstances);
+         
+         // Test GA.
+         List<Float> fitnesses = CausationsGA.test(CausationTestingInstances);
+         System.out.println("Test results:");
+         for (int i = 0; i < NUM_CAUSATIONS; i++)
+         {
+	         System.out.println("Causation=" + i + ", fitness=" + fitnesses.get(i));
+         }
       }
       else
       {
@@ -1302,6 +1310,43 @@ public class CausationLearning
       return(encoding);
    }
 
+   // Permute list of numbers.
+   static public List < List < Integer >> permuteList(List<Integer> input)
+   {
+      int[] num      = new int[input.size()];
+      boolean[] used = new boolean[num.length];
+      for (int i = 0; i < used.length; i++)
+      {
+         num[i]  = input.get(i);
+         used[i] = false;
+      }
+      List < List < Integer >> output = new ArrayList < List < Integer >> ();
+      ArrayList<Integer> temp = new ArrayList<Integer>();
+      permuteHelper(num, 0, used, output, temp);
+      return(output);
+   }
+
+   static private void permuteHelper(int[] num, int level, boolean[] used, List < List < Integer >> output, ArrayList<Integer> temp)
+   {
+      if (level == num.length)
+      {
+         output.add(new ArrayList<Integer>(temp));
+      }
+      else
+      {
+         for (int i = 0; i < num.length; i++)
+         {
+            if (!used[i])
+            {
+               temp.add(num[i]);
+               used[i] = true;
+               permuteHelper(num, level + 1, used, output, temp);
+               used[i] = false;
+               temp.remove(temp.size() - 1);
+            }
+         }
+      }
+   }
 
    // Print parameters.
    public static void printParameters()

@@ -28,7 +28,7 @@ public class CausationInstance
 	  int n = 0;      
       if (causation != null && Causation.MAX_CAUSE_EVENTS > 0)
       {
-    	  List < List < Integer >> eventPermutations = permuteList(causation.causeEvents);
+    	  List < List < Integer >> eventPermutations = CausationLearning.permuteList(causation.causeEvents);
          ArrayList<Integer> permutation = new ArrayList<Integer>();
          for (Integer i : eventPermutations.get(random.nextInt(eventPermutations.size())))
          {
@@ -112,46 +112,6 @@ public class CausationInstance
                      random.nextInt(Causation.NUM_EVENT_TYPES - Causation.NUM_CAUSE_EVENT_TYPES);
       }
    }
-
-
-   // Permute list of numbers.
-   public List < List < Integer >> permuteList(List<Integer> input)
-   {
-      int[] num      = new int[input.size()];
-      boolean[] used = new boolean[num.length];
-      for (int i = 0; i < used.length; i++)
-      {
-         num[i]  = input.get(i);
-         used[i] = false;
-      }
-      List < List < Integer >> output = new ArrayList < List < Integer >> ();
-      ArrayList<Integer> temp = new ArrayList<Integer>();
-      permuteHelper(num, 0, used, output, temp);
-      return(output);
-   }
-
-   private void permuteHelper(int[] num, int level, boolean[] used, List < List < Integer >> output, ArrayList<Integer> temp)
-   {
-      if (level == num.length)
-      {
-         output.add(new ArrayList<Integer>(temp));
-      }
-      else
-      {
-         for (int i = 0; i < num.length; i++)
-         {
-            if (!used[i])
-            {
-               temp.add(num[i]);
-               used[i] = true;
-               permuteHelper(num, level + 1, used, output, temp);
-               used[i] = false;
-               temp.remove(temp.size() - 1);
-            }
-         }
-      }
-   }
-
 
    public void print()
    {
