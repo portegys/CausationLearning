@@ -26,7 +26,6 @@ Run:
 causation.sh or causation.bat
 </pre>
 
-
 Usage:
 <pre>
     java mona.causation.CausationLearning
@@ -38,16 +37,17 @@ Usage:
         [-maxInterveningEvents <quantity> (default=2)]
         [-maxValidInterveningEvents <quantity> (default=1)]
         [-validInterveningEventsProbability <probability> (default=0.9)]
-        [-causationInstanceLength <length> (default=6)]
+        [-causationInstanceLength <length> (default=9)]
         [-numCausationInstances <quantity> (default=10)]
-        [-learner "LSTM" | "SimpleRNN" | "Attention" | "NN" |
-            [-numHiddenNeurons <quantity> (default=128) (repeat for additional layers)]
-            [-numEpochs <quantity> (default=500)]
-         -learner "GA" (default=LSTM)]
-            [-generations <quantity> (default=10)]
-            [-populationSize <quantity> (default=20)]
-            [-fitPopulationSize <quantity> (default=10)]
-            [-mutationRate <probability> (default=0.25)]
+        [-learner
+           "LSTM" | "SimpleRNN" | "Attention" | "NN" |
+             [-numHiddenNeurons <quantity> (default=128) (repeat for additional layers)]
+             [-numEpochs <quantity> (default=500)]
+           "GA" (default=LSTM)]
+             [-generations <quantity> (default=10)]
+             [-populationSize <quantity> (default=20)]
+             [-fitPopulationSize <quantity> (default=10)]
+             [-mutationRate <probability> (default=0.25)]
         [-randomSeed <random number seed> (default=4517)]
   Print parameters:
     java mona.causation.CausationLearning -printParameters

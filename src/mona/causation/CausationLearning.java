@@ -100,14 +100,15 @@ public class CausationLearning
       "        [-validInterveningEventsProbability <probability> (default=" + CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY + ")]\n" +
       "        [-causationInstanceLength <length> (default=" + Causation.CAUSATION_INSTANCE_LENGTH + ")]\n" +
       "        [-numCausationInstances <quantity> (default=" + NUM_CAUSATION_INSTANCES + ")]\n" +
-      "        [-learner \"LSTM\" | \"SimpleRNN\" | \"Attention\" | \"NN\" | \n" +
-      "            [-numHiddenNeurons <quantity> (default=" + DEFAULT_NUM_HIDDEN_NEURONS + ") (repeat for additional layers)]\n" +
-      "            [-numEpochs <quantity> (default=" + NUM_EPOCHS + ")]\n" +
-      "         -learner \"GA\" (default=" + LEARNER + ")]\n" +
-      "            [-generations <quantity> (default=" + EvolveCausations.GENERATIONS + ")]\n" +
-      "            [-populationSize <quantity> (default=" + EvolveCausations.POPULATION_SIZE + ")]\n" +
-      "            [-fitPopulationSize <quantity> (default=" + EvolveCausations.FIT_POPULATION_SIZE + ")]\n" +
-      "            [-mutationRate <probability> (default=" + EvolveCausations.MUTATION_RATE + ")]\n" +
+      "        [-learner\n" +
+      "           \"LSTM\" | \"SimpleRNN\" | \"Attention\" | \"NN\" |\n" +      
+      "             [-numHiddenNeurons <quantity> (default=" + DEFAULT_NUM_HIDDEN_NEURONS + ") (repeat for additional layers)]\n" +
+      "             [-numEpochs <quantity> (default=" + NUM_EPOCHS + ")]\n" +
+      "           \"GA\" (default=" + LEARNER + ")]\n" +
+      "             [-generations <quantity> (default=" + EvolveCausations.GENERATIONS + ")]\n" +
+      "             [-populationSize <quantity> (default=" + EvolveCausations.POPULATION_SIZE + ")]\n" +
+      "             [-fitPopulationSize <quantity> (default=" + EvolveCausations.FIT_POPULATION_SIZE + ")]\n" +
+      "             [-mutationRate <probability> (default=" + EvolveCausations.MUTATION_RATE + ")]\n" +
       "        [-randomSeed <random number seed> (default=" + DEFAULT_RANDOM_SEED + ")]\n" +
       "  Print parameters:\n" +
       "    java mona.causation.CausationLearning -printParameters\n" +
