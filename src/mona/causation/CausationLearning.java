@@ -1106,14 +1106,14 @@ public class CausationLearning
       else
       {
          // GA.
-         CausationsGA = new EvolveCausations(Causations, random);
+         CausationsGA = new EvolveCausations(Causations, CausationTrainingInstances, random);
       }
 
       // Run.
       if (LEARNER.equals("GA"))
       {
          // Run GA.
-         CausationsGA.run(CausationTrainingInstances);
+         CausationsGA.run();
          
          // Test GA.
          List<Float> fitnesses = CausationsGA.test(CausationTestingInstances);

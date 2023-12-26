@@ -34,9 +34,11 @@ public class EvolveCausations
    public static boolean LOG = true;
 
    // Constructor.
-   public EvolveCausations(ArrayList<Causation> causations, Random randomizer)
+   public EvolveCausations(ArrayList<Causation> causations, 
+		   ArrayList<CausationInstance> causationInstances, Random randomizer)
    {
       Causations = causations;
+	  CausationInstances = causationInstances;     
       Populations = new Population[Causations.size()];
       for (int i = 0; i < Populations.length; i++)
       {
@@ -47,10 +49,8 @@ public class EvolveCausations
 
 
    // Run.
-   public void run(ArrayList<CausationInstance> causationInstances)
-   {
-	   CausationInstances = causationInstances;
-	   
+   public void run()
+   {	   
       // Log run.
       log("Parameters:");
       log("  GENERATIONS=" + GENERATIONS);
@@ -326,22 +326,105 @@ public class EvolveCausations
     	  }    	  
       }
       
-      // Match event stream in causation instance.
+      // Match cause event ordering in causation instance.
       boolean matchEventStream(int[] instanceEvents, int startIndex, int[] causeEvents)
       {
-    	  if (instanceEvents[startIndex] == Causation.EFFECT_EVENT_TYPE) 
+    	  if (instanceEvents[startIndex] == Causation.EFFECT_EVENT_TYPE)
     	  {
     		  return false;
     	  }
-    	  // TODO.
-    	  
+    	  int maxValidInterveningEvents = genome.genes.get(0).ivalue;
+    	  for (int i = 0, j = startIndex; i < causeEvents.length; i++) 
+    	  {
+    		  int k = j;
+        	  for (; instanceEvents[k] != Causation.EFFECT_EVENT_TYPE; k++)
+        	  {    		  
+	    		  if (causeEvents[i] == instanceEvents[k])
+	    		  {
+	    			  if (i == 0 || (k - j) <= maxValidInterveningEvents)
+	    			  {
+	    				  if (i == causeEvents.length - 1)
+	    				  {
+	    					  return true;
+	    				  } else {
+		    				  j = k + 1;
+		    				  break;
+	    				  }
+	    			  }
+	    		  }
+        	  }
+        	  if (j <= k)
+        	  {
+        		  break;
+        	  }
+    	  }
     	  return matchEventStream(instanceEvents, startIndex + 1, causeEvents);
       }
       
       // Mutate.
       void mutate()
       {
-          // TODO.
+    	  // Mutate MAX_VALID_INTERVENING_EVENTS.
+          Gene interveningEvents = genome.genes.get(0);
+          if (randomizer.nextFloat() < MUTATION_RATE)
+          {
+	          boolean increase = randomizer.nextBoolean();
+	          if (interveningEvents.ivalue == 0)
+	          {
+	        	  increase = true;
+	          } else if (interveningEvents.ivalue == Causation.MAX_INTERVENING_EVENTS)
+	          {
+	        	  increase = false;
+	          }
+	          if (increase)
+	          {
+	        	  interveningEvents.ivalue++;
+	          } else {
+	        	  interveningEvents.ivalue--;
+	          }
+          }
+          
+          // Mutate causation events.
+          if (randomizer.nextFloat() < MUTATION_RATE)
+          {
+	          if (genome.genes.size() > 1)
+	          {        	  
+	        	  int n = 0;
+	        	  for (int i = 1, j = genome.genes.size(); i < j; i++)
+	        	  {
+	        		  n += genome.genes.get(i).ivalue;
+	        	  }
+	        	  for (int i = 0, j = genome.genes.size() - 1, k = randomizer.nextInt(j); i < j; i++, k = (k + 1) % j)
+	        	  {
+		        	  Gene gene = genome.genes.get(k + 1);
+		        	  if (n == 0)
+		        	  {
+		        		  gene.ivalue++;
+		        		  break;		        		  
+		        	  } else if (n == Causation.MAX_CAUSE_EVENTS) {
+		        		  if (gene.ivalue > 0)
+		        		  {
+		        			  gene.ivalue--;
+		        			  break;
+		        		  }
+		        	  } else {
+			        	  if (gene.ivalue == 0)
+			        	  {
+			        		  gene.ivalue++;
+			        		  break;
+			        	  } else {
+			        		  if (randomizer.nextBoolean()) 
+			        		  {
+			        			  gene.ivalue++;
+			        		  } else {
+			        			  gene.ivalue--;
+			        		  }
+			        		  break;
+			        	  }		        		  
+		        	  }
+	        	  }
+	          }
+          }          
       }
 
       // Print.
