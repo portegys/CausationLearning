@@ -174,7 +174,7 @@ public class EvolveCausations
             Member member = members.get(m);
             members.set(m, null);
             fitPopulation[i] = member;
-            log("    " + member.getInfo());
+            log("    member=" + member.ID + ", " + member.getInfo());
          }
          members.clear();
          for (int i = 0; i < FIT_POPULATION_SIZE; i++)
@@ -196,7 +196,7 @@ public class EvolveCausations
                Member member = members.get(j);
                Member child  = new Member(IDdispenser++, Generation + 1, member);
                members.add(child);
-               log("    member=" + i + ", " + child.getInfo());
+               log("    member=" + (members.size() - 1) + ", " + child.getInfo());
             }
          }
       }
@@ -292,6 +292,9 @@ public class EvolveCausations
          genome = new CausationGenome(randomizer);
          genome.copyGenome(member.genome);
          mutate();
+
+         // Evaluate mutant.
+         evaluate();
       }
 
 

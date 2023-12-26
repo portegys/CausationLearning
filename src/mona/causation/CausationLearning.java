@@ -101,7 +101,7 @@ public class CausationLearning
       "        [-causationInstanceLength <length> (default=" + Causation.CAUSATION_INSTANCE_LENGTH + ")]\n" +
       "        [-numCausationInstances <quantity> (default=" + NUM_CAUSATION_INSTANCES + ")]\n" +
       "        [-learner\n" +
-      "           \"LSTM\" | \"SimpleRNN\" | \"Attention\" | \"NN\" |\n" +      
+      "           \"LSTM\" | \"SimpleRNN\" | \"Attention\" | \"NN\" |\n" +
       "             [-numHiddenNeurons <quantity> (default=" + DEFAULT_NUM_HIDDEN_NEURONS + ") (repeat for additional layers)]\n" +
       "             [-numEpochs <quantity> (default=" + NUM_EPOCHS + ")]\n" +
       "           \"GA\" (default=" + LEARNER + ")]\n" +
