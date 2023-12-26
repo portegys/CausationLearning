@@ -34,23 +34,23 @@ public class EvolveCausations
    public static boolean LOG = true;
 
    // Constructor.
-   public EvolveCausations(ArrayList<Causation> causations, 
-		   ArrayList<CausationInstance> causationInstances, Random randomizer)
+   public EvolveCausations(ArrayList<Causation> causations,
+                           ArrayList<CausationInstance> causationInstances, Random randomizer)
    {
-      Causations = causations;
-	  CausationInstances = causationInstances;     
-      Populations = new Population[Causations.size()];
+      Causations         = causations;
+      CausationInstances = causationInstances;
+      Populations        = new Population[Causations.size()];
       for (int i = 0; i < Populations.length; i++)
       {
          Populations[i] = new Population(i, randomizer);
       }
-      Generation  = 0;
+      Generation = 0;
    }
 
 
    // Run.
    public void run()
-   {	   
+   {
       // Log run.
       log("Parameters:");
       log("  GENERATIONS=" + GENERATIONS);
@@ -65,59 +65,62 @@ public class EvolveCausations
          log("Generation=" + Generation);
          for (int i = 0; i < Populations.length; i++)
          {
-             log("Population=" + i);        	 
+            log("Population=" + i);
             Populations[i].evolve(Generation);
          }
       }
       log("End evolve");
    }
 
+
    // Test.
    public ArrayList<Float> test(ArrayList<CausationInstance> causationInstances)
    {
-	   CausationInstances = causationInstances;
-	   ArrayList<Float> causationFitnesses = new ArrayList<Float>();
-	   
+      CausationInstances = causationInstances;
+      ArrayList<Float> causationFitnesses = new ArrayList<Float>();
+
       log("Begin testing:");
-         for (int i = 0; i < Populations.length; i++)
-         {
-             log("Population=" + i);        	 
-            Populations[i].test();
-            causationFitnesses.add(Populations[i].members.get(0).fitness);
-            Populations[i].print();
-         }
+      for (int i = 0; i < Populations.length; i++)
+      {
+         log("Population=" + i);
+         Populations[i].test();
+         causationFitnesses.add(Populations[i].members.get(0).fitness);
+         Populations[i].print();
+      }
       log("End testing");
-      return causationFitnesses;
+      return(causationFitnesses);
    }
+
 
    // Population.
    public class Population
    {
-	  int causationID;
+      int               causationID;
       ArrayList<Member> members;
       int               IDdispenser;
-      Random randomizer;
+      Random            randomizer;
 
       public Population(int causationID, Random randomizer)
       {
-    	  this.causationID = causationID;
-    	  this.randomizer = randomizer;
-         members     = new ArrayList<Member>();
-         IDdispenser = 0;
+         this.causationID = causationID;
+         this.randomizer  = randomizer;
+         members          = new ArrayList<Member>();
+         IDdispenser      = 0;
          ArrayList<CausationInstance> instances = new ArrayList<CausationInstance>();
          for (int i = 0, j = CausationInstances.size(); i < j; i++)
          {
-        	 CausationInstance instance = CausationInstances.get(i);
-        	 if (instance.causation.ID == causationID)
-        	 {
-        		 instances.add(instance);
-        	 }
+            CausationInstance instance = CausationInstances.get(i);
+            if (instance.causation.ID == causationID)
+            {
+               instances.add(instance);
+            }
          }
          for (int i = 0, j = instances.size(), k = randomizer.nextInt(j); i < POPULATION_SIZE; i++, k = (k + 1) % j)
-         {       	
-        	 members.add(new Member(IDdispenser++, instances.get(k), 0, randomizer));
+         {
+            members.add(new Member(IDdispenser++, instances.get(k), 0, randomizer));
          }
       }
+
 
       // Evolve.
       void evolve(int generation)
@@ -139,11 +142,12 @@ public class EvolveCausations
          log("Evaluate:");
          for (int i = 0; i < POPULATION_SIZE; i++)
          {
-        	 Member member = members.get(i);
-        	 member.evaluate();
+            Member member = members.get(i);
+            member.evaluate();
             log("    member=" + i + ", " + member.getInfo());
          }
       }
+
 
       // Prune unfit members.
       void prune()
@@ -152,8 +156,8 @@ public class EvolveCausations
          Member[] fitPopulation = new Member[FIT_POPULATION_SIZE];
          for (int i = 0; i < FIT_POPULATION_SIZE; i++)
          {
-            float max = 0.0f;        	 
-            int m = -1;
+            float max = 0.0f;
+            int   m   = -1;
             for (int j = 0; j < POPULATION_SIZE; j++)
             {
                Member member = members.get(j);
@@ -169,13 +173,13 @@ public class EvolveCausations
             }
             Member member = members.get(m);
             members.set(m, null);
-            fitPopulation[i]     = member;
+            fitPopulation[i] = member;
             log("    " + member.getInfo());
          }
          members.clear();
          for (int i = 0; i < FIT_POPULATION_SIZE; i++)
          {
-        	members.add(fitPopulation[i]); 
+            members.add(fitPopulation[i]);
          }
       }
 
@@ -186,33 +190,34 @@ public class EvolveCausations
          log("Mutate:");
          if (FIT_POPULATION_SIZE > 0)
          {
-	         for (int i = 0, j = randomizer.nextInt(FIT_POPULATION_SIZE), k = FIT_POPULATION_SIZE; 
-	        		 i < FIT_POPULATION_SIZE && k < POPULATION_SIZE; i++, j = (j + 1) % FIT_POPULATION_SIZE, k++)
-	         {
-	        	 Member member = members.get(j);
-	        	 Member child = new Member(IDdispenser++, Generation + 1, member);
-	        	 members.add(child);
-	            log("    member=" + i + ", " + child.getInfo());
-	         } 
+            for (int i = 0, j = randomizer.nextInt(FIT_POPULATION_SIZE), k = FIT_POPULATION_SIZE;
+                 i < FIT_POPULATION_SIZE && k < POPULATION_SIZE; i++, j = (j + 1) % FIT_POPULATION_SIZE, k++)
+            {
+               Member member = members.get(j);
+               Member child  = new Member(IDdispenser++, Generation + 1, member);
+               members.add(child);
+               log("    member=" + i + ", " + child.getInfo());
+            }
          }
       }
-      
+
+
       // Test member fitness.
       void test()
       {
          log("Test:");
          for (int i = 0; i < POPULATION_SIZE; i++)
          {
-        	 Member member = members.get(i);
-        	 member.evaluate();
+            Member member = members.get(i);
+            member.evaluate();
             log("    member=" + i + ", " + member.getInfo());
          }
-         
+
          Member[] population = new Member[POPULATION_SIZE];
          for (int i = 0; i < POPULATION_SIZE; i++)
          {
-            float max = 0.0f;        	 
-            int m = -1;
+            float max = 0.0f;
+            int   m   = -1;
             for (int j = 0; j < POPULATION_SIZE; j++)
             {
                Member member = members.get(j);
@@ -228,34 +233,35 @@ public class EvolveCausations
             }
             Member member = members.get(m);
             members.set(m, null);
-            population[i]     = member;
+            population[i] = member;
          }
          members.clear();
          for (int i = 0; i < POPULATION_SIZE; i++)
          {
-        	members.add(population[i]); 
-         }         
+            members.add(population[i]);
+         }
       }
+
 
       // Print.
       void print()
       {
-          System.out.println("Population:");    	  
-    	  for (int i = 0; i < POPULATION_SIZE; i++)
-    	  {
-    		  members.get(i).print();
-    	  }
+         System.out.println("Population:");
+         for (int i = 0; i < POPULATION_SIZE; i++)
+         {
+            members.get(i).print();
+         }
       }
    };
 
    // Population member.
    public class Member
    {
-      int   ID;
-      int causationID;
-      int   generation;
-      Random randomizer;      
-      float fitness;
+      int    ID;
+      int    causationID;
+      int    generation;
+      Random randomizer;
+      float  fitness;
 
       // Genome.
       CausationGenome genome;
@@ -264,7 +270,7 @@ public class EvolveCausations
       Member(int ID, CausationInstance causationInstance, int generation, Random randomizer)
       {
          this.ID         = ID;
-         causationID = causationInstance.causation.ID; 
+         causationID     = causationInstance.causation.ID;
          this.generation = generation;
          this.randomizer = randomizer;
          fitness         = 0.0f;
@@ -287,152 +293,184 @@ public class EvolveCausations
          genome.copyGenome(member.genome);
          mutate();
       }
-      
+
+
       // Evaluate.
       void evaluate()
       {
-    	  List < List < Integer >> causationPermutations = 
-    			  CausationLearning.permuteList(Causations.get(causationID).causeEvents);
-    	  fitness = 0.0f;
-    	  for (CausationInstance instance : CausationInstances)
-    	  {
-    		  boolean match = false;
-    		  for (List<Integer> permutation : causationPermutations)
-    		  {
-    			  int[] causeEvents = new int[permutation.size()];
-    			  for (int i = 0; i < causeEvents.length; i++)
-    			  {
-    				  causeEvents[i] = permutation.get(i);
-    			  }
-    			  if ((match = matchEventStream(instance.events, 0, causeEvents)))
-    			  {
-    				  break;
-    			  }
-    		  }
-    		  if (match)
-    		  {
-    			  if (instance.valid && instance.causation.ID == causationID)
-    			  {
-    				  fitness += 1.0f;
-    			  } else {
-    				  fitness -= 1.0f;
-    			  }
-    		  } else {
-    			  if (instance.valid && instance.causation.ID == causationID)
-    			  {
-    				  fitness -= 1.0f;
-    			  }    			  
-    		  }
-    	  }    	  
+         List < List < Integer >> causationPermutations =
+            CausationLearning.permuteList(Causations.get(causationID).causeEvents);
+         fitness = 0.0f;
+         for (CausationInstance instance : CausationInstances)
+         {
+            boolean match = false;
+            for (List<Integer> permutation : causationPermutations)
+            {
+               int[] causeEvents = new int[permutation.size()];
+               for (int i = 0; i < causeEvents.length; i++)
+               {
+                  causeEvents[i] = permutation.get(i);
+               }
+               if ((match = matchEventStream(instance.events, 0, causeEvents)))
+               {
+                  break;
+               }
+            }
+            if (match)
+            {
+               if (instance.valid && (instance.causation.ID == causationID))
+               {
+                  fitness += 1.0f;
+               }
+               else
+               {
+                  fitness -= 1.0f;
+               }
+            }
+            else
+            {
+               if (instance.valid && (instance.causation.ID == causationID))
+               {
+                  fitness -= 1.0f;
+               }
+            }
+         }
       }
-      
-      // Match cause event ordering in causation instance.
+
+
+      // Match cause event order in causation instance.
       boolean matchEventStream(int[] instanceEvents, int startIndex, int[] causeEvents)
       {
-    	  if (instanceEvents[startIndex] == Causation.EFFECT_EVENT_TYPE)
-    	  {
-    		  return false;
-    	  }
-    	  int maxValidInterveningEvents = genome.genes.get(0).ivalue;
-    	  for (int i = 0, j = startIndex; i < causeEvents.length; i++) 
-    	  {
-    		  int k = j;
-        	  for (; instanceEvents[k] != Causation.EFFECT_EVENT_TYPE; k++)
-        	  {    		  
-	    		  if (causeEvents[i] == instanceEvents[k])
-	    		  {
-	    			  if (i == 0 || (k - j) <= maxValidInterveningEvents)
-	    			  {
-	    				  if (i == causeEvents.length - 1)
-	    				  {
-	    					  return true;
-	    				  } else {
-		    				  j = k + 1;
-		    				  break;
-	    				  }
-	    			  }
-	    		  }
-        	  }
-        	  if (j <= k)
-        	  {
-        		  break;
-        	  }
-    	  }
-    	  return matchEventStream(instanceEvents, startIndex + 1, causeEvents);
+         if (instanceEvents[startIndex] == Causation.EFFECT_EVENT_TYPE)
+         {
+            return(false);
+         }
+         int maxValidInterveningEvents = genome.genes.get(0).ivalue;
+         for (int i = 0, j = startIndex; i < causeEvents.length; i++)
+         {
+            int k = j;
+            for ( ; instanceEvents[k] != Causation.EFFECT_EVENT_TYPE; k++)
+            {
+               if (causeEvents[i] == instanceEvents[k])
+               {
+                  if ((i == 0) || ((k - j) <= maxValidInterveningEvents))
+                  {
+                     if (i == causeEvents.length - 1)
+                     {
+                        return(true);
+                     }
+                     else
+                     {
+                        j = k + 1;
+                        break;
+                     }
+                  }
+               }
+            }
+            if (j <= k)
+            {
+               break;
+            }
+         }
+         return(matchEventStream(instanceEvents, startIndex + 1, causeEvents));
       }
-      
+
+
       // Mutate.
       void mutate()
       {
-    	  // Mutate MAX_VALID_INTERVENING_EVENTS.
-          Gene interveningEvents = genome.genes.get(0);
-          if (randomizer.nextFloat() < MUTATION_RATE)
-          {
-	          boolean increase = randomizer.nextBoolean();
-	          if (interveningEvents.ivalue == 0)
-	          {
-	        	  increase = true;
-	          } else if (interveningEvents.ivalue == Causation.MAX_INTERVENING_EVENTS)
-	          {
-	        	  increase = false;
-	          }
-	          if (increase)
-	          {
-	        	  interveningEvents.ivalue++;
-	          } else {
-	        	  interveningEvents.ivalue--;
-	          }
-          }
-          
-          // Mutate causation events.
-          if (randomizer.nextFloat() < MUTATION_RATE)
-          {
-	          if (genome.genes.size() > 1)
-	          {        	  
-	        	  int n = 0;
-	        	  for (int i = 1, j = genome.genes.size(); i < j; i++)
-	        	  {
-	        		  n += genome.genes.get(i).ivalue;
-	        	  }
-	        	  for (int i = 0, j = genome.genes.size() - 1, k = randomizer.nextInt(j); i < j; i++, k = (k + 1) % j)
-	        	  {
-		        	  Gene gene = genome.genes.get(k + 1);
-		        	  if (n == 0)
-		        	  {
-		        		  gene.ivalue++;
-		        		  break;		        		  
-		        	  } else if (n == Causation.MAX_CAUSE_EVENTS) {
-		        		  if (gene.ivalue > 0)
-		        		  {
-		        			  gene.ivalue--;
-		        			  break;
-		        		  }
-		        	  } else {
-			        	  if (gene.ivalue == 0)
-			        	  {
-			        		  gene.ivalue++;
-			        		  break;
-			        	  } else {
-			        		  if (randomizer.nextBoolean()) 
-			        		  {
-			        			  gene.ivalue++;
-			        		  } else {
-			        			  gene.ivalue--;
-			        		  }
-			        		  break;
-			        	  }		        		  
-		        	  }
-	        	  }
-	          }
-          }          
+         // Mutate MAX_VALID_INTERVENING_EVENTS.
+         Gene interveningEvents = genome.genes.get(0);
+
+         if (randomizer.nextFloat() < MUTATION_RATE)
+         {
+            boolean increase = randomizer.nextBoolean();
+            if (interveningEvents.ivalue == 0)
+            {
+               increase = true;
+            }
+            else if (interveningEvents.ivalue == Causation.MAX_INTERVENING_EVENTS)
+            {
+               increase = false;
+            }
+            if (increase)
+            {
+               interveningEvents.ivalue++;
+            }
+            else
+            {
+               interveningEvents.ivalue--;
+            }
+         }
+
+         // Mutate causation events.
+         if (randomizer.nextFloat() < MUTATION_RATE)
+         {
+            if (genome.genes.size() > 1)
+            {
+               int n = 0;
+               for (int i = 1, j = genome.genes.size(); i < j; i++)
+               {
+                  n += genome.genes.get(i).ivalue;
+               }
+               for (int i = 0, j = genome.genes.size() - 1, k = randomizer.nextInt(j); i < j; i++, k = (k + 1) % j)
+               {
+                  Gene gene = genome.genes.get(k + 1);
+                  if (n == 0)
+                  {
+                     gene.ivalue++;
+                     break;
+                  }
+                  else if (n == Causation.MAX_CAUSE_EVENTS)
+                  {
+                     if (gene.ivalue > 0)
+                     {
+                        gene.ivalue--;
+                        break;
+                     }
+                  }
+                  else
+                  {
+                     if (gene.ivalue == 0)
+                     {
+                        gene.ivalue++;
+                        break;
+                     }
+                     else
+                     {
+                        if (randomizer.nextBoolean())
+                        {
+                           gene.ivalue++;
+                        }
+                        else
+                        {
+                           gene.ivalue--;
+                        }
+                        break;
+                     }
+                  }
+               }
+            }
+         }
       }
+
 
       // Print.
       void print()
       {
          System.out.println(getInfo());
-         System.out.println("genome:");
-         genome.print();
+         System.out.print("genome: ");
+         System.out.print(genome.genes.get(0).name + "=" + genome.genes.get(0).ivalue);
+         System.out.print(", CAUSATION_EVENTS: {");
+         for (int i = 1, j = genome.genes.size(); i < j; i++)
+         {
+            System.out.print(genome.genes.get(i).ivalue);
+            if (i < j - 1)
+            {
+               System.out.print(", ");
+            }
+         }
+         System.out.println("}");
       }
 
 
@@ -488,20 +526,22 @@ public class EvolveCausations
             }
          }
       }
-      
+
+
       CausationGenome(Random randomizer)
       {
          super(MUTATION_RATE, randomizer.nextInt());
-      } 
-      
+      }
+
+
       // Copy genome.
       void copyGenome(Genome genome)
-      {    	  
-    	  genes.clear();
-    	  for (Gene gene : genome.genes)
-    	  {
-    		  genes.add(gene.copy());
-    	  }
+      {
+         genes.clear();
+         for (Gene gene : genome.genes)
+         {
+            genes.add(gene.copy());
+         }
       }
    }
 

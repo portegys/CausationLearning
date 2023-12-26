@@ -22,13 +22,13 @@ public class CausationInstance
 
    public CausationInstance(Causation causation, Random random)
    {
-      this.causation   = causation;
-      events           = new int[Causation.CAUSATION_INSTANCE_LENGTH];
-      valid            = true;
-	  int n = 0;      
-      if (causation != null && Causation.MAX_CAUSE_EVENTS > 0)
+      this.causation = causation;
+      events         = new int[Causation.CAUSATION_INSTANCE_LENGTH];
+      valid          = true;
+      int n = 0;
+      if ((causation != null) && (Causation.MAX_CAUSE_EVENTS > 0))
       {
-    	  List < List < Integer >> eventPermutations = CausationLearning.permuteList(causation.causeEvents);
+         List < List < Integer >> eventPermutations = CausationLearning.permuteList(causation.causeEvents);
          ArrayList<Integer> permutation = new ArrayList<Integer>();
          for (Integer i : eventPermutations.get(random.nextInt(eventPermutations.size())))
          {
@@ -113,14 +113,17 @@ public class CausationInstance
       }
    }
 
+
    public void print()
    {
-	  if (causation != null)
-	  {
-		  System.out.print("causation ID=" + causation.ID);
-	  } else {
-		  System.out.print("causation ID=null");
-	  }
+      if (causation != null)
+      {
+         System.out.print("causation ID=" + causation.ID);
+      }
+      else
+      {
+         System.out.print("causation ID=null");
+      }
       System.out.print(", events: { ");
       for (int i : events)
       {

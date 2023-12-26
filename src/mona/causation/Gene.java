@@ -78,26 +78,29 @@ public class Gene
       randomizer        = new Random(randomSeed);
    }
 
+
    // Copy.
    Gene copy()
    {
-	  Gene gene = new Gene(mutationRate, randomSeed);
-      gene.type              = type;
+      Gene gene = new Gene(mutationRate, randomSeed);
+
+      gene.type = type;
       if (name != null)
       {
-    	  gene.name              = new String(name);
+         gene.name = new String(name);
       }
-      gene.ivalue            = ivalue;
-      gene.imin = imin;
-      gene.imax = imax;
+      gene.ivalue = ivalue;
+      gene.imin   = imin;
+      gene.imax   = imax;
       gene.idelta = idelta;
       gene.fvalue = fvalue;
-      gene.fmin = fmin;
-      gene.fmax = fmax;
+      gene.fmin   = fmin;
+      gene.fmax   = fmax;
       gene.fdelta = fdelta;
-      return gene;
+      return(gene);
    }
-   
+
+
    // Mutate gene.
    void mutate()
    {
@@ -180,6 +183,7 @@ public class Gene
          break;
       }
    }
+
 
    // Print gene.
    void print()

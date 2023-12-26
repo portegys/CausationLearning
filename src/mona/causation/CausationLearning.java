@@ -625,7 +625,7 @@ public class CausationLearning
          System.err.println(Usage);
          System.exit(1);
       }
-      Causation.setCausationParms();      
+      Causation.setCausationParms();
       if (printParms)
       {
          System.out.println("Parameters:");
@@ -667,9 +667,9 @@ public class CausationLearning
       }
       if (NUM_CAUSATION_INSTANCES < NUM_CAUSATIONS)
       {
-          System.err.println("Number of causation instances cannot be less than number of causations");
-          System.err.println(Usage);
-          System.exit(1);
+         System.err.println("Number of causation instances cannot be less than number of causations");
+         System.err.println(Usage);
+         System.exit(1);
       }
       if (LEARNER.equals("GA"))
       {
@@ -690,7 +690,7 @@ public class CausationLearning
             System.err.println("Population size cannot be less than number of causations");
             System.err.println(Usage);
             System.exit(1);
-         }         
+         }
       }
       else
       {
@@ -751,21 +751,21 @@ public class CausationLearning
       CausationTrainingInstances = new ArrayList<CausationInstance>();
       for (int i = 0, j = random.nextInt(NUM_CAUSATIONS); i < NUM_CAUSATION_INSTANCES; i++, j = (j + 1) % NUM_CAUSATIONS)
       {
-    	  Causation causation = null;
-    	 if (NUM_CAUSATIONS > 0)
-    	 {
-	         causation = Causations.get(j);
-    	 }
+         Causation causation = null;
+         if (NUM_CAUSATIONS > 0)
+         {
+            causation = Causations.get(j);
+         }
          CausationTrainingInstances.add(new CausationInstance(causation, random));
       }
       CausationTestingInstances = new ArrayList<CausationInstance>();
       for (int i = 0, j = random.nextInt(NUM_CAUSATIONS); i < NUM_CAUSATION_INSTANCES; i++, j = (j + 1) % NUM_CAUSATIONS)
       {
-    	  Causation causation = null;
-    	 if (NUM_CAUSATIONS > 0)
-    	 {
-	         causation = Causations.get(j);
-    	 }
+         Causation causation = null;
+         if (NUM_CAUSATIONS > 0)
+         {
+            causation = Causations.get(j);
+         }
          CausationTestingInstances.add(new CausationInstance(causation, random));
       }
 
@@ -783,14 +783,14 @@ public class CausationLearning
       for (int i = 0; i < CausationTrainingInstances.size(); i++)
       {
          CausationInstance instance = CausationTrainingInstances.get(i);
-         System.out.print("[" + i + "] " );
+         System.out.print("[" + i + "] ");
          instance.print();
       }
       System.out.println("Causation testing instances:");
       for (int i = 0; i < CausationTestingInstances.size(); i++)
       {
          CausationInstance instance = CausationTestingInstances.get(i);
-         System.out.print("[" + i + "] " );
+         System.out.print("[" + i + "] ");
          instance.print();
       }
 
@@ -829,7 +829,7 @@ public class CausationLearning
             {
                y_train += "\n";
                CausationInstance instance = CausationTrainingInstances.get(i);
-               if (instance.valid && instance.causation != null)
+               if (instance.valid && (instance.causation != null))
                {
                   y_train += oneHot(instance.causation.ID, NUM_CAUSATIONS + 1) + ",";
                }
@@ -872,7 +872,7 @@ public class CausationLearning
             {
                y_test += "\n";
                CausationInstance instance = CausationTestingInstances.get(i);
-               if (instance.valid && instance.causation != null)
+               if (instance.valid && (instance.causation != null))
                {
                   y_test += oneHot(instance.causation.ID, NUM_CAUSATIONS + 1) + ",";
                }
@@ -929,7 +929,7 @@ public class CausationLearning
             {
                y_train += "\n";
                CausationInstance instance = CausationTrainingInstances.get(i);
-               if (instance.valid && instance.causation != null)
+               if (instance.valid && (instance.causation != null))
                {
                   y_train += oneHot(instance.causation.ID, NUM_CAUSATIONS + 1) + ",";
                }
@@ -972,7 +972,7 @@ public class CausationLearning
             {
                y_test += "\n";
                CausationInstance instance = CausationTestingInstances.get(i);
-               if (instance.valid && instance.causation != null)
+               if (instance.valid && (instance.causation != null))
                {
                   y_test += oneHot(instance.causation.ID, NUM_CAUSATIONS + 1) + ",";
                }
@@ -1031,7 +1031,7 @@ public class CausationLearning
                CausationInstance instance = CausationTrainingInstances.get(i);
                for (int k = 0; k < instance.events.length; k++)
                {
-                  if ((instance.effectEventIndex == k) && instance.valid && instance.causation != null)
+                  if ((instance.effectEventIndex == k) && instance.valid && (instance.causation != null))
                   {
                      y_train += oneHot(instance.causation.ID, NUM_CAUSATIONS + 1);
                   }
@@ -1078,7 +1078,7 @@ public class CausationLearning
                CausationInstance instance = CausationTestingInstances.get(i);
                for (int k = 0; k < instance.events.length; k++)
                {
-                  if ((instance.effectEventIndex == k) && instance.valid && instance.causation != null)
+                  if ((instance.effectEventIndex == k) && instance.valid && (instance.causation != null))
                   {
                      y_test += oneHot(instance.causation.ID, NUM_CAUSATIONS + 1);
                   }
@@ -1114,13 +1114,13 @@ public class CausationLearning
       {
          // Run GA.
          CausationsGA.run();
-         
+
          // Test GA.
          List<Float> fitnesses = CausationsGA.test(CausationTestingInstances);
          System.out.println("Test results:");
          for (int i = 0; i < NUM_CAUSATIONS; i++)
          {
-	         System.out.println("Causation=" + i + ", fitness=" + fitnesses.get(i));
+            System.out.println("Causation=" + i + ", fitness=" + fitnesses.get(i));
          }
       }
       else
@@ -1310,6 +1310,7 @@ public class CausationLearning
       return(encoding);
    }
 
+
    // Permute list of numbers.
    static public List < List < Integer >> permuteList(List<Integer> input)
    {
@@ -1347,6 +1348,7 @@ public class CausationLearning
          }
       }
    }
+
 
    // Print parameters.
    public static void printParameters()

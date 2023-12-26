@@ -101,6 +101,7 @@ public class Genome
       }
    }
 
+
    // Print genome.
    void print()
    {
