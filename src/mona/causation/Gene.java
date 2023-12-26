@@ -83,7 +83,7 @@ public class Gene
    {
 	  Gene gene = new Gene(mutationRate, randomSeed);
       gene.type              = type;
-      if (gene.name != null)
+      if (name != null)
       {
     	  gene.name              = new String(name);
       }

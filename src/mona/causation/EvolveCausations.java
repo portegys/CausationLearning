@@ -496,7 +496,7 @@ public class EvolveCausations
       
       // Copy genome.
       void copyGenome(Genome genome)
-      {
+      {    	  
     	  genes.clear();
     	  for (Gene gene : genome.genes)
     	  {
