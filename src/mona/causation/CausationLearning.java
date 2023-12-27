@@ -89,6 +89,7 @@ public class CausationLearning
    // Usage.
    public static final String Usage =
       "Usage:\n" +
+      "  Run:\n" +   
       "    java mona.causation.CausationLearning\n" +
       "        [-numEventTypes <quantity> (default=" + Causation.NUM_EVENT_TYPES + ")]\n" +
       "        [-numCauseEventTypes <quantity> (default=" + Causation.NUM_CAUSE_EVENT_TYPES + ")]\n" +

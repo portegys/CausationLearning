@@ -28,6 +28,7 @@ causation.sh or causation.bat
 
 Usage:
 <pre>
+  Run:
     java mona.causation.CausationLearning
         [-numEventTypes <quantity> (default=10)]
         [-numCauseEventTypes <quantity> (default=5)]
