@@ -105,7 +105,7 @@ public class Genome
    // Print genome.
    void print()
    {
-      for (int i = 0; i < genes.size(); i++)
+      for (int i = 0, j = genes.size(); i < j; i++)
       {
          genes.get(i).print();
       }

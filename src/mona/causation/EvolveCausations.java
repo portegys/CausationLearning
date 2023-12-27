@@ -212,7 +212,6 @@ public class EvolveCausations
             member.evaluate();
             log("    member=" + i + ", " + member.getInfo());
          }
-
          Member[] population = new Member[POPULATION_SIZE];
          for (int i = 0; i < POPULATION_SIZE; i++)
          {
@@ -301,8 +300,17 @@ public class EvolveCausations
       // Evaluate.
       void evaluate()
       {
+         ArrayList<Integer> genomeCauseEvents = new ArrayList<Integer>();
+         for (int i = 1, j = genome.genes.size(); i < j; i++)
+         {
+            Gene gene = genome.genes.get(i);
+            for (int k = 0; k < gene.ivalue; k++)
+            {
+               genomeCauseEvents.add(i - 1);
+            }
+         }
          List < List < Integer >> causationPermutations =
-            CausationLearning.permuteList(Causations.get(causationID).causeEvents);
+            CausationLearning.permuteList(genomeCauseEvents);
          fitness = 0.0f;
          for (CausationInstance instance : CausationInstances)
          {
