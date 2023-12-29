@@ -100,17 +100,14 @@ for response in range(trainTotal):
 
 # predict
 from causation_attention_dataset import X_test_shape, X_test_seq, y_test_shape, y_test_seq
-if X_test_shape[0] == 0:
-    print('Empty test dataset')
-    sys.exit(1)
-seq = array(X_test_seq)
-X = seq.reshape(X_test_shape[0], X_test_shape[1], X_test_shape[2])
-seq = array(y_test_seq)
-y = seq.reshape(y_test_shape[0], y_test_shape[1])
 num_samples = X_test_shape[0]
 testOK = 0
 testTotal = num_samples
 if testTotal > 0:
+    seq = array(X_test_seq)
+    X = seq.reshape(X_test_shape[0], X_test_shape[1], X_test_shape[2])
+    seq = array(y_test_seq)
+    y = seq.reshape(y_test_shape[0], y_test_shape[1])
     predictions = model.predict(X, batch_size=num_samples, verbose=0)
     if verbose:
         print('Test:')

@@ -50,12 +50,12 @@ public class Causation
 
    public void print()
    {
-      System.out.println("ID=" + ID);
-      System.out.print("cause events: { ");
+      System.out.print("ID=" + ID);
+      System.out.print(", cause events: { ");
       for (int i : causeEvents)
       {
          System.out.print(i + " ");
       }
-      System.out.println("}, effect: " + EFFECT_EVENT_TYPE);
+      System.out.println("}, effect event: " + EFFECT_EVENT_TYPE);
    }
 }

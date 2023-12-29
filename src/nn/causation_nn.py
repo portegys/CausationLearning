@@ -52,9 +52,6 @@ from causation_nn_dataset import X_train_shape, y_train_shape, X_train_seq, y_tr
 if X_train_shape[0] == 0:
     print('Empty train dataset')
     sys.exit(1)
-if X_test_shape[0] == 0:
-    print('Empty test dataset')
-    sys.exit(1)
 seq = array(X_train_seq)
 X = seq.reshape(X_train_shape[0], X_train_shape[1])
 seq = array(y_train_seq)
@@ -96,13 +93,13 @@ for response in range(trainTotal):
                 print(' error')
 
 # predict
-seq = array(X_test_seq)
-X = seq.reshape(X_test_shape[0], X_test_shape[1])
-seq = array(y_test_seq)
-y = seq.reshape(y_test_shape[0], y_test_shape[1])
 testOK = 0
 testTotal = X_test_shape[0]
 if testTotal > 0:
+    seq = array(X_test_seq)
+    X = seq.reshape(X_test_shape[0], X_test_shape[1])
+    seq = array(y_test_seq)
+    y = seq.reshape(y_test_shape[0], y_test_shape[1])
     predictions = model.predict(X, batch_size=testTotal, verbose=0)
     if verbose:
         print('Test:')
