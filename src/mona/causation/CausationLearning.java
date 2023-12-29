@@ -44,9 +44,9 @@ import org.json.JSONObject;
 public class CausationLearning
 {
    // Parameters.
-   public static int                NUM_CAUSATIONS          = 2;
+   public static int                NUM_CAUSATIONS = 2;
    public static int                NUM_TRAINING_CAUSATION_INSTANCES = 10;
-   public static int                NUM_TESTING_CAUSATION_INSTANCES = 10;   
+   public static int                NUM_TESTING_CAUSATION_INSTANCES  = 10;
    public static String             LEARNER    = "LSTM";
    public static int                NUM_EPOCHS = 500;
    public static final int          DEFAULT_NUM_HIDDEN_NEURONS = 128;
@@ -86,14 +86,14 @@ public class CausationLearning
 
    // GA.
    public static EvolveCausations CausationsGA;
-   
+
    // Verbosity.
    public static boolean Verbose = false;
 
    // Usage.
    public static final String Usage =
       "Usage:\n" +
-      "  Run:\n" +   
+      "  Run:\n" +
       "    java mona.causation.CausationLearning\n" +
       "        [-numEventTypes <quantity> (default=" + Causation.NUM_EVENT_TYPES + ")]\n" +
       "        [-numCauseEventTypes <quantity> (default=" + Causation.NUM_CAUSE_EVENT_TYPES + ")]\n" +
@@ -115,7 +115,7 @@ public class CausationLearning
       "             [-fitPopulationSize <quantity> (default=" + EvolveCausations.FIT_POPULATION_SIZE + ")]\n" +
       "             [-mutationRate <probability> (default=" + EvolveCausations.MUTATION_RATE + ")]\n" +
       "        [-randomSeed <random number seed> (default=" + DEFAULT_RANDOM_SEED + ")]\n" +
-      "        [-verbose (default=" + Verbose + ")]\n" +   
+      "        [-verbose (default=" + Verbose + ")]\n" +
       "  Print parameters:\n" +
       "    java mona.causation.CausationLearning -printParameters\n" +
       "  Version:\n" +
@@ -404,7 +404,7 @@ public class CausationLearning
                System.exit(1);
             }
             continue;
-         }         
+         }
          if (args[i].equals("-learner"))
          {
             i++;
@@ -617,7 +617,7 @@ public class CausationLearning
          {
             Verbose = true;
             continue;
-         }         
+         }
          if (args[i].equals("-printParameters"))
          {
             printParms = true;
@@ -785,29 +785,29 @@ public class CausationLearning
       // Print parameters and causations.
       if (Verbose)
       {
-	      System.out.println("Parameters:");
-	      printParameters();
-	      System.out.println("Causations:");
-	      for (int i = 0; i < Causations.size(); i++)
-	      {
-	         Causation causation = Causations.get(i);
-	         System.out.print("[" + i + "] ");
-	         causation.print();
-	      }
-	      System.out.println("Causation training instances:");
-	      for (int i = 0; i < CausationTrainingInstances.size(); i++)
-	      {
-	         CausationInstance instance = CausationTrainingInstances.get(i);
-	         System.out.print("[" + i + "] ");
-	         instance.print();
-	      }
-	      System.out.println("Causation testing instances:");
-	      for (int i = 0; i < CausationTestingInstances.size(); i++)
-	      {
-	         CausationInstance instance = CausationTestingInstances.get(i);
-	         System.out.print("[" + i + "] ");
-	         instance.print();
-	      }
+         System.out.println("Parameters:");
+         printParameters();
+         System.out.println("Causations:");
+         for (int i = 0; i < Causations.size(); i++)
+         {
+            Causation causation = Causations.get(i);
+            System.out.print("[" + i + "] ");
+            causation.print();
+         }
+         System.out.println("Causation training instances:");
+         for (int i = 0; i < CausationTrainingInstances.size(); i++)
+         {
+            CausationInstance instance = CausationTrainingInstances.get(i);
+            System.out.print("[" + i + "] ");
+            instance.print();
+         }
+         System.out.println("Causation testing instances:");
+         for (int i = 0; i < CausationTestingInstances.size(); i++)
+         {
+            CausationInstance instance = CausationTestingInstances.get(i);
+            System.out.print("[" + i + "] ");
+            instance.print();
+         }
       }
 
       // Learn and evaluate performance.
@@ -1181,7 +1181,7 @@ public class CausationLearning
          int n = 5;
          if (Verbose)
          {
-        	 n = 4;
+            n = 4;
          }
          String[] opts = new String[n + (NUM_HIDDEN_NEURONS.size() * 2)];
          opts[0]       = "python";
@@ -1196,7 +1196,7 @@ public class CausationLearning
          }
          if (!Verbose)
          {
-        	 opts[k]       = "-q";
+            opts[k] = "-q";
          }
          ProcessBuilder processBuilder = new ProcessBuilder(opts);
          processBuilder.inheritIO();
@@ -1214,8 +1214,8 @@ public class CausationLearning
          catch (InterruptedException e) {}
          if (exitCode != 0)
          {
-             System.err.println(pythonFilename + " exited with error code " + exitCode);        	 
-        	 System.exit(exitCode);
+            System.err.println(pythonFilename + " exited with error code " + exitCode);
+            System.exit(exitCode);
          }
 
          // Fetch the results.
@@ -1395,7 +1395,7 @@ public class CausationLearning
       System.out.println("VALID_INTERVENING_EVENTS_PROBABILITY = " + CausationInstance.VALID_INTERVENING_EVENTS_PROBABILITY);
       System.out.println("CAUSATION_INSTANCE_LENGTH = " + Causation.CAUSATION_INSTANCE_LENGTH);
       System.out.println("NUM_TRAINING_CAUSATION_INSTANCES = " + NUM_TRAINING_CAUSATION_INSTANCES);
-      System.out.println("NUM_TESTING_CAUSATION_INSTANCES = " + NUM_TESTING_CAUSATION_INSTANCES);      
+      System.out.println("NUM_TESTING_CAUSATION_INSTANCES = " + NUM_TESTING_CAUSATION_INSTANCES);
       System.out.println("CAUSATION_INSTANCE_LENGTH = " + Causation.CAUSATION_INSTANCE_LENGTH);
       System.out.println("LEARNER = " + LEARNER);
       System.out.print("NUM_HIDDEN_NEURONS = {");
@@ -1409,7 +1409,7 @@ public class CausationLearning
       }
       System.out.println("}");
       System.out.println("NUM_EPOCHS = " + NUM_EPOCHS);
-      EvolveCausations.printParameters();      
+      EvolveCausations.printParameters();
       System.out.println("RANDOM_SEED = " + RANDOM_SEED);
    }
 }
