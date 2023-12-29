@@ -38,8 +38,8 @@ Usage:
         [-maxInterveningEvents <quantity> (default=2)]
         [-maxValidInterveningEvents <quantity> (default=1)]
         [-validInterveningEventsProbability <probability> (default=0.9)]
-        [-causationInstanceLength <length> (default=9)]
-        [-numCausationInstances <quantity> (default=10)]
+        [-numTrainingCausationInstances <quantity> (default=10)]
+        [-numTestingCausationInstances <quantity> (default=10)]
         [-learner
            "LSTM" | "SimpleRNN" | "Attention" | "NN" |
              [-numHiddenNeurons <quantity> (default=128) (repeat for additional layers)]
