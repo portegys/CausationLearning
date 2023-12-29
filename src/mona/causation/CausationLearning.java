@@ -88,7 +88,7 @@ public class CausationLearning
    public static EvolveCausations CausationsGA;
 
    // Verbosity.
-   public static boolean Verbose = false;
+   public static boolean Verbose = true;
 
    // Usage.
    public static final String Usage =
@@ -115,7 +115,7 @@ public class CausationLearning
       "             [-fitPopulationSize <quantity> (default=" + EvolveCausations.FIT_POPULATION_SIZE + ")]\n" +
       "             [-mutationRate <probability> (default=" + EvolveCausations.MUTATION_RATE + ")]\n" +
       "        [-randomSeed <random number seed> (default=" + DEFAULT_RANDOM_SEED + ")]\n" +
-      "        [-verbose (default=" + Verbose + ")]\n" +
+      "        [-verbose \"true\" | \"false\" (default=" + Verbose + ")]\n" +
       "  Print parameters:\n" +
       "    java mona.causation.CausationLearning -printParameters\n" +
       "  Version:\n" +
@@ -615,7 +615,27 @@ public class CausationLearning
          }
          if (args[i].equals("-verbose"))
          {
-            Verbose = true;
+            i++;
+            if (i >= args.length)
+            {
+               System.err.println("Invalid verbose option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
+            if (args[i].equals("true"))
+            {
+               Verbose = true;
+            }
+            else if (args[i].equals("false"))
+            {
+               Verbose = false;
+            }
+            else
+            {
+               System.err.println("Invalid verbose option");
+               System.err.println(Usage);
+               System.exit(1);
+            }
             continue;
          }
          if (args[i].equals("-printParameters"))
