@@ -50,6 +50,7 @@ Usage:
              [-fitPopulationSize <quantity> (default=10)]
              [-mutationRate <probability> (default=0.25)]
         [-randomSeed <random number seed> (default=4517)]
+        [-verbose (default=false)]        
   Print parameters:
     java mona.causation.CausationLearning -printParameters
   Version:

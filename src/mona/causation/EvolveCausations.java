@@ -245,7 +245,7 @@ public class EvolveCausations
       // Print.
       void print()
       {
-         System.out.println("Population:");
+         log("Population:");
          for (int i = 0; i < POPULATION_SIZE; i++)
          {
             members.get(i).print();
@@ -469,19 +469,20 @@ public class EvolveCausations
       // Print.
       void print()
       {
-         System.out.println(getInfo());
-         System.out.print("genome: ");
-         System.out.print(genome.genes.get(0).name + "=" + genome.genes.get(0).ivalue);
-         System.out.print(", CAUSATION_EVENTS: {");
+         log(getInfo());
+         String info = "genome: ";
+         info += genome.genes.get(0).name + "=" + genome.genes.get(0).ivalue;
+         info += ", CAUSATION_EVENTS: {";
          for (int i = 1, j = genome.genes.size(); i < j; i++)
          {
-            System.out.print(genome.genes.get(i).ivalue);
+            info += genome.genes.get(i).ivalue;
             if (i < j - 1)
             {
-               System.out.print(", ");
+               info += ", ";
             }
          }
-         System.out.println("}");
+         info += "}";
+         log(info);
       }
 
 
@@ -557,7 +558,7 @@ public class EvolveCausations
    }
 
    // Logging.
-   void log(String message)
+   static void log(String message)
    {
       if (LOG)
       {
@@ -569,9 +570,9 @@ public class EvolveCausations
    // Print parameters.
    public static void printParameters()
    {
-      System.out.println("GENERATIONS = " + GENERATIONS);
-      System.out.println("POPULATION_SIZE = " + POPULATION_SIZE);
-      System.out.println("FIT_POPULATION_SIZE = " + FIT_POPULATION_SIZE);
-      System.out.println("MUTATION_RATE = " + MUTATION_RATE);
+      log("GENERATIONS = " + GENERATIONS);
+      log("POPULATION_SIZE = " + POPULATION_SIZE);
+      log("FIT_POPULATION_SIZE = " + FIT_POPULATION_SIZE);
+      log("MUTATION_RATE = " + MUTATION_RATE);
    }
 }

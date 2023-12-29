@@ -86,6 +86,9 @@ public class CausationLearning
 
    // GA.
    public static EvolveCausations CausationsGA;
+   
+   // Verbosity.
+   public static boolean Verbose = false;
 
    // Usage.
    public static final String Usage =
@@ -112,6 +115,7 @@ public class CausationLearning
       "             [-fitPopulationSize <quantity> (default=" + EvolveCausations.FIT_POPULATION_SIZE + ")]\n" +
       "             [-mutationRate <probability> (default=" + EvolveCausations.MUTATION_RATE + ")]\n" +
       "        [-randomSeed <random number seed> (default=" + DEFAULT_RANDOM_SEED + ")]\n" +
+      "        [-verbose (default=" + Verbose + ")]\n" +   
       "  Print parameters:\n" +
       "    java mona.causation.CausationLearning -printParameters\n" +
       "  Version:\n" +
@@ -609,6 +613,11 @@ public class CausationLearning
             }
             continue;
          }
+         if (args[i].equals("-verbose"))
+         {
+            Verbose = true;
+            continue;
+         }         
          if (args[i].equals("-printParameters"))
          {
             printParms = true;
@@ -694,6 +703,7 @@ public class CausationLearning
             System.err.println(Usage);
             System.exit(1);
          }
+         EvolveCausations.LOG = Verbose;
       }
       else
       {
@@ -772,29 +782,32 @@ public class CausationLearning
          CausationTestingInstances.add(new CausationInstance(causation, random));
       }
 
-      // Print causations.
-      System.out.println("Parameters:");
-      printParameters();
-      System.out.println("Causations:");
-      for (int i = 0; i < Causations.size(); i++)
+      // Print parameters and causations.
+      if (Verbose)
       {
-         Causation causation = Causations.get(i);
-         System.out.print("[" + i + "] ");
-         causation.print();
-      }
-      System.out.println("Causation training instances:");
-      for (int i = 0; i < CausationTrainingInstances.size(); i++)
-      {
-         CausationInstance instance = CausationTrainingInstances.get(i);
-         System.out.print("[" + i + "] ");
-         instance.print();
-      }
-      System.out.println("Causation testing instances:");
-      for (int i = 0; i < CausationTestingInstances.size(); i++)
-      {
-         CausationInstance instance = CausationTestingInstances.get(i);
-         System.out.print("[" + i + "] ");
-         instance.print();
+	      System.out.println("Parameters:");
+	      printParameters();
+	      System.out.println("Causations:");
+	      for (int i = 0; i < Causations.size(); i++)
+	      {
+	         Causation causation = Causations.get(i);
+	         System.out.print("[" + i + "] ");
+	         causation.print();
+	      }
+	      System.out.println("Causation training instances:");
+	      for (int i = 0; i < CausationTrainingInstances.size(); i++)
+	      {
+	         CausationInstance instance = CausationTrainingInstances.get(i);
+	         System.out.print("[" + i + "] ");
+	         instance.print();
+	      }
+	      System.out.println("Causation testing instances:");
+	      for (int i = 0; i < CausationTestingInstances.size(); i++)
+	      {
+	         CausationInstance instance = CausationTestingInstances.get(i);
+	         System.out.print("[" + i + "] ");
+	         instance.print();
+	      }
       }
 
       // Learn and evaluate performance.
@@ -1165,16 +1178,25 @@ public class CausationLearning
             System.err.println("Cannot create " + pythonFilename);
             System.exit(1);
          }
-         String[] opts = new String[5 + (NUM_HIDDEN_NEURONS.size() * 2)];
+         int n = 5;
+         if (Verbose)
+         {
+        	 n = 4;
+         }
+         String[] opts = new String[n + (NUM_HIDDEN_NEURONS.size() * 2)];
          opts[0]       = "python";
          opts[1]       = pythonFilename;
          opts[2]       = "-e";
          opts[3]       = (NUM_EPOCHS + "");
-         opts[4]       = "-q";
-         for (int i = 0, j = NUM_HIDDEN_NEURONS.size(), k = 5; i < j; i++, k += 2)
+         int k = 4;
+         for (int i = 0, j = NUM_HIDDEN_NEURONS.size(); i < j; i++, k += 2)
          {
             opts[k]     = "-h";
             opts[k + 1] = (NUM_HIDDEN_NEURONS.get(i) + "");
+         }
+         if (!Verbose)
+         {
+        	 opts[k]       = "-q";
          }
          ProcessBuilder processBuilder = new ProcessBuilder(opts);
          processBuilder.inheritIO();
