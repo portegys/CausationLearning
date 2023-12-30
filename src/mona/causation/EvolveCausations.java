@@ -48,10 +48,9 @@ public class EvolveCausations
    }
 
 
-   // Run.
-   public void run()
+   // Train.
+   public void train()
    {
-      // Log run.
       log("Parameters:");
       log("  GENERATIONS=" + GENERATIONS);
       log("  POPULATION_SIZE=" + POPULATION_SIZE);
@@ -74,21 +73,26 @@ public class EvolveCausations
 
 
    // Test.
-   public ArrayList<Float> test(ArrayList<CausationInstance> causationInstances)
+   public ArrayList<Boolean> test(ArrayList<CausationInstance> causationInstances)
    {
       CausationInstances = causationInstances;
-      ArrayList<Float> causationFitnesses = new ArrayList<Float>();
-
+      ArrayList<Boolean> results = new ArrayList<Boolean>();
       log("Begin testing:");
-      for (int i = 0; i < Populations.length; i++)
+      for (CausationInstance instance : causationInstances)
       {
-         log("Population=" + i);
-         Populations[i].test();
-         causationFitnesses.add(Populations[i].members.get(0).fitness);
-         Populations[i].print();
+         boolean result = true;
+         for (int i = 0; i < Populations.length; i++)
+         {
+            if (!Populations[i].test(instance))
+            {
+               result = false;
+               break;
+            }
+         }
+         results.add(result);
       }
       log("End testing");
-      return(causationFitnesses);
+      return(results);
    }
 
 
@@ -202,43 +206,13 @@ public class EvolveCausations
       }
 
 
-      // Test member fitness.
-      void test()
+      // Test population fitness.
+      boolean test(CausationInstance instance)
       {
-         log("Test:");
-         for (int i = 0; i < POPULATION_SIZE; i++)
-         {
-            Member member = members.get(i);
-            member.evaluate();
-            log("    member=" + i + ", " + member.getInfo());
-         }
-         Member[] population = new Member[POPULATION_SIZE];
-         for (int i = 0; i < POPULATION_SIZE; i++)
-         {
-            float max = 0.0f;
-            int   m   = -1;
-            for (int j = 0; j < POPULATION_SIZE; j++)
-            {
-               Member member = members.get(j);
-               if (member == null)
-               {
-                  continue;
-               }
-               if ((m == -1) || (member.fitness > max))
-               {
-                  m   = j;
-                  max = member.fitness;
-               }
-            }
-            Member member = members.get(m);
-            members.set(m, null);
-            population[i] = member;
-         }
-         members.clear();
-         for (int i = 0; i < POPULATION_SIZE; i++)
-         {
-            members.add(population[i]);
-         }
+         boolean result = members.get(0).test(instance);
+
+         log("Test: result=" + result);
+         return(result);
       }
 
 
@@ -344,6 +318,62 @@ public class EvolveCausations
                {
                   fitness -= 1.0f;
                }
+               else
+               {
+                  fitness += 1.0f;
+               }
+            }
+         }
+      }
+
+
+      // Test.
+      boolean test(CausationInstance instance)
+      {
+         ArrayList<Integer> genomeCauseEvents = new ArrayList<Integer>();
+         for (int i = 1, j = genome.genes.size(); i < j; i++)
+         {
+            Gene gene = genome.genes.get(i);
+            for (int k = 0; k < gene.ivalue; k++)
+            {
+               genomeCauseEvents.add(i - 1);
+            }
+         }
+         List < List < Integer >> causationPermutations =
+            CausationLearning.permuteList(genomeCauseEvents);
+         boolean match = false;
+         for (List<Integer> permutation : causationPermutations)
+         {
+            int[] causeEvents = new int[permutation.size()];
+            for (int i = 0; i < causeEvents.length; i++)
+            {
+               causeEvents[i] = permutation.get(i);
+            }
+            if ((match = matchEventStream(instance.events, 0, causeEvents)))
+            {
+               break;
+            }
+         }
+         if (match)
+         {
+            if (instance.valid && (instance.causation.ID == causationID))
+            {
+               return(true);
+            }
+            else
+            {
+               return(false);
+            }
+         }
+         else
+         {
+            if (instance.valid && (instance.causation.ID == causationID))
+            {
+               return(false);
+            }
+            else
+            {
+               return(true);
             }
          }
       }

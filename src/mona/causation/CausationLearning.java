@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -63,7 +64,7 @@ public class CausationLearning
    public static Random    random;
    public final static int MAX_TRIES = 100;
 
-   // NN.
+   // Files.
    public static final String RNN_DATASET_FILENAME       = "causation_rnn_dataset.py";
    public static final String RNN_FILENAME               = "causation_rnn.py";
    public static final String RNN_RESULTS_FILENAME       = "causation_rnn_results.json";
@@ -73,6 +74,7 @@ public class CausationLearning
    public static final String NN_DATASET_FILENAME        = "causation_nn_dataset.py";
    public static final String NN_FILENAME         = "causation_nn.py";
    public static final String NN_RESULTS_FILENAME = "causation_nn_results.json";
+   public static final String GA_RESULTS_FILENAME = "causation_ga_results.json";
 
    // Version.
    public static final String VERSION = "1.0";
@@ -1148,16 +1150,42 @@ public class CausationLearning
       // Run.
       if (LEARNER.equals("GA"))
       {
-         // Run GA.
-         CausationsGA.run();
+         // Train GA.
+         CausationsGA.train();
 
          // Test GA.
-         List<Float> fitnesses = CausationsGA.test(CausationTestingInstances);
-         System.out.println("Test results:");
-         for (int i = 0; i < NUM_CAUSATIONS; i++)
+         List<Boolean> results   = CausationsGA.test(CausationTestingInstances);
+         int           testOK    = 0;
+         int           testTotal = CausationTestingInstances.size();
+         for (Boolean result : results)
          {
-            System.out.println("Causation=" + i + ", fitness=" + fitnesses.get(i));
+            if (result)
+            {
+               testOK++;
+            }
          }
+         float pct = 0.0f;
+         if (testTotal > 0)
+         {
+            pct = ((float)testOK / (float)testTotal) * 100.0f;
+         }
+         DecimalFormat df = new DecimalFormat("0.0");
+         if (Verbose)
+         {
+            System.out.println("Writing results to " + GA_RESULTS_FILENAME);
+         }
+         try (PrintWriter writer = new PrintWriter(GA_RESULTS_FILENAME))
+            {
+               writer.println("{\"test_correct_predictions\":\"" + testOK + "\",\"test_total_predictions\":\"" +
+                              testTotal + "\",\"test_pct\":\"" + df.format(pct) + "\"}");
+            }
+            catch (IOException e)
+            {
+               System.err.println("Cannot write results to file " + GA_RESULTS_FILENAME + ": " + e.getMessage());
+            }
+
+         System.out.print("Test correct/total = " + testOK + "/" + testTotal);
+         System.out.println(" (" + df.format(pct) + "%)");
       }
       else
       {
