@@ -80,15 +80,20 @@ public class EvolveCausations
       log("Begin testing:");
       for (CausationInstance instance : causationInstances)
       {
+         log("Test instance, causation ID=" + instance.causation.ID);
          boolean result = true;
          for (int i = 0; i < Populations.length; i++)
          {
+            String message = "  Test population, causation ID=" + Populations[i].causationID;
             if (!Populations[i].test(instance))
             {
+               log(message + ", result=false");
                result = false;
                break;
             }
+            log(message + ", result=true");
          }
+         log("result=" + result);
          results.add(result);
       }
       log("End testing");
@@ -209,10 +214,7 @@ public class EvolveCausations
       // Test population fitness.
       boolean test(CausationInstance instance)
       {
-         boolean result = members.get(0).test(instance);
-
-         log("Test: result=" + result);
-         return(result);
+         return(members.get(0).test(instance));
       }
 
 
@@ -256,7 +258,9 @@ public class EvolveCausations
       // Construct mutation of given member.
       Member(int ID, int generation, Member member)
       {
+         causationID     = 4;
          this.ID         = ID;
+         causationID     = member.causationID;
          this.generation = generation;
          this.randomizer = member.randomizer;
          fitness         = 0.0f;
