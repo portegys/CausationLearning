@@ -1175,17 +1175,14 @@ public class CausationLearning
             System.out.println("Writing results to " + GA_RESULTS_FILENAME);
          }
          try (PrintWriter writer = new PrintWriter(GA_RESULTS_FILENAME))
-            {
-               writer.println("{\"test_correct_predictions\":\"" + testOK + "\",\"test_total_predictions\":\"" +
-                              testTotal + "\",\"test_pct\":\"" + df.format(pct) + "\"}");
-            }
-            catch (IOException e)
-            {
-               System.err.println("Cannot write results to file " + GA_RESULTS_FILENAME + ": " + e.getMessage());
-            }
-
-
-
+         {
+           writer.println("{\"test_correct_predictions\":\"" + testOK + "\",\"test_total_predictions\":\"" +
+                          testTotal + "\",\"test_pct\":\"" + df.format(pct) + "\"}");
+         }
+         catch (IOException e)
+         {
+           System.err.println("Cannot write results to file " + GA_RESULTS_FILENAME + ": " + e.getMessage());
+         }
          System.out.print("Test correct/total = " + testOK + "/" + testTotal);
          System.out.println(" (" + df.format(pct) + "%)");
       }

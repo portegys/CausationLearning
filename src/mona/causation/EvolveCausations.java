@@ -80,7 +80,7 @@ public class EvolveCausations
       log("Begin testing:");
       for (CausationInstance instance : causationInstances)
       {
-         log("Test instance, causation ID=" + instance.causation.ID);
+         log("Test instance, causation ID=" + instance.causation.ID + ", valid=" + instance.valid);
          boolean result = true;
          for (int i = 0; i < Populations.length; i++)
          {
@@ -258,7 +258,6 @@ public class EvolveCausations
       // Construct mutation of given member.
       Member(int ID, int generation, Member member)
       {
-         causationID     = 4;
          this.ID         = ID;
          causationID     = member.causationID;
          this.generation = generation;
