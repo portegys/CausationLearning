@@ -10,33 +10,35 @@ import java.util.Random;
 // Causation instances.
 public class CausationInstance
 {
-   public int[]     events;
+   public int[]              events;
    public ArrayList<Integer> causationIDs;
 
    // Constructors.
    public CausationInstance(Random random)
    {
-      events         = new int[Causation.CAUSATION_INSTANCE_LENGTH];
+      events = new int[Causation.CAUSATION_INSTANCE_LENGTH];
       for (int i = 0; i < Causation.CAUSATION_INSTANCE_LENGTH; i++)
       {
-    	  events[i] = random.nextInt(Causation.NUM_EVENT_TYPES);
+         events[i] = random.nextInt(Causation.NUM_EVENT_TYPES);
       }
       causationIDs = new ArrayList<Integer>();
    }
-   
+
+
    // Instance of causation ID?
    public boolean instanceOf(int causationID)
    {
-	   for (int i = 0, j = causationIDs.size(); i < j; i++)
-	   {
-		   if (causationIDs.get(i) == causationID)
-		   {
-			   return true;
-		   }
-	   }
-	   return false;
+      for (int i = 0, j = causationIDs.size(); i < j; i++)
+      {
+         if (causationIDs.get(i) == causationID)
+         {
+            return(true);
+         }
+      }
+      return(false);
    }
-   
+
+
    // Print.
    public void print()
    {
@@ -51,6 +53,6 @@ public class CausationInstance
       {
          System.out.print(i + " ");
       }
-      System.out.println("}");      
+      System.out.println("}");
    }
 }

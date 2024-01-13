@@ -30,10 +30,10 @@ public class Causation
    // Constructor.
    public Causation(int ID, Random random)
    {
-      this.ID     = ID;
-      events = new ArrayList<Integer>();
+      this.ID = ID;
+      events  = new ArrayList<Integer>();
       int n = 0;
-      if (MAX_CAUSE_EVENTS > 0 && NUM_CAUSE_EVENT_TYPES > 0)
+      if ((MAX_CAUSE_EVENTS > 0) && (NUM_CAUSE_EVENT_TYPES > 0))
       {
          n = random.nextInt(MAX_CAUSE_EVENTS) + 1;
          for (int i = 0; i < n; i++)
@@ -43,6 +43,7 @@ public class Causation
          Collections.sort(events);
       }
    }
+
 
    // Is the stream of events a valid instance of causation?
    public boolean instanceOf(int[] eventStream, int maxValidInterveningEvents)
@@ -57,11 +58,12 @@ public class Causation
          }
          if (matchEventStream(eventStream, 0, causeEvents, maxValidInterveningEvents))
          {
-            return true;
+            return(true);
          }
       }
-      return false;
+      return(false);
    }
+
 
    // Permute list of numbers.
    static public List < List < Integer >> permuteList(List<Integer> input)
@@ -79,8 +81,8 @@ public class Causation
       return(output);
    }
 
-   static private void permuteHelper(int[] num, int level, boolean[] used, 
-		   List < List < Integer >> output, ArrayList<Integer> temp)
+   static private void permuteHelper(int[] num, int level, boolean[] used,
+                                     List < List < Integer >> output, ArrayList<Integer> temp)
    {
       if (level == num.length)
       {
@@ -102,9 +104,10 @@ public class Causation
       }
    }
 
+
    // Match cause event order in event stream.
-   static public boolean matchEventStream(int[] eventStream, int startIndex, 
-		   int[] orderedCauseEvents, int maxValidInterveningEvents)
+   static public boolean matchEventStream(int[] eventStream, int startIndex,
+                                          int[] orderedCauseEvents, int maxValidInterveningEvents)
    {
       if (orderedCauseEvents.length == 0)
       {
@@ -113,7 +116,7 @@ public class Causation
       if (startIndex == eventStream.length)
       {
          return(false);
-      }      
+      }
       for (int i = 0, j = startIndex; i < orderedCauseEvents.length; i++)
       {
          int k = j;
@@ -140,9 +143,10 @@ public class Causation
             break;
          }
       }
-      return(matchEventStream(eventStream, startIndex + 1, 
-    		  orderedCauseEvents, maxValidInterveningEvents));
+      return(matchEventStream(eventStream, startIndex + 1,
+                              orderedCauseEvents, maxValidInterveningEvents));
    }
+
 
    // Print.
    public void print()

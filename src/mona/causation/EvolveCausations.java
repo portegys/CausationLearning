@@ -36,8 +36,8 @@ public class EvolveCausations
    // Constructor.
    public EvolveCausations(ArrayList<Causation> causations, Random randomizer)
    {
-      Causations         = causations;
-      Populations        = new Population[Causations.size()];
+      Causations  = causations;
+      Populations = new Population[Causations.size()];
       for (int i = 0; i < Populations.length; i++)
       {
          Populations[i] = new Population(i, randomizer);
@@ -49,8 +49,8 @@ public class EvolveCausations
    // Train.
    public void train(ArrayList<CausationInstance> causationInstances)
    {
-	      CausationInstances = causationInstances;
-	      
+      CausationInstances = causationInstances;
+
       log("Parameters:");
       log("  GENERATIONS=" + GENERATIONS);
       log("  POPULATION_SIZE=" + POPULATION_SIZE);
@@ -80,31 +80,31 @@ public class EvolveCausations
       log("Begin testing:");
       for (CausationInstance instance : causationInstances)
       {
-    	 boolean[] causationIndexes = new boolean[Populations.length];
-    	 for (int i = 0; i < causationIndexes.length; i++)
-    	 {
-    		 causationIndexes[i] = false;
-    	 }
+         boolean[] causationIndexes = new boolean[Populations.length];
+         for (int i = 0; i < causationIndexes.length; i++)
+         {
+            causationIndexes[i] = false;
+         }
          String message = "Test instance, causation IDs: {";
          for (int i = 0, j = instance.causationIDs.size(); i < j; i++)
          {
-        	 int k = instance.causationIDs.get(i);
-        	 causationIndexes[k] = true;
-        	 message += (k + "");
-        	 if (i < j - 1)
-        	 {
-        		 message += ",";
-        	 }
+            int k = instance.causationIDs.get(i);
+            causationIndexes[k] = true;
+            message            += (k + "");
+            if (i < j - 1)
+            {
+               message += ",";
+            }
          }
          message += "}";
          boolean result = true;
          for (int i = 0; i < Populations.length; i++)
          {
-        	if (Populations[i].test(instance) != causationIndexes[i])
-        	{
-        		result = false;
-        		break;
-        	}
+            if (Populations[i].test(instance) != causationIndexes[i])
+            {
+               result = false;
+               break;
+            }
          }
          message += (", result=" + result);
          log(message);
@@ -249,11 +249,11 @@ public class EvolveCausations
       // Constructors.
       Member(int ID, int causationID, int generation, Random randomizer)
       {
-         this.ID         = ID;
-         this.causationID     = causationID;
-         this.generation = generation;
-         this.randomizer = randomizer;
-         fitness         = 0.0f;
+         this.ID          = ID;
+         this.causationID = causationID;
+         this.generation  = generation;
+         this.randomizer  = randomizer;
+         fitness          = 0.0f;
 
          // Create genome.
          genome = new CausationGenome(randomizer);
@@ -282,7 +282,8 @@ public class EvolveCausations
       // Evaluate.
       void evaluate()
       {
-    	 int maxValidInterveningEvents = genome.genes.get(0).ivalue; 
+         int maxValidInterveningEvents = genome.genes.get(0).ivalue;
+
          ArrayList<Integer> genomeCauseEvents = new ArrayList<Integer>();
          for (int i = 1, j = genome.genes.size(); i < j; i++)
          {
@@ -304,7 +305,7 @@ public class EvolveCausations
                for (int i = 0; i < causeEvents.length; i++)
                {
                   causeEvents[i] = permutation.get(i);
-               }               
+               }
                if ((match = Causation.matchEventStream(instance.events, 0, causeEvents, maxValidInterveningEvents)))
                {
                   break;
@@ -335,10 +336,12 @@ public class EvolveCausations
          }
       }
 
+
       // Test.
       boolean test(CausationInstance instance)
       {
-     	 int maxValidInterveningEvents = genome.genes.get(0).ivalue;    	  
+         int maxValidInterveningEvents = genome.genes.get(0).ivalue;
+
          ArrayList<Integer> genomeCauseEvents = new ArrayList<Integer>();
          for (int i = 1, j = genome.genes.size(); i < j; i++)
          {
@@ -386,6 +389,7 @@ public class EvolveCausations
             }
          }
       }
+
 
       // Mutate.
       void mutate()
