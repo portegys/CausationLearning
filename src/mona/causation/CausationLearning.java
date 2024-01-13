@@ -1274,6 +1274,7 @@ public class CausationLearning
                System.err.println("Cannot write results to file " + GA_RESULTS_FILENAME + ": " + e.getMessage());
             }
 
+
          System.out.print("Test correct/total = " + testOK + "/" + testTotal);
          System.out.println(" (" + df.format(pct) + "%)");
       }

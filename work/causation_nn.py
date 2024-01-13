@@ -59,6 +59,7 @@ seq = array(X_train_seq)
 X = seq.reshape(X_train_shape[0], X_train_shape[1])
 seq = array(y_train_seq)
 y = seq.reshape(y_train_shape[0], y_train_shape[1])
+x_response = y_train_shape[1] - 1
 
 # create NN
 model = Sequential()
@@ -90,12 +91,14 @@ for response in range(trainTotal):
     t = [i for i,v in enumerate(a) if v > threshold]
     if p == t:
         trainOK += 1
-        if verbose:
-            print('target:', t, 'predicted:', p, end='')
-            if p == t:
-                print(' OK')
-            else:
-                print(' error')
+    if verbose:
+        t=['X' if x==x_response else x for x in t]
+        p=['X' if x==x_response else x for x in p]
+        print('target: {', ' '.join(map(str, t)), '} predicted: {', ' '.join(map(str, p)), '}', end='')
+        if p == t:
+            print(' OK')
+        else:
+            print(' error')
 
 # predict
 testOK = 0
@@ -116,7 +119,9 @@ if testTotal > 0:
         if p == t:
             testOK += 1
         if verbose:
-            print('target:', t, 'predicted:', p, end='')
+            t=['X' if x==x_response else x for x in t]
+            p=['X' if x==x_response else x for x in p]
+            print('target: {', ' '.join(map(str, t)), '} predicted: {', ' '.join(map(str, p)), '}', end='')
             if p == t:
                 print(' OK')
             else:

@@ -69,6 +69,7 @@ X = seq.reshape(X_train_shape[0], X_train_shape[1], X_train_shape[2])
 seq = array(y_train_seq)
 y = seq.reshape(y_train_shape[0], y_train_shape[1])
 num_samples, time_steps, input_dim, output_dim = X_train_shape[0], X_train_shape[1], X_train_shape[2], y_train_shape[1]
+x_response = output_dim - 1
 
 # create model
 model_input = Input(shape=(time_steps, input_dim))
@@ -96,12 +97,14 @@ for response in range(trainTotal):
     t = [i for i,v in enumerate(a) if v > threshold]
     if p == t:
         trainOK += 1
-        if verbose:
-            print('target:', t, 'predicted:', p, end='')
-            if p == t:
-                print(' OK')
-            else:
-                print(' error')
+    if verbose:
+        t=['X' if x==x_response else x for x in t]
+        p=['X' if x==x_response else x for x in p]
+        print('target: {', ' '.join(map(str, t)), '} predicted: {', ' '.join(map(str, p)), '}', end='')
+        if p == t:
+            print(' OK')
+        else:
+            print(' error')
 
 # predict
 from causation_attention_dataset import X_test_shape, X_test_seq, y_test_shape, y_test_seq
@@ -124,7 +127,9 @@ if testTotal > 0:
         if p == t:
             testOK += 1
         if verbose:
-            print('target:', t, 'predicted:', p, end='')
+            t=['X' if x==x_response else x for x in t]
+            p=['X' if x==x_response else x for x in p]
+            print('target: {', ' '.join(map(str, t)), '} predicted: {', ' '.join(map(str, p)), '}', end='')
             if p == t:
                 print(' OK')
             else:

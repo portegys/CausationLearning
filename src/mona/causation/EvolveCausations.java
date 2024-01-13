@@ -58,7 +58,7 @@ public class EvolveCausations
       log("  MUTATION_RATE=" + MUTATION_RATE);
 
       // Evolution loop.
-      log("Begin evolve:");
+      log("Train:");
       for (Generation = 0; Generation < GENERATIONS; Generation++)
       {
          log("Generation=" + Generation);
@@ -68,7 +68,6 @@ public class EvolveCausations
             Populations[i].evolve(Generation);
          }
       }
-      log("End evolve");
    }
 
 
@@ -77,7 +76,7 @@ public class EvolveCausations
    {
       CausationInstances = causationInstances;
       ArrayList<Boolean> results = new ArrayList<Boolean>();
-      log("Begin testing:");
+      log("Test:");
       for (CausationInstance instance : causationInstances)
       {
          boolean[] causationIndexes = new boolean[Populations.length];
@@ -85,32 +84,56 @@ public class EvolveCausations
          {
             causationIndexes[i] = false;
          }
-         String message = "Test instance, causation IDs: {";
+         String message = "target: { ";
          for (int i = 0, j = instance.causationIDs.size(); i < j; i++)
          {
             int k = instance.causationIDs.get(i);
             causationIndexes[k] = true;
-            message            += (k + "");
-            if (i < j - 1)
+         }
+         for (int i = 0; i < causationIndexes.length; i++)
+         {
+            if (causationIndexes[i])
             {
-               message += ",";
+               message += (i + " ");
+            }
+            else
+            {
+               message += "X ";
             }
          }
-         message += "}";
+         message += "} predicted: { ";
          boolean result = true;
          for (int i = 0; i < Populations.length; i++)
          {
-            if (Populations[i].test(instance) != causationIndexes[i])
+            if (Populations[i].test(instance))
             {
-               result = false;
-               break;
+               if (!causationIndexes[i])
+               {
+                  result = false;
+               }
+               message += (i + " ");
+            }
+            else
+            {
+               if (causationIndexes[i])
+               {
+                  result = false;
+               }
+               message += "X ";
             }
          }
-         message += (", result=" + result);
+         message += "}";
+         if (result)
+         {
+            message += " OK";
+         }
+         else
+         {
+            message += " error";
+         }
          log(message);
          results.add(result);
       }
-      log("End testing");
       return(results);
    }
 
