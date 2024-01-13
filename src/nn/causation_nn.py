@@ -17,6 +17,9 @@ n_epochs = 500
 # results file name
 results_filename = 'causation_nn_results.json'
 
+# prediction significance threshold
+threshold = 0.5
+
 # verbosity
 verbose = True
 
@@ -81,8 +84,10 @@ trainTotal = X_train_shape[0]
 if verbose:
     print('Train:')
 for response in range(trainTotal):
-    p = argmax(predictions[response])
-    t = argmax(y[response])
+    a = predictions[response]
+    p = [i for i,v in enumerate(a) if v > threshold]
+    a = y[response]
+    t = [i for i,v in enumerate(a) if v > threshold]
     if p == t:
         trainOK += 1
         if verbose:
@@ -104,8 +109,10 @@ if testTotal > 0:
     if verbose:
         print('Test:')
     for response in range(testTotal):
-        p = argmax(predictions[response])
-        t = argmax(y[response])
+        a = predictions[response]
+        p = [i for i,v in enumerate(a) if v > threshold]
+        a = y[response]
+        t = [i for i,v in enumerate(a) if v > threshold]
         if p == t:
             testOK += 1
         if verbose:

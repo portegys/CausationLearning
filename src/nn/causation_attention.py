@@ -28,6 +28,9 @@ n_epochs = 500
 # results file name
 results_filename = 'causation_attention_results.json'
 
+# prediction significance threshold
+threshold = 0.5
+
 # verbosity
 verbose = True
 
@@ -67,7 +70,7 @@ seq = array(y_train_seq)
 y = seq.reshape(y_train_shape[0], y_train_shape[1])
 num_samples, time_steps, input_dim, output_dim = X_train_shape[0], X_train_shape[1], X_train_shape[2], y_train_shape[1]
 
-# create RNN
+# create model
 model_input = Input(shape=(time_steps, input_dim))
 x = LSTM(n_hidden, return_sequences=True)(model_input)
 x = Attention(units=n_attention)(x)
@@ -87,8 +90,10 @@ trainTotal = num_samples
 if verbose:
     print('Train:')
 for response in range(trainTotal):
-    p = argmax(predictions[response])
-    t = argmax(y[response])
+    a = predictions[response]
+    p = [i for i,v in enumerate(a) if v > threshold]
+    a = y[response]
+    t = [i for i,v in enumerate(a) if v > threshold]
     if p == t:
         trainOK += 1
         if verbose:
@@ -112,8 +117,10 @@ if testTotal > 0:
     if verbose:
         print('Test:')
     for response in range(testTotal):
-        p = argmax(predictions[response])
-        t = argmax(y[response])
+        a = predictions[response]
+        p = [i for i,v in enumerate(a) if v > threshold]
+        a = y[response]
+        t = [i for i,v in enumerate(a) if v > threshold]
         if p == t:
             testOK += 1
         if verbose:

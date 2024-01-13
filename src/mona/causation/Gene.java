@@ -6,9 +6,6 @@
 
 package mona.causation;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Random;
 
 public class Gene

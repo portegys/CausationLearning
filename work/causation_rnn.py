@@ -19,6 +19,9 @@ n_epochs = 500
 # results file name
 results_filename = 'causation_rnn_results.json'
 
+# prediction significance threshold
+threshold = 0.5
+
 # verbosity
 verbose = True
 
@@ -95,24 +98,18 @@ trainSteps = X_train_shape[1]
 if verbose:
     print('Train:')
 for path in range(trainTotal):
-    p = []
-    for step in range(trainSteps):
-        if X[path][step][-1] == 1:
-            r = argmax(predictions[path][step])
-            p.append(r)
-    t = []
-    for step in range(trainSteps):
-        if X[path][step][-1] == 1:
-            r = argmax(y[path][step])
-            t.append(r)
-    if p[0] == t[0]:
+    a = predictions[path][trainSteps - 1]
+    p = [i for i,v in enumerate(a) if v > threshold]
+    a = y[path][trainSteps - 1]
+    t = [i for i,v in enumerate(a) if v > threshold]
+    if p == t:
         trainOK += 1
-    if verbose:
-        print('target:', t[0], 'predicted:', p[0], end='')
-        if p[0] == t[0]:
-            print(' OK')
-        else:
-            print(' error')
+        if verbose:
+            print('target:', t, 'predicted:', p, end='')
+            if p == t:
+                print(' OK')
+            else:
+                print(' error')
 
 # predict
 from causation_rnn_dataset import X_test_shape, X_test_seq, y_test_shape, y_test_seq
@@ -128,24 +125,18 @@ if testTotal > 0:
     if verbose:
         print('Test:')
     for path in range(testTotal):
-        p = []
-        for step in range(testSteps):
-            if X[path][step][-1] == 1:
-                r = argmax(predictions[path][step])
-                p.append(r)
-        t = []
-        for step in range(testSteps):
-            if X[path][step][-1] == 1:
-                r = argmax(y[path][step])
-                t.append(r)
-        if p[0] == t[0]:
+        a = predictions[path][trainSteps - 1]
+        p = [i for i,v in enumerate(a) if v > threshold]
+        a = y[path][trainSteps - 1]
+        t = [i for i,v in enumerate(a) if v > threshold]
+        if p == t:
             testOK += 1
-        if verbose:
-            print('target:', t[0], 'predicted:', p[0], end='')
-            if p[0] == t[0]:
-                print(' OK')
-            else:
-                print(' error')
+            if verbose:
+                print('target:', t, 'predicted:', p, end='')
+                if p == t:
+                    print(' OK')
+                else:
+                    print(' error')
 
 trainPct=0
 if trainTotal > 0:
