@@ -77,7 +77,8 @@ public class CausationLearning
    public static final String NN_FILENAME         = "causation_nn.py";
    public static final String NN_RESULTS_FILENAME = "causation_nn_results.json";
    public static final String GA_RESULTS_FILENAME = "causation_ga_results.json";
-
+   public static final String HISTOGRAM_RESULTS_FILENAME = "causation_histogram_results.json";
+   
    // Version.
    public static final String VERSION = "1.0";
 
@@ -90,6 +91,9 @@ public class CausationLearning
 
    // GA.
    public static EvolveCausations CausationsGA;
+   
+   // Event histogram.
+   public static EventHistogram CausationHistogram;
 
    // Verbosity.
    public static boolean Verbose = true;
@@ -113,11 +117,12 @@ public class CausationLearning
       "           \"LSTM\" | \"SimpleRNN\" | \"Attention\" | \"NN\" |\n" +
       "             [-numHiddenNeurons <quantity> (default=" + DEFAULT_NUM_HIDDEN_NEURONS + ") (repeat for additional layers)]\n" +
       "             [-numEpochs <quantity> (default=" + NUM_EPOCHS + ")]\n" +
-      "           \"GA\" (default=" + LEARNER + ")]\n" +
+      "           \"GA\" |\n" +
       "             [-generations <quantity> (default=" + EvolveCausations.GENERATIONS + ")]\n" +
       "             [-populationSize <quantity> (default=" + EvolveCausations.POPULATION_SIZE + ")]\n" +
       "             [-fitPopulationSize <quantity> (default=" + EvolveCausations.FIT_POPULATION_SIZE + ")]\n" +
       "             [-mutationRate <probability> (default=" + EvolveCausations.MUTATION_RATE + ")]\n" +
+      "           \"Histogram\" (default=" + LEARNER + ")]\n" +    
       "        [-randomSeed <random number seed> (default=" + DEFAULT_RANDOM_SEED + ")]\n" +
       "        [-verbose \"true\" | \"false\" (default=" + Verbose + ")]\n" +
       "  Print parameters:\n" +
@@ -417,7 +422,8 @@ public class CausationLearning
             }
             LEARNER = args[i];
             if (!LEARNER.equals("LSTM") && !LEARNER.equals("SimpleRNN") &&
-                !LEARNER.equals("Attention") && !LEARNER.equals("NN") && !LEARNER.equals("GA"))
+                !LEARNER.equals("Attention") && !LEARNER.equals("NN") && 
+                !LEARNER.equals("GA") && !LEARNER.equals("Histogram"))
             {
                System.err.println("Invalid learner option");
                System.err.println(Usage);
@@ -712,14 +718,24 @@ public class CausationLearning
          }
          EvolveCausations.LOG = Verbose;
       }
-      else
-      {
-         if (gotGenerations || gotPopulationSize || gotFitPopulationSize || gotMutationRate)
+      else if (gotGenerations || gotPopulationSize || gotFitPopulationSize || gotMutationRate)
          {
             System.err.println("Incompatible learner options");
             System.err.println(Usage);
             System.exit(1);
-         }
+      } else {
+          if (gotNumHidden || gotNumEpochs)
+          {
+             System.err.println("Incompatible learner options");
+             System.err.println(Usage);
+             System.exit(1);
+          }    	  
+          if (gotGenerations || gotPopulationSize || gotFitPopulationSize || gotMutationRate)
+          {
+             System.err.println("Incompatible learner options");
+             System.err.println(Usage);
+             System.exit(1); 
+          }
       }
 
       // Initialize random numbers.
@@ -1231,14 +1247,58 @@ public class CausationLearning
             System.exit(1);
          }
       }
-      else
+      else if (LEARNER.equals("GA"))
       {
-         // GA.
          CausationsGA = new EvolveCausations(Causations, random);
       }
-
+      else
+      {
+         // Event histogram.
+    	 CausationHistogram = new EventHistogram(Causations, random);
+      }
+      
       // Run.
-      if (LEARNER.equals("GA"))
+      if (LEARNER.equals("Histogram"))
+      {
+          // Train histogram.
+    	  CausationHistogram.train(CausationTrainingInstances);
+
+          // Test histogram.
+          List<Boolean> results   = CausationHistogram.test(CausationTestingInstances);
+          int           testOK    = 0;
+          int           testTotal = results.size();
+          for (Boolean result : results)
+          {
+             if (result)
+             {
+                testOK++;
+             }
+          }
+          float pct = 0.0f;
+          if (testTotal > 0)
+          {
+             pct = ((float)testOK / (float)testTotal) * 100.0f;
+          }
+          DecimalFormat df = new DecimalFormat("0.0");
+          if (Verbose)
+          {
+             System.out.println("Writing results to " + HISTOGRAM_RESULTS_FILENAME);
+          }
+          try (PrintWriter writer = new PrintWriter(HISTOGRAM_RESULTS_FILENAME))
+             {
+                writer.println("{\"test_correct_predictions\":\"" + testOK + "\",\"test_total_predictions\":\"" +
+                               testTotal + "\",\"test_pct\":\"" + df.format(pct) + "\"}");
+             }
+             catch (IOException e)
+             {
+                System.err.println("Cannot write results to file " + HISTOGRAM_RESULTS_FILENAME + ": " + e.getMessage());
+             }
+
+
+          System.out.print("Test correct/total = " + testOK + "/" + testTotal);
+          System.out.println(" (" + df.format(pct) + "%)");    	  
+      }
+      else if (LEARNER.equals("GA"))
       {
          // Train GA.
          CausationsGA.train(CausationTrainingInstances);

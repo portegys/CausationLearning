@@ -1,7 +1,7 @@
 // For conditions of distribution and use, see copyright notice in CausationLearning.java
 
 /*
- * Evolve causations.
+ * Event histogram algorithm.
  */
 
 package mona.causation;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class EvolveCausations
+public class EventHistogram
 {
    // Parameters.
    public static int   GENERATIONS         = 10;
@@ -34,7 +34,7 @@ public class EvolveCausations
    public static boolean LOG = true;
 
    // Constructor.
-   public EvolveCausations(ArrayList<Causation> causations, Random randomizer)
+   public EventHistogram(ArrayList<Causation> causations, Random randomizer)
    {
       Causations  = causations;
       
