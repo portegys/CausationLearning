@@ -27,7 +27,7 @@ public class Causation
    public int                ID;
    public ArrayList<Integer> events;
 
-   // Constructor.
+   // Constructors.
    public Causation(int ID, Random random)
    {
       this.ID = ID;
@@ -42,6 +42,13 @@ public class Causation
          }
          Collections.sort(events);
       }
+   }
+
+
+   public Causation()
+   {
+      ID     = -1;
+      events = new ArrayList<Integer>();
    }
 
 

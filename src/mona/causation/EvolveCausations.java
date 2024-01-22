@@ -18,9 +18,6 @@ public class EvolveCausations
    public static int   FIT_POPULATION_SIZE = 10;
    public static float MUTATION_RATE       = 0.25f;
 
-   // Causations.
-   ArrayList<Causation> Causations;
-
    // Causation instances.
    ArrayList<CausationInstance> CausationInstances;
 
@@ -34,21 +31,19 @@ public class EvolveCausations
    public static boolean LOG = true;
 
    // Constructor.
-   public EvolveCausations(ArrayList<Causation> causations, Random randomizer)
+   public EvolveCausations(int numCausations, Random randomizer)
    {
-      Causations  = causations;
-      
       log("Parameters:");
       log("  GENERATIONS=" + GENERATIONS);
       log("  POPULATION_SIZE=" + POPULATION_SIZE);
       log("  FIT_POPULATION_SIZE=" + FIT_POPULATION_SIZE);
       log("  MUTATION_RATE=" + MUTATION_RATE);
-         
-      Populations = new Population[Causations.size()];
+
+      Populations = new Population[numCausations];
       for (int i = 0; i < Populations.length; i++)
       {
          Populations[i] = new Population(i, randomizer);
-      }            
+      }
    }
 
 
@@ -60,7 +55,7 @@ public class EvolveCausations
       {
          Populations[i].init();
       }
-      
+
       // Evolution loop.
       log("Train:");
       for (Generation = 0; Generation < GENERATIONS; Generation++)
@@ -79,8 +74,9 @@ public class EvolveCausations
    public ArrayList<Boolean> test(ArrayList<CausationInstance> causationTestingInstances)
    {
       CausationInstances = causationTestingInstances;
-      ArrayList<Boolean> results = new ArrayList<Boolean>();
+
       log("Test:");
+      ArrayList<Boolean> results = new ArrayList<Boolean>();
       for (CausationInstance instance : CausationInstances)
       {
          boolean[] causationIndexes = new boolean[Populations.length];
@@ -153,7 +149,7 @@ public class EvolveCausations
       public Population(int causationID, Random randomizer)
       {
          this.causationID = causationID;
-         this.randomizer = randomizer;
+         this.randomizer  = randomizer;
          members          = new ArrayList<Member>();
          IDdispenser      = 0;
          for (int i = 0; i < POPULATION_SIZE; i++)
@@ -162,24 +158,26 @@ public class EvolveCausations
          }
       }
 
+
       // Initialize members.
       void init()
       {
          if (POPULATION_SIZE > 0)
          {
-        	  int i = 0;
-		   	  for (CausationInstance instance : CausationInstances)
-		   	  {
-		   		  if (instance.instanceOf(causationID))
-		   		  {
-		            Member member = members.get(i);
-		            member.init(instance);
-		            i = (i + 1) % POPULATION_SIZE;
-		   		  }
-		   	  }
+            int i = 0;
+            for (CausationInstance instance : CausationInstances)
+            {
+               if (instance.instanceOf(causationID))
+               {
+                  Member member = members.get(i);
+                  member.init(instance);
+                  i = (i + 1) % POPULATION_SIZE;
+               }
+            }
          }
       }
-      
+
+
       // Evolve.
       void evolve(int generation)
       {
@@ -322,12 +320,14 @@ public class EvolveCausations
          evaluate();
       }
 
+
       // Initialize member with causation instance.
       void init(CausationInstance instance)
       {
-    	  genome.init(instance, randomizer);
+         genome.init(instance, randomizer);
       }
-      
+
+
       // Evaluate.
       void evaluate()
       {
@@ -567,37 +567,39 @@ public class EvolveCausations
          }
       }
 
+
       // Initialize with causation instance.
-	     void init(CausationInstance causationInstance, Random randomizer)
-	     {
-	         for (Gene gene : genes)
-	         {
-	            gene.ivalue = 0;
-	         }	    	 
-	           int n = Causation.CAUSATION_INSTANCE_LENGTH;
-	           if (n > 0)
-	           {
-	              int[] events = new int[n];
-	              for (int i = 0; i < n; i++)
-	              {
-	                 events[i] = causationInstance.events[i];
-	              }
-	              int j = randomizer.nextInt(Causation.MAX_CAUSE_EVENTS + 1);
-	              for (int i = 0; i < j && i < n; i++)
-	              {
-	                 int k = randomizer.nextInt(n);
-	                 for (int q = 0; q < n; q++, k = (k + 1) % n)
-	                 {
-	                    if (events[k] != -1)
-	                    {
-	                       genes.get(events[k] + 1).ivalue++;
-	                       events[k] = -1;
-	                       break;
-	                    }
-	                 }
-	              }
-	           }
-	     }
+      void init(CausationInstance causationInstance, Random randomizer)
+      {
+         for (Gene gene : genes)
+         {
+            gene.ivalue = 0;
+         }
+         int n = Causation.CAUSATION_INSTANCE_LENGTH;
+         if (n > 0)
+         {
+            int[] events = new int[n];
+            for (int i = 0; i < n; i++)
+            {
+               events[i] = causationInstance.events[i];
+            }
+            int j = randomizer.nextInt(Causation.MAX_CAUSE_EVENTS + 1);
+            for (int i = 0; i < j && i < n; i++)
+            {
+               int k = randomizer.nextInt(n);
+               for (int q = 0; q < n; q++, k = (k + 1) % n)
+               {
+                  if (events[k] != -1)
+                  {
+                     genes.get(events[k] + 1).ivalue++;
+                     events[k] = -1;
+                     break;
+                  }
+               }
+            }
+         }
+      }
+
 
       // Copy genome.
       void copyGenome(Genome genome)
