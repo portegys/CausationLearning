@@ -1,14 +1,13 @@
 // For conditions of distribution and use, see copyright notice in CausationLearning.java
 
 /*
- * Event histogram algorithm.
+ * Event histogram algorithm for determining causation events.
  */
 
 package mona.causation;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 
 public class EventHistogram
