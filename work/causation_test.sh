@@ -7,43 +7,60 @@ then
 fi
 runs=$1
 
+
+Usage:
+  Run:
+    java mona.causation.CausationLearning
         [-numEventTypes <quantity> (default=10)]
         [-numCauseEventTypes <quantity> (default=5)]
         [-numCausations <quantity> (default=2)]
         [-maxCauseEvents <quantity> (default=2)]
-        [-eventOmissionProbability <probability> (default=0.1)]
         [-maxInterveningEvents <quantity> (default=2)]
         [-maxValidInterveningEvents <quantity> (default=1)]
-        [-validInterveningEventsProbability <probability> (default=0.9)]
-        [-numTrainingCausationInstances <quantity> (default=10)]
-        [-numTestingCausationInstances <quantity> (default=10)]
+        [-numValidTrainingCausationInstances <quantity> (default=5)]
+        [-numInvalidTrainingCausationInstances <quantity> (default=5)]
+        [-numValidTestingCausationInstances <quantity> (default=5)]
+        [-numInvalidTestingCausationInstances <quantity> (default=5)]
         [-learner
            "LSTM" | "SimpleRNN" | "Attention" | "NN" |
              [-numHiddenNeurons <quantity> (default=128) (repeat for additional layers)]
              [-numEpochs <quantity> (default=500)]
-           "GA" (default=LSTM)]
+           "GA" |
              [-generations <quantity> (default=10)]
              [-populationSize <quantity> (default=20)]
              [-fitPopulationSize <quantity> (default=10)]
              [-mutationRate <probability> (default=0.25)]
+           "Histogram" (default=LSTM)]
         [-randomSeed <random number seed> (default=4517)]
-        [-verbose (default=false)]
-        
-# Parameters:
-minBasePathLength=10
-incrBasePathLength=10
-maxBasePathLength=20
-minModularPathLength=2
-maxModularPathLength=5
-minNumModularPaths=5
-incrNumModularPaths=5
-maxNumModularPaths=10
-minNumNeurons=128
-incrNumNeurons=128
-maxNumNeurons=256
-minKernelSize=2
-incrKernelSize=2
-maxKernelSize=4
+        [-verbose "true" | "false" (default=true)]
+  Print parameters:
+    java mona.causation.CausationLearning -printParameters
+  Version:
+    java mona.causation.CausationLearning -version
+Exit codes:
+  0=success
+  1=error
+
+Parameters:
+NUM_EVENT_TYPES = 10
+NUM_CAUSE_EVENT_TYPES = 5
+NUM_CAUSATIONS = 2
+MAX_CAUSE_EVENTS = 2
+MAX_INTERVENING_EVENTS = 2
+MAX_VALID_INTERVENING_EVENTS = 1
+CAUSATION_INSTANCE_LENGTH = 6
+NUM_VALID_TRAINING_CAUSATION_INSTANCES = 5
+NUM_INVALID_TRAINING_CAUSATION_INSTANCES = 5
+NUM_VALID_TESTING_CAUSATION_INSTANCES = 5
+NUM_INVALID_TESTING_CAUSATION_INSTANCES = 5
+LEARNER = LSTM
+NUM_HIDDEN_NEURONS = {128}
+NUM_EPOCHS = 500
+GENERATIONS = 10
+POPULATION_SIZE = 20
+FIT_POPULATION_SIZE = 10
+MUTATION_RATE = 0.25
+RANDOM_SEED = 4517
 
 echo basePathLength,numModularPaths,numNeurons,pathModificationType,train_prediction_errors,train_total_predictions,train_error_pct,test_prediction_errors,test_total_predictions,test_error_pct > world_composer_nn_test_results.csv
 echo basePathLength,numModularPaths,numNeurons,pathModificationType,train_prediction_errors,train_total_predictions,train_error_pct,test_prediction_errors,test_total_predictions,test_error_pct > world_composer_nn_dilate_overlay_test_results.csv
@@ -160,4 +177,3 @@ do
 done
 
 exit 0
-

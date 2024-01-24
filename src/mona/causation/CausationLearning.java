@@ -727,6 +727,7 @@ public class CausationLearning
       }
       else
       {
+         // Event histogram.
          if (gotNumHidden || gotNumEpochs)
          {
             System.err.println("Incompatible learner options");
@@ -739,6 +740,7 @@ public class CausationLearning
             System.err.println(Usage);
             System.exit(1);
          }
+         EventHistogram.LOG = Verbose;         
       }
 
       // Initialize random numbers.
