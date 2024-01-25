@@ -8,10 +8,14 @@ fi
 runs=$1
 
 # Data sizes
-NUM_VALID_TRAINING_CAUSATION_INSTANCES=5
-NUM_INVALID_TRAINING_CAUSATION_INSTANCES=5
-NUM_VALID_TESTING_CAUSATION_INSTANCES=5
-NUM_INVALID_TESTING_CAUSATION_INSTANCES=5
+NUM_VALID_TRAINING_CAUSATION_INSTANCES=25
+NUM_INVALID_TRAINING_CAUSATION_INSTANCES=25
+NUM_VALID_TESTING_CAUSATION_INSTANCES=25
+NUM_INVALID_TESTING_CAUSATION_INSTANCES=25
+echo NUM_VALID_TRAINING_CAUSATION_INSTANCES=$NUM_VALID_TRAINING_CAUSATION_INSTANCES
+echo NUM_INVALID_TRAINING_CAUSATION_INSTANCES=$NUM_INVALID_TRAINING_CAUSATION_INSTANCES
+echo NUM_VALID_TESTING_CAUSATION_INSTANCES=$NUM_VALID_TESTING_CAUSATION_INSTANCES
+echo NUM_INVALID_TESTING_CAUSATION_INSTANCES=$NUM_INVALID_TESTING_CAUSATION_INSTANCES
 
 # Parameters:
 MIN_NUM_EVENT_TYPES=10
@@ -52,9 +56,12 @@ do
     do
      for MAX_VALID_INTERVENING_EVENTS in $(seq $MIN_MAX_VALID_INTERVENING_EVENTS $INCR_MAX_VALID_INTERVENING_EVENTS $MAX_MAX_VALID_INTERVENING_EVENTS)
      do
+      echo NUM_EVENT_TYPES=${NUM_EVENT_TYPES} NUM_CAUSE_EVENT_TYPES=${NUM_CAUSE_EVENT_TYPES} NUM_CAUSATIONS=${NUM_CAUSATIONS} MAX_CAUSE_EVENTS=${MAX_CAUSE_EVENTS} MAX_INTERVENING_EVENTS=${MAX_INTERVENING_EVENTS} MAX_VALID_INTERVENING_EVENTS=${MAX_VALID_INTERVENING_EVENTS}
+      echo learner=LSTM
       for i in $(seq $runs)
       do
        randomSeed=$RANDOM
+       echo run=${i} randomSeed=$randomSeed
        ./causation.sh -learner LSTM -numValidTrainingCausationInstances $NUM_VALID_TRAINING_CAUSATION_INSTANCES \
         -numInvalidTrainingCausationInstances $NUM_INVALID_TRAINING_CAUSATION_INSTANCES \
         -numValidTestingCausationInstances $NUM_VALID_TESTING_CAUSATION_INSTANCES \
@@ -65,7 +72,7 @@ do
         -maxCauseEvents $MAX_CAUSE_EVENTS \
         -maxInterveningEvents $MAX_INTERVENING_EVENTS \
         -maxValidInterveningEvents $MAX_VALID_INTERVENING_EVENTS \
-        -randomSeed $randomSeed
+        -randomSeed $randomSeed -verbose false
        train_correct_predictions=`cat causation_rnn_results.json | jq -r .train_correct_predictions`
        train_total_predictions=`cat causation_rnn_results.json | jq -r .train_total_predictions`
        train_pct=`cat causation_rnn_results.json | jq -r .train_pct`
@@ -74,8 +81,11 @@ do
        test_pct=`cat causation_rnn_results.json | jq -r .test_pct`
        echo ${NUM_EVENT_TYPES},${NUM_CAUSE_EVENT_TYPES},${NUM_CAUSATIONS},${MAX_CAUSE_EVENTS},${MAX_INTERVENING_EVENTS},${MAX_VALID_INTERVENING_EVENTS},${train_correct_predictions},${train_total_predictions},${train_pct},${test_correct_predictions},${test_total_predictions},${test_pct} >> causation_learning_lstm_test_results.csv
       done
+      echo learner=SimpleRNN
       for i in $(seq $runs)
       do
+       randomSeed=$RANDOM
+       echo run=${i} randomSeed=$randomSeed
        ./causation.sh -learner SimpleRNN -numValidTrainingCausationInstances $NUM_VALID_TRAINING_CAUSATION_INSTANCES \
         -numInvalidTrainingCausationInstances $NUM_INVALID_TRAINING_CAUSATION_INSTANCES \
         -numValidTestingCausationInstances $NUM_VALID_TESTING_CAUSATION_INSTANCES \
@@ -86,7 +96,7 @@ do
         -maxCauseEvents $MAX_CAUSE_EVENTS \
         -maxInterveningEvents $MAX_INTERVENING_EVENTS \
         -maxValidInterveningEvents $MAX_VALID_INTERVENING_EVENTS \
-        -randomSeed $randomSeed
+        -randomSeed $randomSeed -verbose false
        train_correct_predictions=`cat causation_rnn_results.json | jq -r .train_correct_predictions`
        train_total_predictions=`cat causation_rnn_results.json | jq -r .train_total_predictions`
        train_pct=`cat causation_rnn_results.json | jq -r .train_pct`
@@ -95,8 +105,11 @@ do
        test_pct=`cat causation_rnn_results.json | jq -r .test_pct`
        echo ${NUM_EVENT_TYPES},${NUM_CAUSE_EVENT_TYPES},${NUM_CAUSATIONS},${MAX_CAUSE_EVENTS},${MAX_INTERVENING_EVENTS},${MAX_VALID_INTERVENING_EVENTS},${train_correct_predictions},${train_total_predictions},${train_pct},${test_correct_predictions},${test_total_predictions},${test_pct} >> causation_learning_simple_rnn_test_results.csv
       done
+      echo learner=Attention
       for i in $(seq $runs)
       do
+       randomSeed=$RANDOM
+       echo run=${i} randomSeed=$randomSeed
        ./causation.sh -learner Attention -numValidTrainingCausationInstances $NUM_VALID_TRAINING_CAUSATION_INSTANCES \
         -numInvalidTrainingCausationInstances $NUM_INVALID_TRAINING_CAUSATION_INSTANCES \
         -numValidTestingCausationInstances $NUM_VALID_TESTING_CAUSATION_INSTANCES \
@@ -107,7 +120,7 @@ do
         -maxCauseEvents $MAX_CAUSE_EVENTS \
         -maxInterveningEvents $MAX_INTERVENING_EVENTS \
         -maxValidInterveningEvents $MAX_VALID_INTERVENING_EVENTS \
-        -randomSeed $randomSeed
+        -randomSeed $randomSeed -verbose false
        train_correct_predictions=`cat causation_attention_results.json | jq -r .train_correct_predictions`
        train_total_predictions=`cat causation_attention_results.json | jq -r .train_total_predictions`
        train_pct=`cat causation_attention_results.json | jq -r .train_pct`
@@ -116,8 +129,11 @@ do
        test_pct=`cat causation_attention_results.json | jq -r .test_pct`
        echo ${NUM_EVENT_TYPES},${NUM_CAUSE_EVENT_TYPES},${NUM_CAUSATIONS},${MAX_CAUSE_EVENTS},${MAX_INTERVENING_EVENTS},${MAX_VALID_INTERVENING_EVENTS},${train_correct_predictions},${train_total_predictions},${train_pct},${test_correct_predictions},${test_total_predictions},${test_pct} >> causation_learning_attention_test_results.csv
       done
+      echo learner=NN
       for i in $(seq $runs)
       do
+       randomSeed=$RANDOM
+       echo run=${i} randomSeed=$randomSeed
        ./causation.sh -learner NN -numValidTrainingCausationInstances $NUM_VALID_TRAINING_CAUSATION_INSTANCES \
         -numInvalidTrainingCausationInstances $NUM_INVALID_TRAINING_CAUSATION_INSTANCES \
         -numValidTestingCausationInstances $NUM_VALID_TESTING_CAUSATION_INSTANCES \
@@ -128,7 +144,7 @@ do
         -maxCauseEvents $MAX_CAUSE_EVENTS \
         -maxInterveningEvents $MAX_INTERVENING_EVENTS \
         -maxValidInterveningEvents $MAX_VALID_INTERVENING_EVENTS \
-        -randomSeed $randomSeed
+        -randomSeed $randomSeed -verbose false
        train_correct_predictions=`cat causation_nn_results.json | jq -r .train_correct_predictions`
        train_total_predictions=`cat causation_nn_results.json | jq -r .train_total_predictions`
        train_pct=`cat causation_nn_results.json | jq -r .train_pct`
@@ -137,8 +153,11 @@ do
        test_pct=`cat causation_nn_results.json | jq -r .test_pct`
        echo ${NUM_EVENT_TYPES},${NUM_CAUSE_EVENT_TYPES},${NUM_CAUSATIONS},${MAX_CAUSE_EVENTS},${MAX_INTERVENING_EVENTS},${MAX_VALID_INTERVENING_EVENTS},${train_correct_predictions},${train_total_predictions},${train_pct},${test_correct_predictions},${test_total_predictions},${test_pct} >> causation_learning_nn_test_results.csv
       done
+      echo learner=GA
       for i in $(seq $runs)
       do
+       randomSeed=$RANDOM
+       echo run=${i} randomSeed=$randomSeed
        ./causation.sh -learner GA -numValidTrainingCausationInstances $NUM_VALID_TRAINING_CAUSATION_INSTANCES \
         -numInvalidTrainingCausationInstances $NUM_INVALID_TRAINING_CAUSATION_INSTANCES \
         -numValidTestingCausationInstances $NUM_VALID_TESTING_CAUSATION_INSTANCES \
@@ -149,7 +168,7 @@ do
         -maxCauseEvents $MAX_CAUSE_EVENTS \
         -maxInterveningEvents $MAX_INTERVENING_EVENTS \
         -maxValidInterveningEvents $MAX_VALID_INTERVENING_EVENTS \
-        -randomSeed $randomSeed
+        -randomSeed $randomSeed -verbose false
        train_correct_predictions=`cat causation_ga_results.json | jq -r .train_correct_predictions`
        train_total_predictions=`cat causation_ga_results.json | jq -r .train_total_predictions`
        train_pct=`cat causation_ga_results.json | jq -r .train_pct`
@@ -158,8 +177,11 @@ do
        test_pct=`cat causation_ga_results.json | jq -r .test_pct`
        echo ${NUM_EVENT_TYPES},${NUM_CAUSE_EVENT_TYPES},${NUM_CAUSATIONS},${MAX_CAUSE_EVENTS},${MAX_INTERVENING_EVENTS},${MAX_VALID_INTERVENING_EVENTS},${train_correct_predictions},${train_total_predictions},${train_pct},${test_correct_predictions},${test_total_predictions},${test_pct} >> causation_learning_ga_test_results.csv
       done
+      echo learner=Histogram
       for i in $(seq $runs)
       do
+       randomSeed=$RANDOM
+       echo run=${i} randomSeed=$randomSeed
        ./causation.sh -learner Histogram -numValidTrainingCausationInstances $NUM_VALID_TRAINING_CAUSATION_INSTANCES \
         -numInvalidTrainingCausationInstances $NUM_INVALID_TRAINING_CAUSATION_INSTANCES \
         -numValidTestingCausationInstances $NUM_VALID_TESTING_CAUSATION_INSTANCES \
@@ -170,7 +192,7 @@ do
         -maxCauseEvents $MAX_CAUSE_EVENTS \
         -maxInterveningEvents $MAX_INTERVENING_EVENTS \
         -maxValidInterveningEvents $MAX_VALID_INTERVENING_EVENTS \
-        -randomSeed $randomSeed
+        -randomSeed $randomSeed -verbose false
        train_correct_predictions=`cat causation_histogram_results.json | jq -r .train_correct_predictions`
        train_total_predictions=`cat causation_histogram_results.json | jq -r .train_total_predictions`
        train_pct=`cat causation_histogram_results.json | jq -r .train_pct`
