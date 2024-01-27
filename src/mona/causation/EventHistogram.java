@@ -213,7 +213,7 @@ public class EventHistogram
          }
          for (int i = 0, j = causationIDs.size(); i < j; i++)
          {
-            int k = instance.causationIDs.get(i);
+            int k = causationIDs.get(i);
             causationIndexes[k] = true;
          }
          for (int i = 0; i < NumCausations; i++)

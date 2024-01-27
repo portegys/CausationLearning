@@ -740,7 +740,7 @@ public class CausationLearning
             System.err.println(Usage);
             System.exit(1);
          }
-         EventHistogram.LOG = Verbose;         
+         EventHistogram.LOG = Verbose;
       }
 
       // Initialize random numbers.
@@ -1309,6 +1309,7 @@ public class CausationLearning
 
 
 
+
          System.out.print("Test correct/total = " + testOK + "/" + testTotal);
          System.out.println(" (" + df.format(pct) + "%)");
       }
@@ -1347,6 +1348,7 @@ public class CausationLearning
             {
                System.err.println("Cannot write results to file " + GA_RESULTS_FILENAME + ": " + e.getMessage());
             }
+
 
 
 
