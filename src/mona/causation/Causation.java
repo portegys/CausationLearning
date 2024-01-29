@@ -12,15 +12,13 @@ import java.util.Random;
 public class Causation
 {
    // Parameters.
-   public static int NUM_EVENT_TYPES              = 10;
-   public static int NUM_CAUSE_EVENT_TYPES        = 5;
-   public static int MAX_CAUSE_EVENTS             = 2;
-   public static int MAX_INTERVENING_EVENTS       = 2;
-   public static int MAX_VALID_INTERVENING_EVENTS = 1;
-   public static int CAUSATION_INSTANCE_LENGTH    = (MAX_CAUSE_EVENTS + 1) * MAX_INTERVENING_EVENTS;
+   public static int NUM_EVENT_TYPES           = 10;
+   public static int MAX_CAUSE_EVENTS          = 2;
+   public static int MAX_INTERVENING_EVENTS    = 1;
+   public static int CAUSATION_INSTANCE_LENGTH = ((MAX_CAUSE_EVENTS + 1) * MAX_INTERVENING_EVENTS) + MAX_CAUSE_EVENTS;
    public static void setCausationParms()
    {
-      CAUSATION_INSTANCE_LENGTH = (MAX_CAUSE_EVENTS + 1) * MAX_INTERVENING_EVENTS;
+      CAUSATION_INSTANCE_LENGTH = ((MAX_CAUSE_EVENTS + 1) * MAX_INTERVENING_EVENTS) + MAX_CAUSE_EVENTS;
    }
 
 
@@ -33,12 +31,12 @@ public class Causation
       this.ID = ID;
       events  = new ArrayList<Integer>();
       int n = 0;
-      if ((MAX_CAUSE_EVENTS > 0) && (NUM_CAUSE_EVENT_TYPES > 0))
+      if ((MAX_CAUSE_EVENTS > 0) && (NUM_EVENT_TYPES > 0))
       {
          n = random.nextInt(MAX_CAUSE_EVENTS) + 1;
          for (int i = 0; i < n; i++)
          {
-            events.add(random.nextInt(NUM_CAUSE_EVENT_TYPES));
+            events.add(random.nextInt(NUM_EVENT_TYPES));
          }
          Collections.sort(events);
       }
@@ -53,7 +51,7 @@ public class Causation
 
 
    // Is the stream of events a valid instance of causation?
-   public boolean instanceOf(int[] eventStream, int maxValidInterveningEvents)
+   public boolean instanceOf(int[] eventStream, int maxInterveningEvents)
    {
       List < List < Integer >> permutations = permuteList(events);
       for (List<Integer> permutation : permutations)
@@ -63,7 +61,7 @@ public class Causation
          {
             causeEvents[i] = permutation.get(i);
          }
-         if (matchEventStream(eventStream, 0, causeEvents, maxValidInterveningEvents))
+         if (matchEventStream(eventStream, 0, causeEvents, maxInterveningEvents))
          {
             return(true);
          }
@@ -165,5 +163,15 @@ public class Causation
          System.out.print(i + " ");
       }
       System.out.println("}");
+   }
+
+
+   // Print parameters.
+   public static void printParameters()
+   {
+      System.out.println("NUM_EVENT_TYPES = " + Causation.NUM_EVENT_TYPES);
+      System.out.println("MAX_CAUSE_EVENTS = " + Causation.MAX_CAUSE_EVENTS);
+      System.out.println("MAX_INTERVENING_EVENTS = " + Causation.MAX_INTERVENING_EVENTS);
+      System.out.println("CAUSATION_INSTANCE_LENGTH = " + Causation.CAUSATION_INSTANCE_LENGTH);
    }
 }

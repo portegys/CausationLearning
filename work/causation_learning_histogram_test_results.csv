@@ -1,2 +1,0 @@
-NUM_EVENT_TYPES,NUM_CAUSE_EVENT_TYPES,NUM_CAUSATIONS,MAX_CAUSE_EVENTS,MAX_INTERVENING_EVENTS,MAX_VALID_INTERVENING_EVENTS,train_correct_predictions,train_total_predictions,train_pct,test_correct_predictions,test_total_predictions,test_pct
-10,5,2,5,2,0,null,null,null,50,50,100.0

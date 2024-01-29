@@ -32,11 +32,9 @@ Usage:
   Run:
     java mona.causation.CausationLearning
         [-numEventTypes <quantity> (default=10)]
-        [-numCauseEventTypes <quantity> (default=5)]
         [-numCausations <quantity> (default=2)]
         [-maxCauseEvents <quantity> (default=2)]
-        [-maxInterveningEvents <quantity> (default=2)]
-        [-maxValidInterveningEvents <quantity> (default=1)]
+        [-maxInterveningEvents <quantity> (default=1)]
         [-numValidTrainingCausationInstances <quantity> (default=5)]
         [-numInvalidTrainingCausationInstances <quantity> (default=5)]
         [-numValidTestingCausationInstances <quantity> (default=5)]

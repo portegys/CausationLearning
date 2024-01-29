@@ -15,7 +15,7 @@ public class EventHistogram
    // Causations.
    int NumCausations;
    Causation[] Causations;
-   int[] MaxValidInterveningEvents;
+   int[] MaxInterveningEvents;
 
    // Causation instances.
    ArrayList<CausationInstance> CausationInstances;
@@ -102,11 +102,11 @@ public class EventHistogram
          }
       }
 
-      // Measure maximum valid intervening events.
-      MaxValidInterveningEvents = new int[NumCausations];
+      // Measure maximum intervening events.
+      MaxInterveningEvents = new int[NumCausations];
       for (int i = 0; i < NumCausations; i++)
       {
-         MaxValidInterveningEvents[i] = 0;
+         MaxInterveningEvents[i] = 0;
       }
       for (CausationInstance instance : CausationInstances)
       {
@@ -119,9 +119,9 @@ public class EventHistogram
                {
                   if (Causations[n].instanceOf(instance.events, k))
                   {
-                     if (MaxValidInterveningEvents[n] < k)
+                     if (MaxInterveningEvents[n] < k)
                      {
-                        MaxValidInterveningEvents[n] = k;
+                        MaxInterveningEvents[n] = k;
                      }
                      break;
                   }
@@ -145,7 +145,7 @@ public class EventHistogram
                s += e + " ";
             }
             s += "}";
-            s += ", maximum valid intervening events = " + MaxValidInterveningEvents[i];
+            s += ", maximum valid intervening events = " + MaxInterveningEvents[i];
             log(s);
          }
       }
@@ -165,7 +165,7 @@ public class EventHistogram
          ArrayList<Integer> causationIDs = new ArrayList<Integer>();
          for (int i = 0; i < NumCausations; i++)
          {
-            if ((Causations[i] != null) && Causations[i].instanceOf(instance.events, MaxValidInterveningEvents[i]))
+            if ((Causations[i] != null) && Causations[i].instanceOf(instance.events, MaxInterveningEvents[i]))
             {
                causationIDs.add(i);
             }

@@ -65,7 +65,7 @@ public class CausationLearning
    public static final int DEFAULT_RANDOM_SEED = 4517;
    public static int       RANDOM_SEED         = DEFAULT_RANDOM_SEED;
    public static Random    random;
-   public final static int MAX_TRIES = 1000;
+   public final static int MAX_TRIES = 100000;
 
    // Files.
    public static final String RNN_DATASET_FILENAME       = "causation_rnn_dataset.py";
@@ -105,11 +105,9 @@ public class CausationLearning
       "  Run:\n" +
       "    java mona.causation.CausationLearning\n" +
       "        [-numEventTypes <quantity> (default=" + Causation.NUM_EVENT_TYPES + ")]\n" +
-      "        [-numCauseEventTypes <quantity> (default=" + Causation.NUM_CAUSE_EVENT_TYPES + ")]\n" +
       "        [-numCausations <quantity> (default=" + NUM_CAUSATIONS + ")]\n" +
       "        [-maxCauseEvents <quantity> (default=" + Causation.MAX_CAUSE_EVENTS + ")]\n" +
       "        [-maxInterveningEvents <quantity> (default=" + Causation.MAX_INTERVENING_EVENTS + ")]\n" +
-      "        [-maxValidInterveningEvents <quantity> (default=" + Causation.MAX_VALID_INTERVENING_EVENTS + ")]\n" +
       "        [-numValidTrainingCausationInstances <quantity> (default=" + NUM_VALID_TRAINING_CAUSATION_INSTANCES + ")]\n" +
       "        [-numInvalidTrainingCausationInstances <quantity> (default=" + NUM_INVALID_TRAINING_CAUSATION_INSTANCES + ")]\n" +
       "        [-numValidTestingCausationInstances <quantity> (default=" + NUM_VALID_TESTING_CAUSATION_INSTANCES + ")]\n" +
@@ -173,32 +171,6 @@ public class CausationLearning
             if (Causation.NUM_EVENT_TYPES < 0)
             {
                System.err.println("Invalid numEventTypes option");
-               System.err.println(Usage);
-               System.exit(1);
-            }
-            continue;
-         }
-         if (args[i].equals("-numCauseEventTypes"))
-         {
-            i++;
-            if (i >= args.length)
-            {
-               System.err.println("Invalid numCauseEventTypes option");
-               System.err.println(Usage);
-               System.exit(1);
-            }
-            try
-            {
-               Causation.NUM_CAUSE_EVENT_TYPES = Integer.parseInt(args[i]);
-            }
-            catch (NumberFormatException e) {
-               System.err.println("Invalid numCauseEventTypes option");
-               System.err.println(Usage);
-               System.exit(1);
-            }
-            if (Causation.NUM_CAUSE_EVENT_TYPES < 0)
-            {
-               System.err.println("Invalid numCauseEventTypes option");
                System.err.println(Usage);
                System.exit(1);
             }
@@ -277,32 +249,6 @@ public class CausationLearning
             if (Causation.MAX_INTERVENING_EVENTS < 0)
             {
                System.err.println("Invalid maxInterveningEvents option");
-               System.err.println(Usage);
-               System.exit(1);
-            }
-            continue;
-         }
-         if (args[i].equals("-maxValidInterveningEvents"))
-         {
-            i++;
-            if (i >= args.length)
-            {
-               System.err.println("Invalid maxValidInterveningEvents option");
-               System.err.println(Usage);
-               System.exit(1);
-            }
-            try
-            {
-               Causation.MAX_VALID_INTERVENING_EVENTS = Integer.parseInt(args[i]);
-            }
-            catch (NumberFormatException e) {
-               System.err.println("Invalid maxValidInterveningEvents option");
-               System.err.println(Usage);
-               System.exit(1);
-            }
-            if (Causation.MAX_VALID_INTERVENING_EVENTS < 0)
-            {
-               System.err.println("Invalid maxValidInterveningEvents option");
                System.err.println(Usage);
                System.exit(1);
             }
@@ -672,25 +618,6 @@ public class CausationLearning
          printParameters();
          System.exit(0);
       }
-      if (Causation.NUM_CAUSE_EVENT_TYPES > Causation.NUM_EVENT_TYPES)
-      {
-         System.err.println("Number of cause event types cannot be greater than number of event types");
-         System.err.println(Usage);
-         System.exit(1);
-      }
-      if ((Causation.MAX_INTERVENING_EVENTS > 0) &&
-          (Causation.NUM_CAUSE_EVENT_TYPES == Causation.NUM_EVENT_TYPES))
-      {
-         System.err.println("Number of cause event types cannot be equal to the number of event types");
-         System.err.println(Usage);
-         System.exit(1);
-      }
-      if (Causation.MAX_VALID_INTERVENING_EVENTS > Causation.MAX_INTERVENING_EVENTS)
-      {
-         System.err.println("Max valid intervening events cannot be greater than max intervening events");
-         System.err.println(Usage);
-         System.exit(1);
-      }
       if (LEARNER.equals("Attention") && (NUM_HIDDEN_NEURONS.size() > 1))
       {
          System.err.println("Attention network limited to single hidden layer");
@@ -809,7 +736,7 @@ public class CausationLearning
             for (int j = 0, k = random.nextInt(NUM_CAUSATIONS); j < NUM_CAUSATIONS;
                  j++, k = (k + 1) % NUM_CAUSATIONS)
             {
-               if (Causations.get(k).instanceOf(instance.events, Causation.MAX_VALID_INTERVENING_EVENTS))
+               if (Causations.get(k).instanceOf(instance.events, Causation.MAX_INTERVENING_EVENTS))
                {
                   instance.causationIDs.add(k);
                   if (!instanceCreated && (validCounters[k] > 0))
@@ -824,7 +751,7 @@ public class CausationLearning
          if (!instanceCreated)
          {
             System.err.println("Cannot create valid training instance");
-            System.exit(1);
+            //System.exit(1);
          }
       }
       for (CausationInstance instance : CausationTrainingInstances)
@@ -840,7 +767,7 @@ public class CausationLearning
             boolean           instanceValid = false;
             for (int j = 0; j < NUM_CAUSATIONS && !instanceValid; j++)
             {
-               instanceValid = Causations.get(j).instanceOf(instance.events, Causation.MAX_VALID_INTERVENING_EVENTS);
+               instanceValid = Causations.get(j).instanceOf(instance.events, Causation.MAX_INTERVENING_EVENTS);
             }
             if (!instanceValid)
             {
@@ -851,7 +778,7 @@ public class CausationLearning
          if (n == MAX_TRIES)
          {
             System.err.println("Cannot create invalid training instance");
-            System.exit(1);
+            //System.exit(1);
          }
       }
       CausationTestingInstances = new ArrayList<CausationInstance>();
@@ -873,7 +800,7 @@ public class CausationLearning
             for (int j = 0, k = random.nextInt(NUM_CAUSATIONS); j < NUM_CAUSATIONS;
                  j++, k = (k + 1) % NUM_CAUSATIONS)
             {
-               if (Causations.get(k).instanceOf(instance.events, Causation.MAX_VALID_INTERVENING_EVENTS))
+               if (Causations.get(k).instanceOf(instance.events, Causation.MAX_INTERVENING_EVENTS))
                {
                   instance.causationIDs.add(k);
                   if (!instanceCreated && (validCounters[k] > 0))
@@ -888,7 +815,7 @@ public class CausationLearning
          if (!instanceCreated)
          {
             System.err.println("Cannot create valid testing instance");
-            System.exit(1);
+            //System.exit(1);
          }
       }
       for (CausationInstance instance : CausationTestingInstances)
@@ -904,7 +831,7 @@ public class CausationLearning
             boolean           instanceValid = false;
             for (int j = 0; j < NUM_CAUSATIONS && !instanceValid; j++)
             {
-               instanceValid = Causations.get(j).instanceOf(instance.events, Causation.MAX_VALID_INTERVENING_EVENTS);
+               instanceValid = Causations.get(j).instanceOf(instance.events, Causation.MAX_INTERVENING_EVENTS);
             }
             if (!instanceValid)
             {
@@ -915,7 +842,7 @@ public class CausationLearning
          if (n == MAX_TRIES)
          {
             System.err.println("Cannot create invalid testing instance");
-            System.exit(1);
+            //System.exit(1);
          }
       }
 
@@ -1594,13 +1521,8 @@ public class CausationLearning
    // Print parameters.
    public static void printParameters()
    {
-      System.out.println("NUM_EVENT_TYPES = " + Causation.NUM_EVENT_TYPES);
-      System.out.println("NUM_CAUSE_EVENT_TYPES = " + Causation.NUM_CAUSE_EVENT_TYPES);
+      Causation.printParameters();
       System.out.println("NUM_CAUSATIONS = " + NUM_CAUSATIONS);
-      System.out.println("MAX_CAUSE_EVENTS = " + Causation.MAX_CAUSE_EVENTS);
-      System.out.println("MAX_INTERVENING_EVENTS = " + Causation.MAX_INTERVENING_EVENTS);
-      System.out.println("MAX_VALID_INTERVENING_EVENTS = " + Causation.MAX_VALID_INTERVENING_EVENTS);
-      System.out.println("CAUSATION_INSTANCE_LENGTH = " + Causation.CAUSATION_INSTANCE_LENGTH);
       System.out.println("NUM_VALID_TRAINING_CAUSATION_INSTANCES = " + NUM_VALID_TRAINING_CAUSATION_INSTANCES);
       System.out.println("NUM_INVALID_TRAINING_CAUSATION_INSTANCES = " + NUM_INVALID_TRAINING_CAUSATION_INSTANCES);
       System.out.println("NUM_VALID_TESTING_CAUSATION_INSTANCES = " + NUM_VALID_TESTING_CAUSATION_INSTANCES);
