@@ -6,6 +6,11 @@ then
    exit 1
 fi
 runs=$1
+if [ "`which jq 2>/dev/null`" = "" ]
+then
+   echo "jq command not found"
+   exit 1
+fi
 
 # Data sizes
 NUM_VALID_TRAINING_CAUSATION_INSTANCES=50
@@ -71,12 +76,12 @@ do
         -randomSeed $randomSeed -verbose false`
        echo $cmd
        $cmd
-       train_correct_predictions=`cat causation_rnn_results.json | jq -r .train_correct_predictions`
-       train_total_predictions=`cat causation_rnn_results.json | jq -r .train_total_predictions`
-       train_pct=`cat causation_rnn_results.json | jq -r .train_pct`
-       test_correct_predictions=`cat causation_rnn_results.json | jq -r .test_correct_predictions`
-       test_total_predictions=`cat causation_rnn_results.json | jq -r .test_total_predictions`
-       test_pct=`cat causation_rnn_results.json | jq -r .test_pct`
+       train_correct_predictions=`cat causation_rnn_results.json | tr -d '\r' | jq -r .train_correct_predictions`
+       train_total_predictions=`cat causation_rnn_results.json | tr -d '\r' | jq -r .train_total_predictions`
+       train_pct=`cat causation_rnn_results.json | tr -d '\r' | jq -r .train_pct`
+       test_correct_predictions=`cat causation_rnn_results.json | tr -d '\r' | jq -r .test_correct_predictions`
+       test_total_predictions=`cat causation_rnn_results.json | tr -d '\r' | jq -r .test_total_predictions`
+       test_pct=`cat causation_rnn_results.json | tr -d '\r' | jq -r .test_pct`
        echo ${NUM_EVENT_TYPES},${NUM_CAUSATIONS},${MAX_CAUSE_EVENTS},${MAX_INTERVENING_EVENTS},${train_correct_predictions},${train_total_predictions},${train_pct},${test_correct_predictions},${test_total_predictions},${test_pct} >> causation_learning_lstm_test_results.csv
        run=$((run + 1))
       done

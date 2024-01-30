@@ -13,7 +13,7 @@ import java.util.Random;
 public class EvolveCausations
 {
    // Parameters.
-   public static int   GENERATIONS         = 10;
+   public static int   GENERATIONS         = 100;
    public static int   POPULATION_SIZE     = 20;
    public static int   FIT_POPULATION_SIZE = 10;
    public static float MUTATION_RATE       = 0.25f;
