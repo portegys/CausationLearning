@@ -61,7 +61,7 @@ do
       run=1
       for randomSeed in $random_list
       do
-       echo run=${run} randomSeed=$randomSeed
+       echo run=${run}/${runs} randomSeed=$randomSeed
        echo Command line:
        cmd=`echo ./causation.sh \
         -learner LSTM \
@@ -76,12 +76,12 @@ do
         -randomSeed $randomSeed -verbose false`
        echo $cmd
        $cmd
-       train_correct_predictions=`cat causation_rnn_results.json | tr -d '\r' | jq -r .train_correct_predictions`
-       train_total_predictions=`cat causation_rnn_results.json | tr -d '\r' | jq -r .train_total_predictions`
-       train_pct=`cat causation_rnn_results.json | tr -d '\r' | jq -r .train_pct`
-       test_correct_predictions=`cat causation_rnn_results.json | tr -d '\r' | jq -r .test_correct_predictions`
-       test_total_predictions=`cat causation_rnn_results.json | tr -d '\r' | jq -r .test_total_predictions`
-       test_pct=`cat causation_rnn_results.json | tr -d '\r' | jq -r .test_pct`
+       train_correct_predictions=`cat causation_rnn_results.json | jq -r .train_correct_predictions | tr -d '\r'`
+       train_total_predictions=`cat causation_rnn_results.json | jq -r .train_total_predictions | tr -d '\r'`
+       train_pct=`cat causation_rnn_results.json | jq -r .train_pct | tr -d '\r'`
+       test_correct_predictions=`cat causation_rnn_results.json | jq -r .test_correct_predictions | tr -d '\r'`
+       test_total_predictions=`cat causation_rnn_results.json | jq -r .test_total_predictions | tr -d '\r'`
+       test_pct=`cat causation_rnn_results.json | jq -r .test_pct | tr -d '\r'`
        echo ${NUM_EVENT_TYPES},${NUM_CAUSATIONS},${MAX_CAUSE_EVENTS},${MAX_INTERVENING_EVENTS},${train_correct_predictions},${train_total_predictions},${train_pct},${test_correct_predictions},${test_total_predictions},${test_pct} >> causation_learning_lstm_test_results.csv
        run=$((run + 1))
       done
@@ -89,7 +89,7 @@ do
       run=1
       for randomSeed in $random_list
       do
-       echo run=${run} randomSeed=$randomSeed
+       echo run=${run}/${runs} randomSeed=$randomSeed
        echo Command line:
        cmd=`echo ./causation.sh \
         -learner SimpleRNN \
@@ -104,12 +104,12 @@ do
         -randomSeed $randomSeed -verbose false`
        echo $cmd
        $cmd
-       train_correct_predictions=`cat causation_rnn_results.json | tr -d '\r' | jq -r .train_correct_predictions`
-       train_total_predictions=`cat causation_rnn_results.json | tr -d '\r' | jq -r .train_total_predictions`
-       train_pct=`cat causation_rnn_results.json | tr -d '\r' | jq -r .train_pct`
-       test_correct_predictions=`cat causation_rnn_results.json | tr -d '\r' | jq -r .test_correct_predictions`
-       test_total_predictions=`cat causation_rnn_results.json | tr -d '\r' | jq -r .test_total_predictions`
-       test_pct=`cat causation_rnn_results.json | tr -d '\r' | jq -r .test_pct`
+       train_correct_predictions=`cat causation_rnn_results.json | jq -r .train_correct_predictions | tr -d '\r'`
+       train_total_predictions=`cat causation_rnn_results.json | jq -r .train_total_predictions | tr -d '\r'`
+       train_pct=`cat causation_rnn_results.json | jq -r .train_pct | tr -d '\r'`
+       test_correct_predictions=`cat causation_rnn_results.json | jq -r .test_correct_predictions | tr -d '\r'`
+       test_total_predictions=`cat causation_rnn_results.json | jq -r .test_total_predictions | tr -d '\r'`
+       test_pct=`cat causation_rnn_results.json | jq -r .test_pct | tr -d '\r'`
        echo ${NUM_EVENT_TYPES},${NUM_CAUSATIONS},${MAX_CAUSE_EVENTS},${MAX_INTERVENING_EVENTS},${train_correct_predictions},${train_total_predictions},${train_pct},${test_correct_predictions},${test_total_predictions},${test_pct} >> causation_learning_simple_rnn_test_results.csv
        run=$((run + 1))
       done
@@ -117,7 +117,7 @@ do
       run=1
       for randomSeed in $random_list
       do
-       echo run=${run} randomSeed=$randomSeed
+       echo run=${run}/${runs} randomSeed=$randomSeed
        echo Command line:
        cmd=`echo ./causation.sh \
         -learner Attention \
@@ -132,12 +132,12 @@ do
         -randomSeed $randomSeed -verbose false`
        echo $cmd
        $cmd
-       train_correct_predictions=`cat causation_attention_results.json | tr -d '\r' | jq -r .train_correct_predictions`
-       train_total_predictions=`cat causation_attention_results.json | tr -d '\r' | jq -r .train_total_predictions`
-       train_pct=`cat causation_attention_results.json | tr -d '\r' | jq -r .train_pct`
-       test_correct_predictions=`cat causation_attention_results.json | tr -d '\r' | jq -r .test_correct_predictions`
-       test_total_predictions=`cat causation_attention_results.json | tr -d '\r' | jq -r .test_total_predictions`
-       test_pct=`cat causation_attention_results.json | tr -d '\r' | jq -r .test_pct`
+       train_correct_predictions=`cat causation_attention_results.json | jq -r .train_correct_predictions | tr -d '\r'`
+       train_total_predictions=`cat causation_attention_results.json | jq -r .train_total_predictions | tr -d '\r'`
+       train_pct=`cat causation_attention_results.json | jq -r .train_pct | tr -d '\r'`
+       test_correct_predictions=`cat causation_attention_results.json | jq -r .test_correct_predictions | tr -d '\r'`
+       test_total_predictions=`cat causation_attention_results.json | jq -r .test_total_predictions | tr -d '\r'`
+       test_pct=`cat causation_attention_results.json | jq -r .test_pct | tr -d '\r'`
        echo ${NUM_EVENT_TYPES},${NUM_CAUSATIONS},${MAX_CAUSE_EVENTS},${MAX_INTERVENING_EVENTS},${train_correct_predictions},${train_total_predictions},${train_pct},${test_correct_predictions},${test_total_predictions},${test_pct} >> causation_learning_attention_test_results.csv
        run=$((run + 1))
       done
@@ -145,7 +145,7 @@ do
       run=1
       for randomSeed in $random_list
       do
-       echo run=${run} randomSeed=$randomSeed
+       echo run=${run}/${runs} randomSeed=$randomSeed
        echo Command line:
        cmd=`echo ./causation.sh \
         -learner NN \
@@ -160,12 +160,12 @@ do
         -randomSeed $randomSeed -verbose false`
        echo $cmd
        $cmd
-       train_correct_predictions=`cat causation_nn_results.json | tr -d '\r' | jq -r .train_correct_predictions`
-       train_total_predictions=`cat causation_nn_results.json | tr -d '\r' | jq -r .train_total_predictions`
-       train_pct=`cat causation_nn_results.json | tr -d '\r' | jq -r .train_pct`
-       test_correct_predictions=`cat causation_nn_results.json | tr -d '\r' | jq -r .test_correct_predictions`
-       test_total_predictions=`cat causation_nn_results.json | tr -d '\r' | jq -r .test_total_predictions`
-       test_pct=`cat causation_nn_results.json | tr -d '\r' | jq -r .test_pct`
+       train_correct_predictions=`cat causation_nn_results.json | jq -r .train_correct_predictions | tr -d '\r'`
+       train_total_predictions=`cat causation_nn_results.json | jq -r .train_total_predictions | tr -d '\r'`
+       train_pct=`cat causation_nn_results.json | jq -r .train_pct | tr -d '\r'`
+       test_correct_predictions=`cat causation_nn_results.json | jq -r .test_correct_predictions | tr -d '\r'`
+       test_total_predictions=`cat causation_nn_results.json | jq -r .test_total_predictions | tr -d '\r'`
+       test_pct=`cat causation_nn_results.json | jq -r .test_pct | tr -d '\r'`
        echo ${NUM_EVENT_TYPES},${NUM_CAUSATIONS},${MAX_CAUSE_EVENTS},${MAX_INTERVENING_EVENTS},${train_correct_predictions},${train_total_predictions},${train_pct},${test_correct_predictions},${test_total_predictions},${test_pct} >> causation_learning_nn_test_results.csv
        run=$((run + 1))
       done
@@ -173,7 +173,7 @@ do
       run=1
       for randomSeed in $random_list
       do
-       echo run=${run} randomSeed=$randomSeed
+       echo run=${run}/${runs} randomSeed=$randomSeed
        echo Command line:
        cmd=`echo ./causation.sh \
         -learner GA \
@@ -188,12 +188,12 @@ do
         -randomSeed $randomSeed -verbose false`
        echo $cmd
        $cmd
-       train_correct_predictions=`cat causation_ga_results.json | tr -d '\r' | jq -r .train_correct_predictions`
-       train_total_predictions=`cat causation_ga_results.json | tr -d '\r' | jq -r .train_total_predictions`
-       train_pct=`cat causation_ga_results.json | tr -d '\r' | jq -r .train_pct`
-       test_correct_predictions=`cat causation_ga_results.json | tr -d '\r' | jq -r .test_correct_predictions`
-       test_total_predictions=`cat causation_ga_results.json | tr -d '\r' | jq -r .test_total_predictions`
-       test_pct=`cat causation_ga_results.json | tr -d '\r' | jq -r .test_pct`
+       train_correct_predictions=`cat causation_ga_results.json | jq -r .train_correct_predictions | tr -d '\r'`
+       train_total_predictions=`cat causation_ga_results.json | jq -r .train_total_predictions | tr -d '\r'`
+       train_pct=`cat causation_ga_results.json | jq -r .train_pct | tr -d '\r'`
+       test_correct_predictions=`cat causation_ga_results.json | jq -r .test_correct_predictions | tr -d '\r'`
+       test_total_predictions=`cat causation_ga_results.json | jq -r .test_total_predictions | tr -d '\r'`
+       test_pct=`cat causation_ga_results.json | jq -r .test_pct | tr -d '\r'`
        echo ${NUM_EVENT_TYPES},${NUM_CAUSATIONS},${MAX_CAUSE_EVENTS},${MAX_INTERVENING_EVENTS},${train_correct_predictions},${train_total_predictions},${train_pct},${test_correct_predictions},${test_total_predictions},${test_pct} >> causation_learning_ga_test_results.csv
        run=$((run + 1))
       done
@@ -201,7 +201,7 @@ do
       run=1
       for randomSeed in $random_list
       do
-       echo run=${run} randomSeed=$randomSeed
+       echo run=${run}/${runs} randomSeed=$randomSeed
        echo Command line:
        cmd=`echo ./causation.sh \
         -learner Histogram \
@@ -216,12 +216,12 @@ do
         -randomSeed $randomSeed -verbose false`
        echo $cmd
        $cmd
-       train_correct_predictions=`cat causation_histogram_results.json | tr -d '\r' | jq -r .train_correct_predictions`
-       train_total_predictions=`cat causation_histogram_results.json | tr -d '\r' | jq -r .train_total_predictions`
-       train_pct=`cat causation_histogram_results.json | tr -d '\r' | jq -r .train_pct`
-       test_correct_predictions=`cat causation_histogram_results.json | tr -d '\r' | jq -r .test_correct_predictions`
-       test_total_predictions=`cat causation_histogram_results.json | tr -d '\r' | jq -r .test_total_predictions`
-       test_pct=`cat causation_histogram_results.json | tr -d '\r' | jq -r .test_pct`
+       train_correct_predictions=`cat causation_histogram_results.json | jq -r .train_correct_predictions | tr -d '\r'`
+       train_total_predictions=`cat causation_histogram_results.json | jq -r .train_total_predictions | tr -d '\r'`
+       train_pct=`cat causation_histogram_results.json | jq -r .train_pct | tr -d '\r'`
+       test_correct_predictions=`cat causation_histogram_results.json | jq -r .test_correct_predictions | tr -d '\r'`
+       test_total_predictions=`cat causation_histogram_results.json | jq -r .test_total_predictions | tr -d '\r'`
+       test_pct=`cat causation_histogram_results.json | jq -r .test_pct | tr -d '\r'`
        echo ${NUM_EVENT_TYPES},${NUM_CAUSATIONS},${MAX_CAUSE_EVENTS},${MAX_INTERVENING_EVENTS},${train_correct_predictions},${train_total_predictions},${train_pct},${test_correct_predictions},${test_total_predictions},${test_pct} >> causation_learning_histogram_test_results.csv
        run=$((run + 1))
       done
