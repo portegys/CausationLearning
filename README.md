@@ -44,7 +44,7 @@ Usage:
              [-numHiddenNeurons <quantity> (default=128) (repeat for additional layers)]
              [-numEpochs <quantity> (default=500)]
            "GA" |
-             [-generations <quantity> (default=10)]
+             [-generations <quantity> (default=100)]
              [-populationSize <quantity> (default=20)]
              [-fitPopulationSize <quantity> (default=10)]
              [-mutationRate <probability> (default=0.25)]
