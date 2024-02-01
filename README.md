@@ -1,9 +1,7 @@
 # Causation learning.
 
-Learn causations in event streams that contain cause-and-effect sequences. A cause-and-effect
-sequence has a single effect event and one or more cause events, occurring in an arbitrary order. 
-Cause and effect events can be distributed over time, meaning they can 
-be separated by 0 or more intervening events.
+Learn causations in event sequences. A causation sequence has one or more cause
+events, occurring in an arbitrary order, with possible intervening non-causal events.
 
 Several learning methods are available:<br>
 LSTM: Long Short-Term Memory neural network.<br>
@@ -14,6 +12,7 @@ GA: Genetic algorithm.<br>
 Histogram: Event histogram algorithm.<br>
 
 One aim of this project is to build more generalized mediator neurons for the Mona neural network.
+https://github.com/morphognosis/NestingBirds
 
 Develop: Import Eclipse project.
 
