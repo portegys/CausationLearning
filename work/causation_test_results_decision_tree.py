@@ -14,7 +14,7 @@ import pydotplus
 
 # Get options
 input_filename = ''
-output_filename = ''
+output_filename = 'causation_test_results_decision_tree.png'
 usage = 'causation_test_results_decision_tree.py -i <input file name> (csv) [-o <output file name> (png)]'
 try:
   opts, args = getopt.getopt(sys.argv[1:],"?i:o:",["input=","output="])
@@ -42,7 +42,7 @@ dataset = dataset.rename(columns={'NUM_EVENT_TYPES': 'NET','NUM_CAUSATIONS': 'NC
 X_names = ['NET','NC','MCE','MIE']
 y_name = ['Score']
 
-# Average accuracy for runs with same parameters.
+# Average accuracy for runs with same parameters
 X_ave = dataset.filter(items=X_names).drop_duplicates()
 X_ave[['Score']] = 0
 X_ave = X_ave.reset_index()
@@ -58,35 +58,42 @@ X = dataset[X_names]
 y = dataset[y_name]
 
 # Score as Good, Fair, Poor
+good_count = 0
+fair_count = 0
+poor_count = 0
+
 def score(x):
+  global good_count, fair_count, poor_count
   if float(x) >= 90.0:
+    good_count += 1
     return 'Good'
   elif float(x) >= 70.0:
+    fair_count += 1
     return 'Fair'
   else:
+    poor_count += 1
     return 'Poor'
 
 y_scores = [score(i) for i in dataset['Score']]
 dataset['Score'] = y_scores
 y = dataset['Score']
+print('Counts: ', 'good=', good_count, ',fair=', fair_count, ',poor=', poor_count, sep='')
 
 # Fit the classifier with default hyper-parameters
 clf = DecisionTreeClassifier(random_state=1234)
 model = clf.fit(X, y)
 
-# Predict the response for test dataset
-y_pred = model.predict(X)
-
 # Accuracy
+y_pred = model.predict(X)
 print("Accuracy:",metrics.accuracy_score(y, y_pred))
 
-# Text representation.
+# Text results
 print('Text results:')
 text_representation = tree.export_text(clf, feature_names=['NUM_EVENT_TYPES','NUM_CAUSATIONS','MAX_CAUSE_EVENTS','MAX_INTERVENING_EVENTS'])
 print(text_representation)
 
-# Graphical representation.
-print('Writing graphical results to causation_test_results_decision_tree.png')
+# Graphical results
+print('Writing graphical results to', output_filename)
 dot_data = StringIO()
 export_graphviz(clf, out_file=dot_data,
                 filled=True, rounded=True, impurity=False,
@@ -94,5 +101,5 @@ export_graphviz(clf, out_file=dot_data,
                 feature_names = X_names,
                 class_names=['Good', 'Fair', 'Poor'])
 graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
-graph.write_png('causation_test_results_decision_tree.png')
+graph.write_png(output_filename)
 Image(graph.create_png())
