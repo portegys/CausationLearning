@@ -30,7 +30,7 @@ Usage:
 <pre>
   Run:
     java mona.causation.CausationLearning
-        [-numEventTypes <quantity> (default=10)]
+        [-numEventTypes `<quantity>` (default=10)]
         [-numCausations <quantity> (default=2)]
         [-maxCauseEvents <quantity> (default=2)]
         [-maxInterveningEvents <quantity> (default=1)]
