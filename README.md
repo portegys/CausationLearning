@@ -58,3 +58,30 @@ Exit codes:
   0=success
   1=error
 </pre>
+
+Run output files:
+causations.json: causations.
+causation_instances.json: causation instances.
+causation_attention_dataset.py: attention dataset.
+causation_attention_results.json: attention results.
+causation_rnn_dataset.py: LSTM and SimpleRNN dataset.
+causation_rnn_results.json: LSTM and SimpleRNN results.
+causation_nn_dataset.py: NN dataset.
+causation_nn_results.json: NN results.
+causation_ga_results.json: GA results.
+causation_histogram_results.json: Histogram results.
+
+Test all learners (requires jq command):
+causation_test.sh <number of runs>
+
+Testing results files:
+causation_learning_lstm_test_results.csv
+causation_learning_simple_rnn_test_results.csv
+causation_learning_attention_test_results.csv
+causation_learning_nn_test_results.csv
+causation_learning_ga_test_results.csv         
+causation_learning_histogram_test_results.csv
+
+Testing results analysis:
+causation_test_results_decision_tree.py -i <testing results csv file> [-o <testing results png file>]
+

@@ -1,0 +1,86 @@
+{
+"Causation training instances": [
+{
+  "Events": [ "4", "9", "9", "3", "0" ],
+  "Causation IDs": [ "0" ]
+},
+{
+  "Events": [ "4", "2", "2", "8", "0" ],
+  "Causation IDs": [ "0", "1" ]
+},
+{
+  "Events": [ "3", "2", "4", "2", "8" ],
+  "Causation IDs": [ "0", "1" ]
+},
+{
+  "Events": [ "6", "2", "2", "7", "9" ],
+  "Causation IDs": [ "1" ]
+},
+{
+  "Events": [ "2", "9", "2", "1", "6" ],
+  "Causation IDs": [ "1" ]
+},
+{
+  "Events": [ "8", "8", "0", "2", "3" ],
+  "Causation IDs": [ ]
+},
+{
+  "Events": [ "5", "1", "7", "8", "1" ],
+  "Causation IDs": [ ]
+},
+{
+  "Events": [ "8", "3", "0", "5", "2" ],
+  "Causation IDs": [ ]
+},
+{
+  "Events": [ "0", "5", "9", "8", "2" ],
+  "Causation IDs": [ ]
+},
+{
+  "Events": [ "3", "2", "9", "8", "6" ],
+  "Causation IDs": [ ]
+}
+],
+"Causation testing instances": [
+{
+  "Events": [ "1", "2", "2", "5", "9" ],
+  "Causation IDs": [ "1" ]
+},
+{
+  "Events": [ "5", "4", "4", "7", "9" ],
+  "Causation IDs": [ "0" ]
+},
+{
+  "Events": [ "4", "5", "6", "6", "6" ],
+  "Causation IDs": [ "0" ]
+},
+{
+  "Events": [ "4", "5", "9", "9", "5" ],
+  "Causation IDs": [ "0" ]
+},
+{
+  "Events": [ "2", "1", "2", "8", "7" ],
+  "Causation IDs": [ "1" ]
+},
+{
+  "Events": [ "1", "5", "7", "7", "3" ],
+  "Causation IDs": [ ]
+},
+{
+  "Events": [ "8", "1", "5", "9", "8" ],
+  "Causation IDs": [ ]
+},
+{
+  "Events": [ "9", "6", "2", "1", "5" ],
+  "Causation IDs": [ ]
+},
+{
+  "Events": [ "2", "3", "7", "5", "0" ],
+  "Causation IDs": [ ]
+},
+{
+  "Events": [ "2", "8", "9", "6", "9" ],
+  "Causation IDs": [ ]
+}
+]
+}

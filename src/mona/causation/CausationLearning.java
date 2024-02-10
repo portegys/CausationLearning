@@ -68,7 +68,9 @@ public class CausationLearning
    public final static int MAX_TRIES = 100000;
 
    // Files.
-   public static final String RNN_DATASET_FILENAME       = "causation_rnn_dataset.py";
+   public static final String CAUSATIONS_FILENAME          = "causations.json";
+   public static final String CAUSATION_INSTANCES_FILENAME = "causation_instances.json";
+   public static final String RNN_DATASET_FILENAME         = "causation_rnn_dataset.py";
    public static final String RNN_FILENAME               = "causation_rnn.py";
    public static final String RNN_RESULTS_FILENAME       = "causation_rnn_results.json";
    public static final String ATTENTION_DATASET_FILENAME = "causation_attention_dataset.py";
@@ -751,7 +753,6 @@ public class CausationLearning
          if (!instanceCreated)
          {
             System.err.println("Cannot create valid training instance");
-            //System.exit(1);
          }
       }
       for (CausationInstance instance : CausationTrainingInstances)
@@ -778,7 +779,6 @@ public class CausationLearning
          if (n == MAX_TRIES)
          {
             System.err.println("Cannot create invalid training instance");
-            //System.exit(1);
          }
       }
       CausationTestingInstances = new ArrayList<CausationInstance>();
@@ -815,7 +815,6 @@ public class CausationLearning
          if (!instanceCreated)
          {
             System.err.println("Cannot create valid testing instance");
-            //System.exit(1);
          }
       }
       for (CausationInstance instance : CausationTestingInstances)
@@ -842,8 +841,73 @@ public class CausationLearning
          if (n == MAX_TRIES)
          {
             System.err.println("Cannot create invalid testing instance");
-            //System.exit(1);
          }
+      }
+
+      // Write causation file.
+      try
+      {
+         FileWriter  fileWriter  = new FileWriter(CAUSATIONS_FILENAME);
+         PrintWriter printWriter = new PrintWriter(fileWriter);
+         printWriter.println("{");
+         printWriter.println("\"Causations\": [");
+         for (int i = 0, j = Causations.size(); i < j; i++)
+         {
+            Causation causation = Causations.get(i);
+            causation.toJSON(printWriter);
+            if (i < j - 1)
+            {
+               printWriter.print(",");
+            }
+            printWriter.println();
+         }
+         printWriter.println("]");
+         printWriter.println("}");
+         printWriter.close();
+      }
+      catch (IOException e)
+      {
+         System.err.println("Cannot write casuations to file " + CAUSATIONS_FILENAME);
+         System.exit(1);
+      }
+
+      // Write causation instances file.
+      try
+      {
+         FileWriter  fileWriter  = new FileWriter(CAUSATION_INSTANCES_FILENAME);
+         PrintWriter printWriter = new PrintWriter(fileWriter);
+         printWriter.println("{");
+         printWriter.println("\"Causation training instances\": [");
+         for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
+         {
+            CausationInstance instance = CausationTrainingInstances.get(i);
+            instance.toJSON(printWriter);
+            if (i < j - 1)
+            {
+               printWriter.print(",");
+            }
+            printWriter.println();
+         }
+         printWriter.println("],");
+         printWriter.println("\"Causation testing instances\": [");
+         for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
+         {
+            CausationInstance instance = CausationTestingInstances.get(i);
+            instance.toJSON(printWriter);
+            if (i < j - 1)
+            {
+               printWriter.print(",");
+            }
+            printWriter.println();
+         }
+         printWriter.println("]");
+         printWriter.println("}");
+         printWriter.close();
+      }
+      catch (IOException e)
+      {
+         System.err.println("Cannot write casuation instances to file " + CAUSATION_INSTANCES_FILENAME);
+         System.exit(1);
       }
 
       // Print parameters and causations.

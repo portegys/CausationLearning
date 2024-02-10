@@ -4,6 +4,7 @@
 
 package mona.causation;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -36,6 +37,36 @@ public class CausationInstance
          }
       }
       return(false);
+   }
+
+
+   // JSON.
+   public void toJSON(PrintWriter printWriter)
+   {
+      printWriter.println("{");
+      printWriter.print("  \"Events\": [ ");
+      for (int i = 0, j = events.length; i < j; i++)
+      {
+         printWriter.print("\"" + events[i] + "\"");
+         if (i < j - 1)
+         {
+            printWriter.print(",");
+         }
+         printWriter.print(" ");
+      }
+      printWriter.println("],");
+      printWriter.print("  \"Causation IDs\": [ ");
+      for (int i = 0, j = causationIDs.size(); i < j; i++)
+      {
+         printWriter.print("\"" + causationIDs.get(i) + "\"");
+         if (i < j - 1)
+         {
+            printWriter.print(",");
+         }
+         printWriter.print(" ");
+      }
+      printWriter.println("]");
+      printWriter.print("}");
    }
 
 
