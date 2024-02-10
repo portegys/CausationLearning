@@ -24,31 +24,31 @@ build.sh or build.bat
 Run:
 <pre>
 causation.sh or causation.bat
-</pre>
+&lt;/pre&gt;
 
 Usage:
-<pre>
+&lt;pre&gt;
   Run:
     java mona.causation.CausationLearning
         [-numEventTypes &lt;quantity&gt; (default=10)]
-        [-numCausations <quantity> (default=2)]
-        [-maxCauseEvents <quantity> (default=2)]
-        [-maxInterveningEvents <quantity> (default=1)]
-        [-numValidTrainingCausationInstances <quantity> (default=5)]
-        [-numInvalidTrainingCausationInstances <quantity> (default=5)]
-        [-numValidTestingCausationInstances <quantity> (default=5)]
-        [-numInvalidTestingCausationInstances <quantity> (default=5)]
+        [-numCausations &lt;quantity&gt; (default=2)]
+        [-maxCauseEvents &lt;quantity&gt; (default=2)]
+        [-maxInterveningEvents &lt;quantity&gt; (default=1)]
+        [-numValidTrainingCausationInstances &lt;quantity&gt; (default=5)]
+        [-numInvalidTrainingCausationInstances &lt;quantity&gt; (default=5)]
+        [-numValidTestingCausationInstances &lt;quantity&gt; (default=5)]
+        [-numInvalidTestingCausationInstances &lt;quantity&gt; (default=5)]
         [-learner
            "LSTM" | "SimpleRNN" | "Attention" | "NN" |
-             [-numHiddenNeurons <quantity> (default=128) (repeat for additional layers)]
-             [-numEpochs <quantity> (default=500)]
+             [-numHiddenNeurons &lt;quantity&gt; (default=128) (repeat for additional layers)]
+             [-numEpochs &lt;quantity&gt; (default=500)]
            "GA" |
-             [-generations <quantity> (default=100)]
-             [-populationSize <quantity> (default=20)]
-             [-fitPopulationSize <quantity> (default=10)]
-             [-mutationRate <probability> (default=0.25)]
+             [-generations &lt;quantity&gt; (default=100)]
+             [-populationSize &lt;quantity&gt; (default=20)]
+             [-fitPopulationSize &lt;quantity&gt; (default=10)]
+             [-mutationRate &lt;probability&gt; (default=0.25)]
            "Histogram" (default=LSTM)]
-        [-randomSeed <random number seed> (default=4517)]
+        [-randomSeed &lt;random number seed&gt; (default=4517)]
         [-verbose "true" | "false" (default=true)]
   Print parameters:
     java mona.causation.CausationLearning -printParameters
@@ -57,10 +57,10 @@ Usage:
 Exit codes:
   0=success
   1=error
-</pre>
+&lt;/pre&gt;
 
 Run output files:
-<pre>
+&lt;pre&gt;
 causations.json: causations.
 causation_instances.json: causation instances.
 causation_attention_dataset.py: attention dataset.
@@ -71,25 +71,25 @@ causation_nn_dataset.py: NN dataset.
 causation_nn_results.json: NN results.
 causation_ga_results.json: GA results.
 causation_histogram_results.json: Histogram results.
-</pre>
+&lt;/pre&gt;
 
 Test all learners (requires jq command):
-<pre>
+&lt;pre&gt;
 causation_test.sh &lt;number of runs&gt;
-</pre>
+&lt;/pre&gt;
 
 Testing results files:
-<pre>
+&lt;pre&gt;
 causation_learning_lstm_test_results.csv
 causation_learning_simple_rnn_test_results.csv
 causation_learning_attention_test_results.csv
 causation_learning_nn_test_results.csv
 causation_learning_ga_test_results.csv         
 causation_learning_histogram_test_results.csv
-</pre>
+&lt;/pre&gt;
 
 Testing results analysis:
-<pre>
+&lt;pre&gt;
 causation_test_results_decision_tree.py -i &lt;testing results csv file&gt;
   [-o &lt;testing results png file&gt; default: causation_test_results_decision_tree.png]
-</pre>
+&lt;/pre&gt;
