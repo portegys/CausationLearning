@@ -24,10 +24,10 @@ build.sh or build.bat
 Run:
 <pre>
 causation.sh or causation.bat
-&lt;/pre&gt;
+</pre>
 
 Usage:
-&lt;pre&gt;
+<pre>
   Run:
     java mona.causation.CausationLearning
         [-numEventTypes &lt;quantity&gt; (default=10)]
@@ -57,10 +57,10 @@ Usage:
 Exit codes:
   0=success
   1=error
-&lt;/pre&gt;
+</pre>
 
 Run output files:
-&lt;pre&gt;
+<pre>
 causations.json: causations.
 causation_instances.json: causation instances.
 causation_attention_dataset.py: attention dataset.
@@ -71,25 +71,25 @@ causation_nn_dataset.py: NN dataset.
 causation_nn_results.json: NN results.
 causation_ga_results.json: GA results.
 causation_histogram_results.json: Histogram results.
-&lt;/pre&gt;
+</pre>
 
 Test all learners (requires jq command):
-&lt;pre&gt;
+<pre>
 causation_test.sh &lt;number of runs&gt;
-&lt;/pre&gt;
+</pre>
 
 Testing results files:
-&lt;pre&gt;
+<pre>
 causation_learning_lstm_test_results.csv
 causation_learning_simple_rnn_test_results.csv
 causation_learning_attention_test_results.csv
 causation_learning_nn_test_results.csv
 causation_learning_ga_test_results.csv         
 causation_learning_histogram_test_results.csv
-&lt;/pre&gt;
+</pre>
 
 Testing results analysis:
-&lt;pre&gt;
+<pre>
 causation_test_results_decision_tree.py -i &lt;testing results csv file&gt;
   [-o &lt;testing results png file&gt; default: causation_test_results_decision_tree.png]
-&lt;/pre&gt;
+</pre>
