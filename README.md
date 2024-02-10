@@ -11,7 +11,7 @@ NN: Multilayer perceptron (non-recurrent).<br>
 GA: Genetic algorithm.<br>
 Histogram: Event histogram algorithm.<br>
 
-One aim of this project is to build more generalized mediator neurons for the Mona neural network.
+One aim of this project is to build more generalized mediator neurons for the Mona neural network:<br>
 https://github.com/morphognosis/NestingBirds
 
 Develop: import Eclipse project.
