@@ -83,5 +83,6 @@ causation_learning_ga_test_results.csv
 causation_learning_histogram_test_results.csv
 
 Testing results analysis:
-causation_test_results_decision_tree.py -i <testing results csv file> [-o <testing results png file>]
+causation_test_results_decision_tree.py -i <testing results csv file> 
+  [-o <testing results png file> default: causation_test_results_decision_tree.png]
 
