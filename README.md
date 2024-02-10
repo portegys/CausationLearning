@@ -75,7 +75,7 @@ causation_histogram_results.json: Histogram results.
 
 Test all learners (requires jq command):
 <pre>
-causation_test.sh <number of runs>
+causation_test.sh &lt;number of runs&gt;
 </pre>
 
 Testing results files:
@@ -90,6 +90,6 @@ causation_learning_histogram_test_results.csv
 
 Testing results analysis:
 <pre>
-causation_test_results_decision_tree.py -i <testing results csv file> 
-  [-o <testing results png file> default: causation_test_results_decision_tree.png]
+causation_test_results_decision_tree.py -i &lt;testing results csv file&gt;
+  [-o &lt;testing results png file&gt; default: causation_test_results_decision_tree.png]
 </pre>
