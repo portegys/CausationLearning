@@ -14,7 +14,7 @@ Histogram: Event histogram algorithm.<br>
 One aim of this project is to build more generalized mediator neurons for the Mona neural network.
 https://github.com/morphognosis/NestingBirds
 
-Develop: Import Eclipse project.
+Develop: import Eclipse project.
 
 Build:
 <pre>
@@ -60,6 +60,7 @@ Exit codes:
 </pre>
 
 Run output files:
+<pre>
 causations.json: causations.
 causation_instances.json: causation instances.
 causation_attention_dataset.py: attention dataset.
@@ -70,19 +71,25 @@ causation_nn_dataset.py: NN dataset.
 causation_nn_results.json: NN results.
 causation_ga_results.json: GA results.
 causation_histogram_results.json: Histogram results.
+</pre>
 
 Test all learners (requires jq command):
+<pre>
 causation_test.sh <number of runs>
+</pre>
 
 Testing results files:
+<pre>
 causation_learning_lstm_test_results.csv
 causation_learning_simple_rnn_test_results.csv
 causation_learning_attention_test_results.csv
 causation_learning_nn_test_results.csv
 causation_learning_ga_test_results.csv         
 causation_learning_histogram_test_results.csv
+</pre>
 
 Testing results analysis:
+<pre>
 causation_test_results_decision_tree.py -i <testing results csv file> 
   [-o <testing results png file> default: causation_test_results_decision_tree.png]
-
+</pre>
