@@ -90,6 +90,6 @@ causation_learning_histogram_test_results.csv
 
 Testing results analysis:
 <pre>
-causation_test_results_decision_tree.py -i &lt;testing results csv file&gt;
+python causation_test_results_decision_tree.py -i &lt;testing results csv file&gt;
   [-o &lt;testing results png file&gt; default: causation_test_results_decision_tree.png]
 </pre>
