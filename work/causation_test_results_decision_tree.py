@@ -77,6 +77,7 @@ def score(x):
 y_scores = [score(i) for i in dataset['Score']]
 dataset['Score'] = y_scores
 y = dataset['Score']
+print('Scoring: good=100-90, fair=89-70, poor=69-0')
 print('Counts: ', 'good=', good_count, ',fair=', fair_count, ',poor=', poor_count, sep='')
 
 # Fit the classifier with default hyper-parameters
