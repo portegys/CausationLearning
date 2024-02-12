@@ -950,16 +950,24 @@ public class CausationLearning
             FileWriter  fileWriter  = new FileWriter(NN_DATASET_FILENAME);
             PrintWriter printWriter = new PrintWriter(fileWriter);
             printWriter.println("X_train_shape = [ " + NUM_TRAINING_CAUSATION_INSTANCES + ", " +
-                                Causation.CAUSATION_INSTANCE_LENGTH * (Causation.NUM_EVENT_TYPES + 1) + " ]");
+                                Causation.CAUSATION_INSTANCE_LENGTH * Causation.NUM_EVENT_TYPES + " ]");
             printWriter.print("X_train_seq = [");
             String X_train = "";
             for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
             {
                X_train += "\n";
                CausationInstance instance = CausationTrainingInstances.get(i);
-               for (int k = 0; k < instance.events.length; k++)
+               for (int k = 0; k < Causation.NUM_EVENT_TYPES; k++)
                {
-                  X_train += oneHot(instance.events[k], (Causation.NUM_EVENT_TYPES + 1));
+                  ArrayList<Integer> steps = new ArrayList<Integer>();
+                  for (int step = 0; step < instance.events.length; step++)
+                  {
+                     if (instance.events[step] == k)
+                     {
+                        steps.add(step);
+                     }
+                  }
+                  X_train += multiHot(steps, Causation.CAUSATION_INSTANCE_LENGTH);
                   X_train += ",";
                }
             }
@@ -993,16 +1001,24 @@ public class CausationLearning
             printWriter.println(y_train);
             printWriter.println("]");
             printWriter.println("X_test_shape = [ " + NUM_TESTING_CAUSATION_INSTANCES + ", " +
-                                Causation.CAUSATION_INSTANCE_LENGTH * (Causation.NUM_EVENT_TYPES + 1) + " ]");
+                                Causation.CAUSATION_INSTANCE_LENGTH * Causation.NUM_EVENT_TYPES + " ]");
             printWriter.print("X_test_seq = [");
             String X_test = "";
             for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
             {
                X_test += "\n";
                CausationInstance instance = CausationTestingInstances.get(i);
-               for (int k = 0; k < instance.events.length; k++)
+               for (int k = 0; k < Causation.NUM_EVENT_TYPES; k++)
                {
-                  X_test += oneHot(instance.events[k], (Causation.NUM_EVENT_TYPES + 1));
+                  ArrayList<Integer> steps = new ArrayList<Integer>();
+                  for (int step = 0; step < instance.events.length; step++)
+                  {
+                     if (instance.events[step] == k)
+                     {
+                        steps.add(step);
+                     }
+                  }
+                  X_test += multiHot(steps, Causation.CAUSATION_INSTANCE_LENGTH);
                   X_test += ",";
                }
             }
@@ -1050,7 +1066,7 @@ public class CausationLearning
             FileWriter  fileWriter  = new FileWriter(ATTENTION_DATASET_FILENAME);
             PrintWriter printWriter = new PrintWriter(fileWriter);
             printWriter.println("X_train_shape = [ " + NUM_TRAINING_CAUSATION_INSTANCES + ", " +
-                                Causation.CAUSATION_INSTANCE_LENGTH + ", " + (Causation.NUM_EVENT_TYPES + 1) + " ]");
+                                Causation.CAUSATION_INSTANCE_LENGTH + ", " + Causation.NUM_EVENT_TYPES + " ]");
             printWriter.print("X_train_seq = [");
             String X_train = "";
             for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
@@ -1059,7 +1075,7 @@ public class CausationLearning
                CausationInstance instance = CausationTrainingInstances.get(i);
                for (int k = 0; k < instance.events.length; k++)
                {
-                  X_train += oneHot(instance.events[k], (Causation.NUM_EVENT_TYPES + 1));
+                  X_train += oneHot(instance.events[k], Causation.NUM_EVENT_TYPES);
                   X_train += ",";
                }
             }
@@ -1093,7 +1109,7 @@ public class CausationLearning
             printWriter.println(y_train);
             printWriter.println("]");
             printWriter.println("X_test_shape = [ " + NUM_TESTING_CAUSATION_INSTANCES + ", " +
-                                Causation.CAUSATION_INSTANCE_LENGTH + ", " + (Causation.NUM_EVENT_TYPES + 1) + " ]");
+                                Causation.CAUSATION_INSTANCE_LENGTH + ", " + Causation.NUM_EVENT_TYPES + " ]");
             printWriter.print("X_test_seq = [");
             String X_test = "";
             for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
@@ -1102,7 +1118,7 @@ public class CausationLearning
                CausationInstance instance = CausationTestingInstances.get(i);
                for (int k = 0; k < instance.events.length; k++)
                {
-                  X_test += oneHot(instance.events[k], (Causation.NUM_EVENT_TYPES + 1));
+                  X_test += oneHot(instance.events[k], Causation.NUM_EVENT_TYPES);
                   X_test += ",";
                }
             }
@@ -1150,7 +1166,7 @@ public class CausationLearning
             FileWriter  fileWriter  = new FileWriter(RNN_DATASET_FILENAME);
             PrintWriter printWriter = new PrintWriter(fileWriter);
             printWriter.println("X_train_shape = [ " + NUM_TRAINING_CAUSATION_INSTANCES + ", " +
-                                Causation.CAUSATION_INSTANCE_LENGTH + ", " + (Causation.NUM_EVENT_TYPES + 1) + " ]");
+                                Causation.CAUSATION_INSTANCE_LENGTH + ", " + Causation.NUM_EVENT_TYPES + " ]");
             printWriter.print("X_train_seq = [");
             String X_train = "";
             for (int i = 0, j = CausationTrainingInstances.size(); i < j; i++)
@@ -1159,7 +1175,7 @@ public class CausationLearning
                CausationInstance instance = CausationTrainingInstances.get(i);
                for (int k = 0; k < instance.events.length; k++)
                {
-                  X_train += oneHot(instance.events[k], (Causation.NUM_EVENT_TYPES + 1));
+                  X_train += oneHot(instance.events[k], Causation.NUM_EVENT_TYPES);
                   X_train += ",";
                }
             }
@@ -1197,7 +1213,7 @@ public class CausationLearning
             printWriter.println(y_train);
             printWriter.println("]");
             printWriter.println("X_test_shape = [ " + NUM_TESTING_CAUSATION_INSTANCES + ", " +
-                                Causation.CAUSATION_INSTANCE_LENGTH + ", " + (Causation.NUM_EVENT_TYPES + 1) + " ]");
+                                Causation.CAUSATION_INSTANCE_LENGTH + ", " + Causation.NUM_EVENT_TYPES + " ]");
             printWriter.print("X_test_seq = [");
             String X_test = "";
             for (int i = 0, j = CausationTestingInstances.size(); i < j; i++)
@@ -1206,7 +1222,7 @@ public class CausationLearning
                CausationInstance instance = CausationTestingInstances.get(i);
                for (int k = 0; k < instance.events.length; k++)
                {
-                  X_test += oneHot(instance.events[k], (Causation.NUM_EVENT_TYPES + 1));
+                  X_test += oneHot(instance.events[k], Causation.NUM_EVENT_TYPES);
                   X_test += ",";
                }
             }
